@@ -111,16 +111,23 @@ export function useUpdateAdmissionSettings() {
 }
 
 // Calls the secure server-side RPC function — bypasses RLS completely
-export async function submitAdmission(payload: { ... }): Promise<{ id: string; reference_no: string }> {
-  
-  const timeoutPromise = new Promise((_, reject) =>
+export async function submitAdmission(payload: {
+  full_name: string; father_name: string; date_of_birth: string | null;
+  b_form_no: string; contact_number: string; whatsapp_number: string | null;
+  home_address: string | null; gender: string | null; applying_class: string;
+  admission_type: AdmissionType; previous_school: string | null;
+  previous_class: string | null; previous_marks: string | null;
+  year_of_passing: string | null;
+}): Promise<{ id: string; reference_no: string }> {
+
+  const timeoutPromise = new Promise<never>((_, reject) =>
     setTimeout(() => reject(new Error("Server took too long. Please check your internet and try again.")), 20000)
   );
 
   const rpcPromise = supabase.rpc("submit_admission_public", {
     p_full_name:       payload.full_name,
     p_father_name:     payload.father_name,
-    p_date_of_birth:   payload.date_of_birth || null,  // ← FIXED: null not ""
+    p_date_of_birth:   payload.date_of_birth || null,
     p_b_form_no:       payload.b_form_no,
     p_contact_number:  payload.contact_number,
     p_whatsapp_number: payload.whatsapp_number  ?? null,

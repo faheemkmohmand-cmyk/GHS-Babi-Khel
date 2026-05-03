@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 export type AdmissionType   = "fresh" | "migration";
 export type AdmissionStatus = "pending" | "under_review" | "approved" | "rejected" | "documents_missing";
@@ -50,7 +51,6 @@ export interface AdmissionDocument {
   uploaded_at: string;
 }
 
-// ── Public: admission settings (banner / open status) ─────────────────────
 export function useAdmissionSettings() {
   return useQuery<AdmissionSettings | null>({
     queryKey: ["admission-settings"],
@@ -67,7 +67,6 @@ export function useAdmissionSettings() {
   });
 }
 
-// ── Public: track an application ─────────────────────────────────────────
 export function useTrackAdmission(query: string) {
   return useQuery({
     queryKey: ["track-admission", query],
@@ -81,13 +80,12 @@ export function useTrackAdmission(query: string) {
   });
 }
 
-// ── Admin: all admissions ─────────────────────────────────────────────────
+const PAGE_SIZE = 20;
+
 export function useAdminAdmissions(filters: {
   status?: string; classFilter?: string; typeFilter?: string; page?: number;
-}) {
-  const PAGE_SIZE = 20;
+} = {}) {
   const page = filters.page ?? 0;
-
   return useQuery<{ admissions: Admission[]; count: number }>({
     queryKey: ["admin-admissions", filters],
     queryFn: async () => {
@@ -96,14 +94,9 @@ export function useAdminAdmissions(filters: {
         .select("*", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
-
-      if (filters.status && filters.status !== "all")
-        q = q.eq("status", filters.status);
-      if (filters.classFilter && filters.classFilter !== "all")
-        q = q.eq("applying_class", filters.classFilter);
-      if (filters.typeFilter && filters.typeFilter !== "all")
-        q = q.eq("admission_type", filters.typeFilter);
-
+      if (filters.status && filters.status !== "all") q = q.eq("status", filters.status);
+      if (filters.classFilter && filters.classFilter !== "all") q = q.eq("applying_class", filters.classFilter);
+      if (filters.typeFilter && filters.typeFilter !== "all") q = q.eq("admission_type", filters.typeFilter);
       const { data, error, count } = await q;
       if (error) throw error;
       return { admissions: (data ?? []) as Admission[], count: count ?? 0 };
@@ -111,7 +104,6 @@ export function useAdminAdmissions(filters: {
   });
 }
 
-// ── Admin: documents for one admission ──────────────────────────────────
 export function useAdmissionDocuments(admissionId: string) {
   return useQuery<AdmissionDocument[]>({
     queryKey: ["admission-docs", admissionId],
@@ -128,24 +120,17 @@ export function useAdmissionDocuments(admissionId: string) {
   });
 }
 
-// ── Admin: update admission ───────────────────────────────────────────────
 export function useUpdateAdmission() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Admission> }) => {
-      const { error } = await supabase
-        .from("admissions")
-        .update(updates)
-        .eq("id", id);
+      const { error } = await supabase.from("admissions").update(updates).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-admissions"] });
-    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-admissions"] }),
   });
 }
 
-// ── Admin: update settings ────────────────────────────────────────────────
 export function useUpdateAdmissionSettings() {
   const qc = useQueryClient();
   return useMutation({
@@ -156,55 +141,51 @@ export function useUpdateAdmissionSettings() {
         .eq("id", 1);
       if (error) throw error;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admission-settings"] });
-    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admission-settings"] }),
   });
 }
 
-// ── Submit new admission (public) ─────────────────────────────────────────
-export async function submitAdmission(payload: Omit<Admission,
-  "id" | "reference_no" | "status" | "admin_note" | "rejection_reason" |
-  "admission_roll_no" | "migration_step" | "created_at" | "updated_at"
->) {
+export async function submitAdmission(payload: {
+  full_name: string; father_name: string; date_of_birth: string | null;
+  b_form_no: string; contact_number: string; whatsapp_number: string | null;
+  home_address: string | null; gender: string | null; applying_class: string;
+  admission_type: AdmissionType; previous_school: string | null;
+  previous_class: string | null; previous_marks: string | null;
+  year_of_passing: string | null;
+}) {
   const { data, error } = await supabase
     .from("admissions")
-    .insert({ ...payload })
+    .insert(payload)
     .select("id, reference_no")
     .single();
   if (error) throw error;
   return data as { id: string; reference_no: string };
 }
 
-// ── Upload document file ─────────────────────────────────────────────────
+// Upload file to Cloudinary, store resulting URL in Supabase
 export async function uploadAdmissionDocument(
   admissionId: string,
   docType: string,
   file: File
-) {
-  const ext = file.name.split(".").pop();
-  const path = `${admissionId}/${docType}-${Date.now()}.${ext}`;
+): Promise<string> {
+  // Upload to Cloudinary — folder: admissions/admissionId
+  const cloudinaryUrl = await uploadToCloudinary(file, `admissions/${admissionId}`);
 
-  const { error: uploadError } = await supabase.storage
-    .from("admissions")
-    .upload(path, file, { upsert: true });
-  if (uploadError) throw uploadError;
-
-  const { error: dbError } = await supabase
+  // Save the Cloudinary URL into Supabase admission_documents table
+  const { error } = await supabase
     .from("admission_documents")
     .insert({
       admission_id: admissionId,
-      doc_type: docType,
-      file_path: path,
-      file_name: file.name,
+      doc_type:     docType,
+      file_path:    cloudinaryUrl,  // full https://res.cloudinary.com/... URL
+      file_name:    file.name,
     });
-  if (dbError) throw dbError;
+  if (error) throw error;
 
+  return cloudinaryUrl;
+}
+
+// Already a full Cloudinary URL — return directly
+export function getDocUrl(path: string): string {
   return path;
-}
-
-// ── Get public URL for a doc ─────────────────────────────────────────────
-export function getDocUrl(path: string) {
-  const { data } = supabase.storage.from("admissions").getPublicUrl(path);
-  return data.publicUrl;
-}
+        }

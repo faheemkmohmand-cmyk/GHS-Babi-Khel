@@ -42,7 +42,7 @@ export default function ClassCard({ cls, role = "student", onEdit, onDelete, ind
 
   const statusConfig = {
     live:      { label: "LIVE",      bg: "bg-red-500",     text: "text-white",   ring: "ring-red-400/50",    border: "border-red-500/30"  },
-    upcoming:  { label: "Upcoming",  bg: "bg-amber-500",   text: "text-white",   ring: "",                   border: "border-amber-400/20"},
+    upcoming:  { label: "Upcoming",  bg: "bg-blue-500",   text: "text-white",   ring: "",                   border: "border-blue-400/20"},
     completed: { label: "Completed", bg: "bg-emerald-500", text: "text-white",   ring: "",                   border: "border-emerald-400/20"},
     cancelled: { label: "Cancelled", bg: "bg-slate-400",   text: "text-white",   ring: "",                   border: "border-slate-400/20" },
   }[status];
@@ -186,8 +186,8 @@ export default function ClassCard({ cls, role = "student", onEdit, onDelete, ind
               </div>
             )}
             {cls.homework && (
-              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 border border-amber-200/50 dark:border-amber-700/30">
-                <p className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+              <div className="bg-blue-50 dark:bg-blue-950/20 rounded-xl p-3 border border-blue-200/50 dark:border-blue-800/30">
+                <p className="text-[11px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                   <BookMarked className="w-3 h-3" /> Homework
                 </p>
                 <p className="text-xs text-foreground/80 leading-relaxed">{cls.homework}</p>

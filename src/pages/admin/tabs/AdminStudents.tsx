@@ -221,7 +221,7 @@ const AdminStudents = () => {
               </span>
             </Button>
           </label>
-          <Button variant="outline" className="gap-1.5 text-amber-600 border-amber-400 hover:bg-amber-50" onClick={() => setPromotionOpen(true)}>
+          <Button variant="outline" className="gap-1.5 text-blue-700 border-blue-400 hover:bg-blue-50" onClick={() => setPromotionOpen(true)}>
             <GraduationCap className="w-4 h-4" /> Promote Students
           </Button>
           <Button onClick={openAdd} className="gap-1.5"><Plus className="w-4 h-4" /> Add Student</Button>
@@ -349,7 +349,7 @@ const AdminStudents = () => {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <GraduationCap className="w-5 h-5 text-amber-500" /> Promote Students to Next Class
+              <GraduationCap className="w-5 h-5 text-blue-500" /> Promote Students to Next Class
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
@@ -373,7 +373,7 @@ const AdminStudents = () => {
                 </Select>
               </div>
             </div>
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-900">
               ⚠️ <strong>Warning:</strong> This action will update the class of all active students in Class {promotionFrom}. Make sure you have saved all results and attendance before promoting. This cannot be undone automatically.
             </div>
           </div>
@@ -382,7 +382,7 @@ const AdminStudents = () => {
             <Button
               onClick={handlePromotion}
               disabled={promoting || promotionFrom === promotionTo}
-             className="gap-1.5 bg-amber-500 hover:bg-amber-600 text-white"
+             className="gap-1.5 bg-blue-500 hover:bg-blue-700 text-white"
             >
               {promoting && <Loader2 className="w-4 h-4 animate-spin" />}
               {promoting ? "Promoting..." : `Promote Class ${promotionFrom} → Class ${promotionTo}`}

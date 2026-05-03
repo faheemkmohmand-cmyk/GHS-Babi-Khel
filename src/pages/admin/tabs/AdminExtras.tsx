@@ -148,7 +148,7 @@ function HonorRollManager() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {entries.map(e => (
             <Card key={e.id}><CardContent className="p-3 flex items-center gap-3">
-              {e.photo_url ? <img src={e.photo_url} alt="" className="w-12 h-12 rounded-xl object-cover shrink-0" /> : <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-lg shrink-0">{e.student_name[0]}</div>}
+              {e.photo_url ? <img src={e.photo_url} alt="" className="w-12 h-12 rounded-xl object-cover shrink-0" /> : <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-orange-500 flex items-center justify-center text-white font-bold text-lg shrink-0">{e.student_name[0]}</div>}
               <div className="flex-1 min-w-0"><p className="text-sm font-semibold text-foreground truncate">{e.student_name}</p><p className="text-xs text-muted-foreground">Class {e.class} · {MONTHS[e.month - 1]} {e.year}</p>{e.reason && <p className="text-[11px] text-muted-foreground truncate mt-0.5">{e.reason}</p>}</div>
               <div className="flex gap-1 shrink-0">
                 <Button size="sm" variant="ghost" onClick={() => openEdit(e)}><Pencil className="w-3.5 h-3.5" /></Button>

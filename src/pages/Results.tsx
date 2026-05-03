@@ -49,21 +49,21 @@ function CountdownCard({ item }: { item: { class: string; exam_type: string; yea
   }, [item.publish_at]);
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-500/40 rounded-2xl px-4 py-3">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-500/40 rounded-2xl px-4 py-3">
       <div className="flex items-center gap-2 shrink-0">
-        <div className="w-8 h-8 rounded-xl bg-amber-400 flex items-center justify-center shrink-0">
+        <div className="w-8 h-8 rounded-xl bg-blue-400 flex items-center justify-center shrink-0">
           <Timer className="w-4 h-4 text-white" />
         </div>
         <div>
-          <p className="text-xs font-bold text-amber-800 dark:text-amber-200">
+          <p className="text-xs font-bold text-blue-900 dark:text-blue-200">
             Class {item.class} — {item.exam_type} {item.year}
           </p>
-          <p className="text-[10px] text-amber-600 dark:text-amber-400">Results coming soon</p>
+          <p className="text-[10px] text-blue-700 dark:text-blue-400">Results coming soon</p>
         </div>
       </div>
-      <div className="sm:ml-auto bg-amber-100 dark:bg-amber-900/40 rounded-xl px-4 py-2 text-center min-w-[120px]">
-        <p className="text-lg font-black text-amber-700 dark:text-amber-300 font-mono tracking-wide">{timeLeft}</p>
-        <p className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-wider">Publishes in</p>
+      <div className="sm:ml-auto bg-blue-100 dark:bg-blue-950/40 rounded-xl px-4 py-2 text-center min-w-[120px]">
+        <p className="text-lg font-black text-blue-800 dark:text-blue-300 font-mono tracking-wide">{timeLeft}</p>
+        <p className="text-[10px] text-blue-700 dark:text-blue-400 font-semibold uppercase tracking-wider">Publishes in</p>
       </div>
     </div>
   );
@@ -76,7 +76,7 @@ function ScheduledResultsBanner() {
   return (
     <div className="mb-6 space-y-3">
       <div className="flex items-center gap-2 mb-1">
-        <Clock className="w-4 h-4 text-amber-500" />
+        <Clock className="w-4 h-4 text-blue-500" />
         <p className="text-sm font-bold text-foreground">
           Upcoming Result Publications
         </p>
@@ -262,7 +262,7 @@ const ResultCardSearch = () => {
                     {r.is_pass ? "✓ PASS" : "✗ FAIL"}
                   </span>
                   {r.position && r.position <= 3 && (
-                    <span className="text-sm font-semibold text-amber-700">
+                    <span className="text-sm font-semibold text-blue-800">
                       {r.position === 1 ? "🥇 1st" : r.position === 2 ? "🥈 2nd" : "🥉 3rd"} Position
                     </span>
                   )}

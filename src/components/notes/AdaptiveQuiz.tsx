@@ -157,18 +157,18 @@ const AdaptiveQuiz = ({ quizId, chapterId, userId }: AdaptiveQuizProps) => {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Points Earned</p>
-              <p className="text-2xl font-bold text-amber-600">{passed ? "50" : "10"}</p>
+              <p className="text-2xl font-bold text-blue-700">{passed ? "50" : "10"}</p>
             </div>
           </div>
         </div>
 
         {!passed && (
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 mb-6 text-left">
-            <p className="text-sm font-semibold text-amber-900 dark:text-amber-200 mb-2">Questions you got wrong:</p>
+          <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-2xl p-4 mb-6 text-left">
+            <p className="text-sm font-semibold text-blue-950 dark:text-blue-200 mb-2">Questions you got wrong:</p>
             {questions.map((q, idx) => {
               if (answers[idx] !== q.correct) {
                 return (
-                  <div key={q.id} className="text-xs text-amber-800 dark:text-amber-300 mb-2">
+                  <div key={q.id} className="text-xs text-blue-900 dark:text-blue-300 mb-2">
                     <p className="font-semibold">Q{idx + 1}: {q.question}</p>
                     <p>Your answer: <span className="text-red-600">Option {answers[idx]?.toUpperCase()}</span></p>
                     <p>Correct: <span className="text-green-600">Option {q.correct.toUpperCase()}</span></p>

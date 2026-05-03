@@ -143,7 +143,7 @@ const AdminHomework = () => {
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="text-sm font-semibold text-foreground">{hw.title}</h3>
                         {overdue && <Badge variant="destructive" className="text-[10px]">Overdue</Badge>}
-                        {isToday(new Date(hw.due_date)) && <Badge className="text-[10px] bg-amber-500">Due Today</Badge>}
+                        {isToday(new Date(hw.due_date)) && <Badge className="text-[10px] bg-blue-500">Due Today</Badge>}
                       </div>
                       <div className="flex items-center gap-2 mt-1 flex-wrap text-xs text-muted-foreground">
                         <span className="bg-primary/10 text-primary font-medium px-2 py-0.5 rounded">{hw.subject}</span>

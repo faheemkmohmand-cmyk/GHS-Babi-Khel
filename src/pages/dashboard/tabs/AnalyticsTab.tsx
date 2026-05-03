@@ -26,7 +26,7 @@ const examTypes: Record<string, string[]> = {
 };
 
 const SUBJECT_COLORS = [
-  "#6366f1","#f59e0b","#10b981","#ef4444","#8b5cf6","#14b8a6","#f97316","#06b6d4","#84cc16","#ec4899"
+  "#6366f1","#1e3a8a","#10b981","#ef4444","#8b5cf6","#14b8a6","#f97316","#06b6d4","#84cc16","#ec4899"
 ];
 
 const currentYear = new Date().getFullYear();
@@ -40,8 +40,8 @@ function AttendanceCard({ userId, cls }: { userId: string; cls: string }) {
   const { data: stat, isLoading } = useStudentAttendanceStats(userId, month, year);
 
   const pct = stat?.percentage ?? 0;
-  const color = pct >= 75 ? "text-green-600" : pct >= 60 ? "text-amber-500" : "text-red-500";
-  const ringColor = pct >= 75 ? "stroke-green-500" : pct >= 60 ? "stroke-amber-400" : "stroke-red-500";
+  const color = pct >= 75 ? "text-green-600" : pct >= 60 ? "text-blue-500" : "text-red-500";
+  const ringColor = pct >= 75 ? "stroke-green-500" : pct >= 60 ? "stroke-blue-400" : "stroke-red-500";
   const radius = 36; const circ = 2 * Math.PI * radius;
   const dashOffset = circ - (pct / 100) * circ;
 
@@ -84,8 +84,8 @@ function AttendanceCard({ userId, cls }: { userId: string; cls: string }) {
               <p className="text-lg font-bold text-red-500">{stat?.absent_days ?? 0}</p>
               <p className="text-[10px] text-muted-foreground">Absent</p>
             </div>
-            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-2">
-              <p className="text-lg font-bold text-amber-500">{stat?.late_days ?? 0}</p>
+            <div className="bg-blue-50 dark:bg-blue-950/20 rounded-xl p-2">
+              <p className="text-lg font-bold text-blue-500">{stat?.late_days ?? 0}</p>
               <p className="text-[10px] text-muted-foreground">Late</p>
             </div>
             <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-2">
@@ -97,7 +97,7 @@ function AttendanceCard({ userId, cls }: { userId: string; cls: string }) {
       )}
       <div className={`mt-3 text-xs font-semibold text-center py-1.5 rounded-lg ${
         pct >= 75 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
-        pct >= 60 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
+        pct >= 60 ? "bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-400" :
         "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
       }`}>
         {pct >= 75 ? "✓ Good attendance" : pct >= 60 ? "⚠ Below recommended (75%)" : "✗ Critical — please improve"}
@@ -190,7 +190,7 @@ function ComparisonChart({ cls, rollNumber }: { cls: string; rollNumber: string 
           <ReferenceLine y={33} stroke="#ef4444" strokeDasharray="3 2" label={{ value: "Pass", fontSize: 9, fill: "#ef4444" }} />
           <Bar dataKey="percentage" fill="#6366f1" radius={[6, 6, 0, 0]}>
             {chartData.map((entry, i) => (
-              <Cell key={i} fill={entry.percentage >= 60 ? "#6366f1" : entry.percentage >= 33 ? "#f59e0b" : "#ef4444"} />
+              <Cell key={i} fill={entry.percentage >= 60 ? "#6366f1" : entry.percentage >= 33 ? "#1e3a8a" : "#ef4444"} />
             ))}
           </Bar>
         </BarChart>

@@ -102,7 +102,7 @@ export default function OnlineClassesTab() {
       <div className="grid grid-cols-3 gap-3">
         {[
           { icon: Wifi,     label: "Live Now",    value: myLive.length,     color: "text-red-500",     bg: "bg-red-50 dark:bg-red-950/20"     },
-          { icon: Calendar, label: "Today",       value: myToday.length,    color: "text-amber-500",   bg: "bg-amber-50 dark:bg-amber-950/20"  },
+          { icon: Calendar, label: "Today",       value: myToday.length,    color: "text-blue-500",   bg: "bg-blue-50 dark:bg-blue-950/20"  },
           { icon: Clock,    label: "Upcoming",    value: myUpcoming.length, color: "text-primary",     bg: "bg-primary/5"                      },
         ].map(s => (
           <div key={s.label} className={`${s.bg} rounded-xl p-3 text-center border border-border/50`}>

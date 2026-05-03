@@ -524,7 +524,7 @@ const WikipediaSearch = ({ compact = false }: WikipediaSearchProps) => {
       {/* ── FAVORITES ─────────────────────────────────────────────────────── */}
       {view === "favorites" && (
         <div className="wsr-fade">
-          <div className="wsr-sec-title"><Star size={14} style={{color:"#f59e0b"}} /> Saved Favorites</div>
+          <div className="wsr-sec-title"><Star size={14} style={{color:"#1e3a8a"}} /> Saved Favorites</div>
           {favorites.length === 0
             ? <div className="wsr-card" style={{padding:28,textAlign:"center"}}>
                 <Star size={32} style={{color:"hsl(var(--muted-foreground))",margin:"0 auto 8px"}} />
@@ -648,7 +648,7 @@ const WikipediaSearch = ({ compact = false }: WikipediaSearchProps) => {
                       <button onClick={toggleFavorite} className="wsr-fav-btn"
                         style={{background:isFavorited?"hsl(var(--primary)/.1)":"hsl(var(--secondary))"}}>
                         {isFavorited
-                          ? <Star size={17} style={{color:"#f59e0b",fill:"#f59e0b"}} />
+                          ? <Star size={17} style={{color:"#1e3a8a",fill:"#1e3a8a"}} />
                           : <StarOff size={17} style={{color:"hsl(var(--muted-foreground))"}} />}
                       </button>
                     </div>
@@ -692,7 +692,7 @@ const WikipediaSearch = ({ compact = false }: WikipediaSearchProps) => {
           {/* Daily fact */}
           {!result && !isLoading && !error && dailyFact && (
             <div className="wsr-fade">
-              <div className="wsr-sec-title"><Sparkles size={14} style={{color:"#f59e0b"}} />Daily Knowledge Fact</div>
+              <div className="wsr-sec-title"><Sparkles size={14} style={{color:"#1e3a8a"}} />Daily Knowledge Fact</div>
               <div className="wsr-card wsr-daily">
                 <div style={{display:"flex",gap:12}}>
                   {dailyFact.thumbnail && <img src={dailyFact.thumbnail.source} alt="" style={{width:58,height:58,borderRadius:10,objectFit:"cover",flexShrink:0}} />}

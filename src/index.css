@@ -10,7 +10,7 @@
 @tailwind utilities;
 
 @layer base {
-  /* ─── ROYAL SLATE — Light (Navy + Gold) ─── */
+  /* ─── ROYAL SLATE — Light (Navy Only) ─── */
   :root {
     --background: 210 40% 98%;
     --foreground: 222 47% 14%;
@@ -34,7 +34,7 @@
     --muted: 215 25% 92%;
     --muted-foreground: 222 15% 42%;
 
-    --accent: 38 92% 50%;
+    --accent: 222 47% 50%;
     --accent-foreground: 222 47% 14%;
 
     --destructive: 0 84% 60%;
@@ -47,7 +47,7 @@
     --radius: 0.75rem;
 
     --success: 142 76% 36%;
-    --warning: 38 92% 50%;
+    --warning: 222 47% 50%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 222 30% 26%;
@@ -63,12 +63,12 @@
 
     --gradient-hero: linear-gradient(135deg, hsl(222 47% 14%), hsl(222 47% 22%), hsl(222 40% 32%));
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 40% 98%));
-    --gradient-accent: linear-gradient(135deg, hsl(38 92% 50%), hsl(45 95% 60%));
+    --gradient-accent: linear-gradient(135deg, hsl(222 47% 50%), hsl(222 40% 60%));
     --shadow-card: 0 4px 20px -4px hsl(222 47% 22% / 0.14);
     --shadow-elevated: 0 12px 40px -8px hsl(222 47% 22% / 0.22);
   }
 
-  /* ─── ROYAL SLATE — Dark (Navy primary, Navy base) ─── */
+  /* ─── ROYAL SLATE — Dark (Navy Only) ─── */
   .dark {
     --background: 222 47% 8%;
     --foreground: 210 30% 96%;

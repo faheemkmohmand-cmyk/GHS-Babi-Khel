@@ -81,7 +81,7 @@ export default function TeacherOnlineClassesTab() {
         {[
           { icon: Wifi,         label: "Live Now",   value: myLive.length,      color: "text-red-500",     bg: "bg-red-50 dark:bg-red-950/20"     },
           { icon: BarChart3,    label: "My Classes", value: myClasses.length,   color: "text-primary",     bg: "bg-primary/5"                     },
-          { icon: Clock,        label: "Upcoming",   value: myUpcoming.length,  color: "text-amber-500",   bg: "bg-amber-50 dark:bg-amber-950/20" },
+          { icon: Clock,        label: "Upcoming",   value: myUpcoming.length,  color: "text-blue-500",   bg: "bg-blue-50 dark:bg-blue-950/20" },
           { icon: CheckCircle,  label: "Completed",  value: myCompleted.length, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/20"},
         ].map(s => (
           <div key={s.label} className={`${s.bg} rounded-xl p-4 text-center border border-border/50`}>

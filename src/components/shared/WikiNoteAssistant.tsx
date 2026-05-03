@@ -143,7 +143,7 @@ const WikiNoteAssistant = ({
     .wna-fab-badge {
       position:absolute; top:-3px; right:-3px;
       width:15px; height:15px; border-radius:50%;
-      background:#f59e0b; border:2px solid hsl(var(--background));
+      background:#1e3a8a; border:2px solid hsl(var(--background));
       display:flex; align-items:center; justify-content:center;
       font-size:8px; font-weight:800; color:#fff;
     }

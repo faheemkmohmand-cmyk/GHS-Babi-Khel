@@ -49,10 +49,10 @@ export const SUBJECT_ICONS: Record<string,string> = {
 export const SUBJECT_COLORS: Record<string,string> = {
   "Mathematics":"from-blue-500 to-indigo-600","Physics":"from-violet-500 to-purple-600",
   "Chemistry":"from-green-500 to-emerald-600","Biology":"from-teal-500 to-cyan-600",
-  "English":"from-orange-500 to-amber-600","Urdu":"from-rose-500 to-pink-600",
+  "English":"from-orange-500 to-blue-700","Urdu":"from-rose-500 to-pink-600",
   "Islamiyat":"from-emerald-600 to-green-700","Pakistan Studies":"from-green-600 to-green-800",
   "Computer Science":"from-sky-500 to-blue-600","General Science":"from-cyan-500 to-teal-600",
-  "History":"from-amber-500 to-orange-600","Geography":"from-lime-500 to-green-600",
+  "History":"from-blue-500 to-orange-600","Geography":"from-lime-500 to-green-600",
 };
 
 export const CLASS_NAMES = ["Class 6","Class 7","Class 8","Class 9","Class 10"];

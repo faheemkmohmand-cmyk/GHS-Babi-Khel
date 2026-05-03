@@ -28,12 +28,12 @@ const ALL_CLASSES = ["6", "7", "8", "9", "10"];
 const CLASS_COLORS: Record<string, string> = {
   "6":  "#6366f1",
   "7":  "#10b981",
-  "8":  "#f59e0b",
+  "8":  "#1e3a8a",
   "9":  "#ef4444",
   "10": "#8b5cf6",
 };
 const SUBJECT_COLORS = [
-  "#6366f1","#10b981","#f59e0b","#ef4444","#8b5cf6",
+  "#6366f1","#10b981","#1e3a8a","#ef4444","#8b5cf6",
   "#14b8a6","#f97316","#06b6d4","#84cc16","#ec4899",
 ];
 const EXAM_TYPES: Record<string, string[]> = {
@@ -207,7 +207,7 @@ function TopperCard({ cls, results }: { cls: string; results: Result[] }) {
               {name[0]}
             </div>
           )}
-          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center">
+          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-blue-400 flex items-center justify-center">
             <Crown className="w-3 h-3 text-white" />
           </div>
         </div>
@@ -221,7 +221,7 @@ function TopperCard({ cls, results }: { cls: string; results: Result[] }) {
         </div>
         <div className="text-right shrink-0">
           <p className="text-2xl font-black" style={{ color }}>{pct.toFixed(1)}%</p>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{grade}</span>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-400">{grade}</span>
         </div>
       </div>
       <div className="grid grid-cols-3 gap-1.5 text-center">
@@ -233,8 +233,8 @@ function TopperCard({ cls, results }: { cls: string; results: Result[] }) {
           <p className="text-xs font-bold text-foreground">{avg.toFixed(1)}%</p>
           <p className="text-[9px] text-muted-foreground">Class Avg</p>
         </div>
-        <div className={`rounded-lg p-1.5 ${passRate >= 80 ? "bg-green-100 dark:bg-green-900/20" : passRate >= 60 ? "bg-amber-100 dark:bg-amber-900/20" : "bg-red-100 dark:bg-red-900/20"}`}>
-          <p className={`text-xs font-bold ${passRate >= 80 ? "text-green-700 dark:text-green-400" : passRate >= 60 ? "text-amber-700 dark:text-amber-400" : "text-red-700 dark:text-red-400"}`}>{passRate}%</p>
+        <div className={`rounded-lg p-1.5 ${passRate >= 80 ? "bg-green-100 dark:bg-green-900/20" : passRate >= 60 ? "bg-blue-100 dark:bg-blue-950/20" : "bg-red-100 dark:bg-red-900/20"}`}>
+          <p className={`text-xs font-bold ${passRate >= 80 ? "text-green-700 dark:text-green-400" : passRate >= 60 ? "text-blue-800 dark:text-blue-400" : "text-red-700 dark:text-red-400"}`}>{passRate}%</p>
           <p className="text-[9px] text-muted-foreground">Pass Rate</p>
         </div>
       </div>
@@ -264,7 +264,7 @@ function OverviewSection({ results, year }: { results: Result[]; year: number })
     <div className="space-y-5">
       <div>
         <h3 className="font-bold text-foreground flex items-center gap-2 text-sm">
-          <Crown className="w-4 h-4 text-amber-500" /> Class Toppers — {year}
+          <Crown className="w-4 h-4 text-blue-500" /> Class Toppers — {year}
         </h3>
         <p className="text-xs text-muted-foreground mt-0.5">Best performer of each class based on published results</p>
       </div>
@@ -354,7 +354,7 @@ function ClassAnalyticsSection({ results, year }: { results: Result[]; year: num
 
   const gradeChartData = useMemo(() => {
     if (!stats) return [];
-    const gc: Record<string, string> = { "A+": "#22c55e", "A": "#3b82f6", "B": "#6366f1", "C": "#f59e0b", "D": "#f97316", "Fail": "#ef4444" };
+    const gc: Record<string, string> = { "A+": "#22c55e", "A": "#3b82f6", "B": "#6366f1", "C": "#1e3a8a", "D": "#f97316", "Fail": "#ef4444" };
     return Object.entries(stats.grades).map(([grade, count]) => ({ name: grade, value: count, color: gc[grade] ?? "#94a3b8" }));
   }, [stats]);
 
@@ -377,7 +377,7 @@ function ClassAnalyticsSection({ results, year }: { results: Result[]; year: num
     const buckets = [
       { label: "0-33", min: 0, max: 33, color: "#ef4444" },
       { label: "33-50", min: 33, max: 50, color: "#f97316" },
-      { label: "50-60", min: 50, max: 60, color: "#f59e0b" },
+      { label: "50-60", min: 50, max: 60, color: "#1e3a8a" },
       { label: "60-75", min: 60, max: 75, color: "#6366f1" },
       { label: "75-90", min: 75, max: 90, color: "#10b981" },
       { label: "90-100", min: 90, max: 101, color: "#22c55e" },
@@ -414,7 +414,7 @@ function ClassAnalyticsSection({ results, year }: { results: Result[]; year: num
                 <p className="text-xs text-muted-foreground">{cr.length} results</p>
                 <div className="mt-2 flex gap-2 text-xs">
                   <span className="font-semibold" style={{ color }}>{avg.toFixed(1)}% avg</span>
-                  <span className={`font-semibold ${Math.round(passed/cr.length*100) >= 70 ? "text-green-600" : "text-amber-600"}`}>{Math.round(passed/cr.length*100)}% pass</span>
+                  <span className={`font-semibold ${Math.round(passed/cr.length*100) >= 70 ? "text-green-600" : "text-blue-700"}`}>{Math.round(passed/cr.length*100)}% pass</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground mt-2" />
               </button>
@@ -450,7 +450,7 @@ function ClassAnalyticsSection({ results, year }: { results: Result[]; year: num
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           <StatPill label="Total" value={stats.total} color={color} />
           <StatPill label="Avg %" value={`${stats.avg}%`} color={color} />
-          <StatPill label="Pass Rate" value={`${stats.passRate}%`} color={stats.passRate >= 70 ? "#10b981" : "#f59e0b"} />
+          <StatPill label="Pass Rate" value={`${stats.passRate}%`} color={stats.passRate >= 70 ? "#10b981" : "#1e3a8a"} />
           <StatPill label="Highest" value={`${stats.highest.toFixed(1)}%`} color="#22c55e" />
           <StatPill label="Lowest" value={`${stats.lowest.toFixed(1)}%`} color="#ef4444" />
           <StatPill label="Passed" value={stats.passed} color="#10b981" />
@@ -521,7 +521,7 @@ function ClassAnalyticsSection({ results, year }: { results: Result[]; year: num
           <div className="space-y-2">
             {top5.map((r, i) => (
               <div key={r.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/30 transition-colors">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${i === 0 ? "bg-amber-400 text-white" : i === 1 ? "bg-slate-400 text-white" : i === 2 ? "bg-orange-500 text-white" : "bg-muted text-muted-foreground"}`}>{i + 1}</div>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${i === 0 ? "bg-blue-400 text-white" : i === 1 ? "bg-slate-400 text-white" : i === 2 ? "bg-orange-500 text-white" : "bg-muted text-muted-foreground"}`}>{i + 1}</div>
                 {r.students?.photo_url ? <img src={r.students.photo_url} alt="" className="w-8 h-8 rounded-full object-cover" /> : (
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">{r.students?.full_name?.[0] ?? "?"}</div>
                 )}
@@ -605,7 +605,7 @@ function StudentProfile({ studentId, studentName, photo, results }: {
           <div className="flex gap-2 mt-1 flex-wrap">
             <span className="text-xs font-bold text-primary">{overallAvg.toFixed(1)}% avg</span>
             <span className="text-xs font-bold text-green-600">{allPassed}/{myResults.length} passed</span>
-            <span className="text-xs font-bold text-amber-600">Best: {bestPct.toFixed(1)}%</span>
+            <span className="text-xs font-bold text-blue-700">Best: {bestPct.toFixed(1)}%</span>
           </div>
         </div>
       </div>
@@ -679,7 +679,7 @@ function StudentProfile({ studentId, studentName, photo, results }: {
             </SectionCard>
           )}
 
-          <SectionCard title="All Exam Results" icon={Award} color="#f59e0b">
+          <SectionCard title="All Exam Results" icon={Award} color="#1e3a8a">
             <div className="space-y-2">
               {byExam.map((r) => (
                 <div key={r.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/20">

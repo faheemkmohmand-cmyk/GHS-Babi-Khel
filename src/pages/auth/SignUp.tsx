@@ -85,16 +85,16 @@ const SignUp = () => {
           className="w-full max-w-md relative z-10"
         >
           <div className="bg-card rounded-2xl shadow-elevated p-8 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-amber-500/15 mx-auto mb-4 flex items-center justify-center">
-              <Clock className="w-8 h-8 text-amber-500" />
+            <div className="w-14 h-14 rounded-2xl bg-blue-500/15 mx-auto mb-4 flex items-center justify-center">
+              <Clock className="w-8 h-8 text-blue-500" />
             </div>
             <h1 className="text-2xl font-heading font-bold text-foreground">Account Under Review</h1>
             <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
-              Your account has been created and is <strong className="text-amber-600">pending admin approval</strong>.
+              Your account has been created and is <strong className="text-blue-700">pending admin approval</strong>.
               You will be able to sign in once an administrator approves your account.
             </p>
-            <div className="mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
-              <p className="text-xs text-amber-700 dark:text-amber-400">
+            <div className="mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
+              <p className="text-xs text-blue-800 dark:text-blue-400">
                 Please check your email to verify your address. Admin will review your request shortly.
               </p>
             </div>

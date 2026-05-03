@@ -422,7 +422,7 @@ function ResultsView({ test, onBack }: { test: Test; onBack: () => void }) {
               <tbody>
                 {(attempts || []).map((a, i) => {
                   const pct = a.percentage;
-                  const rowClass = pct >= 80 ? "bg-primary/5" : pct >= 50 ? "bg-amber-500/5" : "bg-destructive/5";
+                  const rowClass = pct >= 80 ? "bg-primary/5" : pct >= 50 ? "bg-blue-500/5" : "bg-destructive/5";
                   const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : String(i + 1);
                   return (
                     <tr key={a.id} className={`border-b border-border ${rowClass}`}>

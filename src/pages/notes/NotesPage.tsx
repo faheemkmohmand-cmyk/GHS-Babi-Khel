@@ -31,7 +31,7 @@ const NotesPage = () => {
             </div>
             <h1 className="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">
               Study Smarter,<br />
-              <span className="text-yellow-300">Not Harder</span>
+              <span className="text-blue-300">Not Harder</span>
             </h1>
             <p className="text-lg text-white/80 mb-8 max-w-xl mx-auto">
               Beautiful notes, interactive animations, quizzes and graphs — all for free, all for GHS Babi Khel students.

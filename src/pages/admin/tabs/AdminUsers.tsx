@@ -31,7 +31,7 @@ const roles = ["user", "student", "teacher", "parent", "admin"];
 const classes = ["6", "7", "8", "9", "10"];
 
 const roleColors: Record<string, string> = {
-  admin:   "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  admin:   "bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-400",
   teacher: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
   student: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
   parent:  "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
@@ -281,7 +281,7 @@ const AdminUsers = () => {
           { label: "Total Users", value: stats.total, color: "bg-primary/10 text-primary" },
           { label: "Students", value: stats.students, color: "bg-green-100 text-green-700" },
           { label: "Teachers", value: stats.teachers, color: "bg-blue-100 text-blue-700" },
-          { label: "Admins", value: stats.admins, color: "bg-amber-100 text-amber-700" },
+          { label: "Admins", value: stats.admins, color: "bg-blue-100 text-blue-800" },
         ].map(s => (
           <Card key={s.label}>
             <CardContent className="p-4 flex items-center gap-3">

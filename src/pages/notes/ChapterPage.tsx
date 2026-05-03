@@ -287,7 +287,7 @@ const AudioPlayer = ({ content, onClose }: { content: string; onClose: () => voi
           </button>
         ) : (
           <button onClick={handlePause}
-            className="flex-1 flex items-center justify-center gap-1.5 bg-amber-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:opacity-90">
+            className="flex-1 flex items-center justify-center gap-1.5 bg-blue-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:opacity-90">
             <Pause className="w-4 h-4" /> Pause
           </button>
         )}
@@ -693,7 +693,7 @@ const InteractiveIframe = ({ code, subjectColor }: { code: string; subjectColor:
 
 function ChapterChart({ config }: { config: any }) {
   if (!config) return null;
-  const COLORS = config.colors || ["#6366f1","#f59e0b","#10b981","#ef4444","#8b5cf6"];
+  const COLORS = config.colors || ["#6366f1","#1e3a8a","#10b981","#ef4444","#8b5cf6"];
   let data = config.data || [];
   if (config.equation) {
     data = [];
@@ -763,7 +763,7 @@ const PomodoroTimer = ({ onClose }: { onClose: () => void }) => {
       <div className={`text-3xl font-black text-center font-mono mb-3 ${mode==="study"?"text-red-500":"text-green-500"}`}>{fmt(secs)}</div>
       <div className="flex gap-2">
         <button onClick={() => setRunning(r=>!r)}
-          className={`flex-1 py-2 rounded-xl text-white text-sm font-semibold ${running?"bg-amber-500":"bg-primary"}`}>
+          className={`flex-1 py-2 rounded-xl text-white text-sm font-semibold ${running?"bg-blue-500":"bg-primary"}`}>
           {running?"Pause":"Start"}
         </button>
         <button onClick={() => { setRunning(false); setMode("study"); setSecs(25*60); }}
@@ -989,15 +989,15 @@ const RevisionReminder = ({ chapterId, chapterTitle, userId }: { chapterId: stri
   };
   return (
     <motion.div initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }}
-      className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-2xl p-4 mb-4 flex items-start gap-3">
+      className="bg-blue-50 dark:bg-blue-950/20 border border-blue-300 dark:border-blue-800 rounded-2xl p-4 mb-4 flex items-start gap-3">
       <span className="text-2xl">🔔</span>
       <div className="flex-1">
-        <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Time to Revise!</p>
-        <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+        <p className="text-sm font-bold text-blue-900 dark:text-blue-300">Time to Revise!</p>
+        <p className="text-xs text-blue-800 dark:text-blue-400 mt-0.5">
           You completed "{chapterTitle}" earlier. A quick revision now will help you remember it much longer.
         </p>
       </div>
-      <button onClick={dismiss} className="text-xs font-semibold text-amber-700 dark:text-amber-400 hover:underline shrink-0">Dismiss</button>
+      <button onClick={dismiss} className="text-xs font-semibold text-blue-800 dark:text-blue-400 hover:underline shrink-0">Dismiss</button>
     </motion.div>
   );
 };
@@ -1014,7 +1014,7 @@ const GamificationBar = ({ userId }: { userId: string }) => {
   ];
   return (
     <div className="flex items-center gap-3 flex-wrap mb-4">
-      <span className="text-sm font-bold text-amber-600">⭐ {g.total_points} pts</span>
+      <span className="text-sm font-bold text-blue-700">⭐ {g.total_points} pts</span>
       <span className="text-sm font-bold text-orange-500">🔥 {g.streak_days} day streak</span>
       {(g.badges||[]).slice(0,4).map((b:string) => {
         const badge = allBadges.find(x=>x.id===b);
@@ -1116,14 +1116,14 @@ const AdaptiveQuiz = ({ quizId, chapterId, userId }: { quizId: string; chapterId
     return "bg-card border-border opacity-50";
   };
 
-  const diffClr = adaptiveDiff==="hard"?"text-red-500 bg-red-50 dark:bg-red-900/20":adaptiveDiff==="medium"?"text-amber-500 bg-amber-50 dark:bg-amber-900/20":"text-green-500 bg-green-50 dark:bg-green-900/20";
+  const diffClr = adaptiveDiff==="hard"?"text-red-500 bg-red-50 dark:bg-red-900/20":adaptiveDiff==="medium"?"text-blue-500 bg-blue-50 dark:bg-blue-950/20":"text-green-500 bg-green-50 dark:bg-green-900/20";
 
   if (step==="cooldown") return (
-    <div className="mt-10 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-3xl p-8 text-center">
+    <div className="mt-10 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-3xl p-8 text-center">
       <p className="text-4xl mb-3">⏳</p>
       <h3 className="text-xl font-black text-foreground mb-2">Quiz Cooldown</h3>
       <p className="text-muted-foreground mb-1">You need to wait before retrying this quiz.</p>
-      <p className="text-3xl font-black font-mono text-amber-600 my-4">
+      <p className="text-3xl font-black font-mono text-blue-700 my-4">
         {String(Math.floor(cooldownLeft/60)).padStart(2,"0")}:{String(cooldownLeft%60).padStart(2,"0")}
       </p>
       <p className="text-sm text-muted-foreground">Use this time to re-read the chapter!</p>
@@ -1153,7 +1153,7 @@ const AdaptiveQuiz = ({ quizId, chapterId, userId }: { quizId: string; chapterId
           <span className="text-sm font-semibold text-muted-foreground">Q {current+1}/{totalQ}</span>
           <div className="flex items-center gap-2">
             <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${diffClr}`}>{adaptiveDiff}</span>
-            <span className="text-sm bg-amber-100 text-amber-700 font-bold px-3 py-1 rounded-full">⭐ {pts}pts</span>
+            <span className="text-sm bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded-full">⭐ {pts}pts</span>
           </div>
         </div>
         {diffMsg && <p className="text-sm font-semibold text-center mb-4 text-violet-600 bg-violet-50 dark:bg-violet-900/20 py-2 rounded-xl">{diffMsg}</p>}
@@ -1207,8 +1207,8 @@ const AdaptiveQuiz = ({ quizId, chapterId, userId }: { quizId: string; chapterId
           <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-600" style={{width:`${pct}%`}} />
         </div>
         <p className="text-muted-foreground text-sm mb-2">{pct}%</p>
-        <p className="text-amber-600 font-bold text-sm mb-6">⭐ +{pts} points earned!</p>
-        {pct < 60 && <p className="text-amber-600 text-xs mb-3">You can retry in 5 minutes</p>}
+        <p className="text-blue-700 font-bold text-sm mb-6">⭐ +{pts} points earned!</p>
+        {pct < 60 && <p className="text-blue-700 text-xs mb-3">You can retry in 5 minutes</p>}
         <button onClick={()=>{setCurrent(0);setAnswers({});setSelected(null);setRevealed(false);setPts(0);setStreak(0);setAdaptiveDiff("medium");
           const key=`quiz_last_fail_${quizId}`;const lf=localStorage.getItem(key);
           if(lf){const el=(Date.now()-parseInt(lf))/1000;if(el<300){setCooldownLeft(Math.ceil(300-el));setStep("cooldown");return;}}
@@ -1282,7 +1282,7 @@ const FlashcardMode = ({ chapterId, onClose }: { chapterId: string; onClose: () 
             </div>
             {flipped ? (
               <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} className="flex gap-3">
-                <button onClick={markReview} className="flex-1 py-3 rounded-2xl border-2 border-amber-400 bg-amber-50 dark:bg-amber-900/20 text-amber-700 font-bold text-sm">🔄 Review Again</button>
+                <button onClick={markReview} className="flex-1 py-3 rounded-2xl border-2 border-blue-400 bg-blue-50 dark:bg-blue-950/20 text-blue-800 font-bold text-sm">🔄 Review Again</button>
                 <button onClick={markKnown} className="flex-1 py-3 rounded-2xl border-2 border-green-400 bg-green-50 dark:bg-green-900/20 text-green-700 font-bold text-sm">✅ Got It!</button>
               </motion.div>
             ) : <p className="text-center text-sm text-muted-foreground mt-2">👆 Tap to see answer</p>}

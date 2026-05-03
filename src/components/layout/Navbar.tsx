@@ -89,7 +89,7 @@ const Navbar = () => {
                 <NotificationBell />
                 <ThemeSwitcher />
                 {isAdmin && (
-                  <Link to="/admin" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold bg-amber-500 text-white hover:bg-amber-600 transition-all">
+                  <Link to="/admin" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold bg-blue-500 text-white hover:bg-blue-700 transition-all">
                     <Shield className="w-4 h-4" /> Admin
                   </Link>
                 )}
@@ -179,7 +179,7 @@ const Navbar = () => {
                         style={{
                           display: "flex", alignItems: "center", gap: "10px",
                           padding: "13px 16px", borderRadius: "12px",
-                          backgroundColor: "#f59e0b", color: "#fff",
+                          backgroundColor: "#1e3a8a", color: "#fff",
                           fontWeight: 600, fontSize: "14px", textDecoration: "none",
                         }}>
                         <Shield style={{ width: "18px", height: "18px" }} />

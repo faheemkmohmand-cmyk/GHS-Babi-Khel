@@ -15,7 +15,7 @@ const currentYear = new Date().getFullYear();
 function SubjectBadge({ subject }: { subject: string }) {
   const colors: Record<string, string> = {
     English: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-    Urdu: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+    Urdu: "bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-400",
     Maths: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
     Mathematics: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
     Physics: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
@@ -85,11 +85,11 @@ const ExamScheduleTab = () => {
             const diff = differenceInDays(date, new Date());
             return (
               <div key={entry.id} className={`bg-card rounded-xl border p-4 flex items-center gap-4 shadow-sm transition-all ${
-                today ? "border-amber-400 bg-amber-50/50 dark:bg-amber-900/10" :
+                today ? "border-blue-400 bg-blue-50/50 dark:bg-blue-950/10" :
                 past ? "opacity-60 border-border" : "border-border hover:border-primary/30"
               }`}>
                 <div className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 ${
-                  today ? "bg-amber-500 text-white" :
+                  today ? "bg-blue-500 text-white" :
                   past ? "bg-secondary text-muted-foreground" :
                   "bg-primary text-primary-foreground"
                 }`}>
@@ -99,7 +99,7 @@ const ExamScheduleTab = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <SubjectBadge subject={entry.subject} />
-                    {today && <span className="text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">TODAY</span>}
+                    {today && <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">TODAY</span>}
                     {!past && !today && diff <= 3 && <span className="text-[10px] font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">{diff}d left</span>}
                   </div>
                   <p className="text-sm font-semibold text-foreground mt-0.5">{entry.subject}</p>

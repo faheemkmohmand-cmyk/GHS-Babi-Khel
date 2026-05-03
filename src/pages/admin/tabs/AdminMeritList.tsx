@@ -417,7 +417,7 @@ function MeritTable({ entries, showClass = false }: { entries: MeritEntry[]; sho
                     e.grade === "A+" ? "bg-primary text-white" :
                     e.grade === "A" ? "bg-primary text-white" :
                     e.grade === "B" ? "bg-green-500 text-white" :
-                    e.grade === "C" ? "bg-amber-500 text-white" : "bg-muted text-foreground"
+                    e.grade === "C" ? "bg-blue-500 text-white" : "bg-muted text-foreground"
                   }>{e.grade}</Badge>
                 </td>
                 <td className="p-3 text-center">
@@ -450,7 +450,7 @@ function StatsRow({ entries }: { entries: MeritEntry[] }) {
       {[
         { label: "Total Students", value: entries.length, color: "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300" },
         { label: "Passed", value: `${passing.length} (${passRate}%)`, color: "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300" },
-        { label: "Highest %", value: `${highest.toFixed(1)}%`, color: "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300" },
+        { label: "Highest %", value: `${highest.toFixed(1)}%`, color: "bg-blue-50 text-blue-800 dark:bg-blue-950/20 dark:text-blue-300" },
         { label: "Average %", value: `${avg}%`, color: "bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300" },
       ].map(s => (
         <div key={s.label} className={`rounded-xl p-3 text-center ${s.color}`}>
@@ -639,7 +639,7 @@ const AdminMeritList = () => (
   <div className="space-y-5">
     <div>
       <h2 className="text-xl font-heading font-bold text-foreground flex items-center gap-2">
-        <Trophy className="w-5 h-5 text-amber-500" /> Merit List Generator
+        <Trophy className="w-5 h-5 text-blue-500" /> Merit List Generator
       </h2>
       <p className="text-sm text-muted-foreground mt-0.5">
         Auto-generated from results — download professional PDF or publish to student dashboard

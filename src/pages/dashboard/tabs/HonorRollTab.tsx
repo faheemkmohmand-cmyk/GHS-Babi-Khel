@@ -26,7 +26,7 @@ export default function HonorRollTab() {
     <div className="space-y-5">
       <div>
         <h2 className="text-xl font-heading font-bold text-foreground flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-amber-500" /> Honor Roll
+          <Trophy className="w-5 h-5 text-blue-500" /> Honor Roll
         </h2>
         <p className="text-xs text-muted-foreground">Students of the Month</p>
       </div>
@@ -35,7 +35,7 @@ export default function HonorRollTab() {
       <div className="flex gap-2 flex-wrap">
         {MONTHS.map((m, i) => (
           <button key={m} onClick={() => setMonth(i + 1)}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${month === i + 1 ? "bg-amber-500 text-white" : "bg-secondary text-secondary-foreground"}`}>
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${month === i + 1 ? "bg-blue-500 text-white" : "bg-secondary text-secondary-foreground"}`}>
             {m.slice(0, 3)}
           </button>
         ))}
@@ -67,9 +67,9 @@ export default function HonorRollTab() {
                 {students.map((e) => (
                   <div key={e.id} className="bg-card rounded-2xl border border-border p-4 text-center shadow-sm hover:shadow-md transition-shadow">
                     {e.photo_url ? (
-                      <img src={e.photo_url} alt={e.student_name} className="w-16 h-16 rounded-full object-cover mx-auto mb-2 border-2 border-amber-400" />
+                      <img src={e.photo_url} alt={e.student_name} className="w-16 h-16 rounded-full object-cover mx-auto mb-2 border-2 border-blue-400" />
                     ) : (
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-black text-2xl mx-auto mb-2">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-orange-500 flex items-center justify-center text-white font-black text-2xl mx-auto mb-2">
                         {e.student_name[0]}
                       </div>
                     )}
@@ -79,7 +79,7 @@ export default function HonorRollTab() {
                       <p className="text-[10px] text-muted-foreground mt-1.5 italic line-clamp-2">"{e.reason}"</p>
                     )}
                     <div className="mt-2">
-                      <span className="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-0.5 rounded-full font-semibold">
+                      <span className="text-[10px] bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-400 px-2 py-0.5 rounded-full font-semibold">
                         🏅 {MONTHS[e.month - 1]} {e.year}
                       </span>
                     </div>

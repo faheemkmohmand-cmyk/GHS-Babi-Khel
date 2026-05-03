@@ -100,10 +100,10 @@ const SignIn = () => {
 
           {/* Pending / Rejected banners */}
           {pendingStatus === "pending" && (
-            <div className="mb-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-center">
-              <Clock className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-              <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">Waiting for Admin Approval</p>
-              <p className="text-xs text-amber-600 dark:text-amber-400/80 mt-1">
+            <div className="mb-6 p-4 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-center">
+              <Clock className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+              <p className="text-sm font-semibold text-blue-800 dark:text-blue-400">Waiting for Admin Approval</p>
+              <p className="text-xs text-blue-700 dark:text-blue-400/80 mt-1">
                 Your account is under review. You'll be able to login once an administrator approves your account.
               </p>
             </div>

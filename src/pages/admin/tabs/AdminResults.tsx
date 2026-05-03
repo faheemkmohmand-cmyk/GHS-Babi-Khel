@@ -87,11 +87,11 @@ function ResultCountdownTimer({ targetDate, cls, examType, year, onPublished }: 
   }, [targetDate, cls, examType, year, done, onPublished]);
   if (done || !timeLeft) return null;
   return (
-    <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-500/30 rounded-xl px-4 py-2.5">
-      <Timer className="w-4 h-4 text-amber-500 shrink-0 animate-pulse" />
+    <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-500/30 rounded-xl px-4 py-2.5">
+      <Timer className="w-4 h-4 text-blue-500 shrink-0 animate-pulse" />
       <div>
-        <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">Auto-publishes in</p>
-        <p className="text-sm font-bold text-amber-800 dark:text-amber-300 font-mono">{timeLeft}</p>
+        <p className="text-xs text-blue-800 dark:text-blue-400 font-medium">Auto-publishes in</p>
+        <p className="text-sm font-bold text-blue-900 dark:text-blue-300 font-mono">{timeLeft}</p>
       </div>
     </div>
   );
@@ -544,7 +544,7 @@ const AdminResults = () => {
             <Button
               size="sm"
               onClick={toggleAllPublish}
-              className={`gap-1.5 ${allPublished ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-green-600 hover:bg-green-700 text-white"}`}
+              className={`gap-1.5 ${allPublished ? "bg-blue-500 hover:bg-blue-700 text-white" : "bg-green-600 hover:bg-green-700 text-white"}`}
             >
               {allPublished ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               {allPublished ? "Unpublish Results" : anyPublished ? "Publish All" : "Publish Results"}
@@ -575,11 +575,11 @@ const AdminResults = () => {
 
       {/* ── Schedule auto-publish panel ── */}
       {showCountdown && (
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-500/30 rounded-xl p-4 space-y-3">
-          <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-2">
+        <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-500/30 rounded-xl p-4 space-y-3">
+          <p className="text-sm font-semibold text-blue-900 dark:text-blue-300 flex items-center gap-2">
             <Timer className="w-4 h-4" /> Schedule Auto-Publish — {examType} {year}
           </p>
-          <p className="text-xs text-amber-700 dark:text-amber-400">Results will auto-publish to students at the selected date & time</p>
+          <p className="text-xs text-blue-800 dark:text-blue-400">Results will auto-publish to students at the selected date & time</p>
           <div className="flex gap-3 flex-wrap">
             <div>
               <label className="text-xs font-medium text-foreground">Date</label>
@@ -608,7 +608,7 @@ const AdminResults = () => {
                   toast.success(`✅ Class ${cls} scheduled!`);
                   qc.invalidateQueries({ queryKey });
                 }}
-                className="bg-amber-500 hover:bg-amber-600 text-white gap-1.5"
+                className="bg-blue-500 hover:bg-blue-700 text-white gap-1.5"
               >
                 {cdSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Timer className="w-3.5 h-3.5" />}
                 This Class Only
@@ -838,7 +838,7 @@ const AdminResults = () => {
                 </p>
               )}
               {examRolls.length === 0 && (
-                <p className="text-xs text-amber-600 mt-1">
+                <p className="text-xs text-blue-700 mt-1">
                   No exam roll numbers generated for Class {cls} yet. Generate them in Exam Roll Numbers section.
                 </p>
               )}

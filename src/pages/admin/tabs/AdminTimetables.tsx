@@ -17,7 +17,7 @@ const periods = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 const subjectColors: Record<string, string> = {
   math: "bg-blue-100 border-blue-300",
   english: "bg-emerald-100 border-emerald-300",
-  urdu: "bg-amber-100 border-amber-300",
+  urdu: "bg-blue-100 border-blue-300",
   science: "bg-purple-100 border-purple-300",
   islamiat: "bg-green-100 border-green-300",
   "social studies": "bg-orange-100 border-orange-300",

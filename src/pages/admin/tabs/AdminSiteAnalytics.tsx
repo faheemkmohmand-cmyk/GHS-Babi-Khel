@@ -190,7 +190,7 @@ const AdminSiteAnalytics = () => {
         <StatCard label="Total Views"      value={totalViews}     icon={Eye}        color="#3b82f6" sub="Last 30 days" />
         <StatCard label="Unique Sessions"  value={uniqueSessions} icon={Users}      color="#8b5cf6" sub="Unique browsers" />
         <StatCard label="Today's Views"    value={todayViews}     icon={TrendingUp} color="#10b981" sub="Since midnight" />
-        <StatCard label="Mobile Traffic"   value={`${mobilePct}%`} icon={Smartphone} color="#f59e0b" sub={`${mobileCount} visits`} />
+        <StatCard label="Mobile Traffic"   value={`${mobilePct}%`} icon={Smartphone} color="#1e3a8a" sub={`${mobileCount} visits`} />
       </div>
 
       {/* Daily Area Chart */}

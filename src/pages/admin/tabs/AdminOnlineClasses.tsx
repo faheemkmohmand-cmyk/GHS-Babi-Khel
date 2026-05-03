@@ -67,7 +67,7 @@ export default function AdminOnlineClasses() {
     { icon: BarChart3,   label: "Total Classes",     value: classes.length,         color: "text-primary",     bg: "from-primary/10 to-primary/5",             border: "border-primary/20"           },
     { icon: Wifi,        label: "Live Right Now",     value: liveClasses.length,     color: "text-red-500",     bg: "from-red-500/10 to-red-500/5",             border: "border-red-400/20"           },
     { icon: TrendingUp,  label: "Completed Today",    value: completedToday.length,  color: "text-emerald-500", bg: "from-emerald-500/10 to-emerald-500/5",     border: "border-emerald-400/20"       },
-    { icon: Clock,       label: "Upcoming",           value: upcomingClasses.length, color: "text-amber-500",   bg: "from-amber-500/10 to-amber-500/5",         border: "border-amber-400/20"         },
+    { icon: Clock,       label: "Upcoming",           value: upcomingClasses.length, color: "text-blue-500",   bg: "from-blue-500/10 to-blue-500/5",         border: "border-blue-400/20"         },
   ];
 
   return (

@@ -58,13 +58,13 @@ function CountdownTimer({ targetDate, label, sessionId }: { targetDate: string; 
   if (expired) return null;
 
   return (
-    <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-6 text-center">
-      <div className="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
-        <Timer className="w-7 h-7 text-amber-500" />
+    <div className="bg-gradient-to-br from-blue-50 to-orange-50 dark:from-blue-950/20 dark:to-orange-900/20 border border-blue-200 dark:border-blue-500/30 rounded-2xl p-6 text-center">
+      <div className="w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center mx-auto mb-4">
+        <Timer className="w-7 h-7 text-blue-500" />
       </div>
-      <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">{label || "Exam Roll Numbers will be published in"}</p>
-      <p className="text-3xl font-bold font-mono text-amber-800 dark:text-amber-300 tracking-wider">{timeLeft}</p>
-      <p className="text-xs text-amber-600 dark:text-amber-500 mt-3">Please check back when the countdown ends</p>
+      <p className="text-sm font-medium text-blue-800 dark:text-blue-400 mb-2">{label || "Exam Roll Numbers will be published in"}</p>
+      <p className="text-3xl font-bold font-mono text-blue-900 dark:text-blue-300 tracking-wider">{timeLeft}</p>
+      <p className="text-xs text-blue-700 dark:text-blue-500 mt-3">Please check back when the countdown ends</p>
     </div>
   );
 }

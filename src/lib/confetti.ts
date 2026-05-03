@@ -12,7 +12,7 @@ export function triggerConfetti(type: "burst" | "sides" | "gold" | "mini" = "bur
     case "gold":
       confetti({
         particleCount: 80, spread: 60, origin: { y: 0.6 },
-        colors: ["#FFD700", "#FFC107", "#FF8F00", "#FFB300"],
+        colors: ["#1E3A8A", "#1E40AF", "#1E3A8A", "#1E40AF"],
       });
       break;
     case "mini":

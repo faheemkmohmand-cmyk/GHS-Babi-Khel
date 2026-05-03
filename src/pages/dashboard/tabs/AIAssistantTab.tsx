@@ -20,7 +20,7 @@ const QUICK_PROMPTS = [
   { icon: Calculator, label: "Math Problem",     color: "from-blue-500 to-cyan-500",    text: "Solve this math problem step by step: " },
   { icon: Atom,       label: "Physics Help",     color: "from-purple-500 to-violet-500",text: "Explain this Physics concept simply: " },
   { icon: FlaskConical,label: "Chemistry",       color: "from-green-500 to-emerald-500",text: "Explain this Chemistry topic: " },
-  { icon: BookOpen,   label: "English Grammar",  color: "from-orange-500 to-amber-500", text: "Explain this English grammar rule: " },
+  { icon: BookOpen,   label: "English Grammar",  color: "from-orange-500 to-blue-500", text: "Explain this English grammar rule: " },
   { icon: Globe,      label: "Pakistan Studies", color: "from-red-500 to-rose-500",     text: "Tell me about this Pakistan Studies topic: " },
   { icon: Scroll,     label: "Islamiyat",        color: "from-teal-500 to-cyan-600",    text: "Explain this Islamiyat topic: " },
 ];
@@ -208,11 +208,11 @@ const AIAssistantTab = () => {
               </div>
 
               {/* Tips */}
-              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-500/20 rounded-xl p-3 space-y-1">
-                <p className="text-xs font-bold text-amber-700 dark:text-amber-400">💡 Tips for best results</p>
-                <p className="text-xs text-amber-700/80 dark:text-amber-400/70">• Be specific: "Explain Newton's 2nd law with example"</p>
-                <p className="text-xs text-amber-700/80 dark:text-amber-400/70">• Tell your class: "I'm in Class 10"</p>
-                <p className="text-xs text-amber-700/80 dark:text-amber-400/70">• Ask in Urdu: Main Urdu mein bhi jawab de sakta hoon</p>
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-500/20 rounded-xl p-3 space-y-1">
+                <p className="text-xs font-bold text-blue-800 dark:text-blue-400">💡 Tips for best results</p>
+                <p className="text-xs text-blue-800/80 dark:text-blue-400/70">• Be specific: "Explain Newton's 2nd law with example"</p>
+                <p className="text-xs text-blue-800/80 dark:text-blue-400/70">• Tell your class: "I'm in Class 10"</p>
+                <p className="text-xs text-blue-800/80 dark:text-blue-400/70">• Ask in Urdu: Main Urdu mein bhi jawab de sakta hoon</p>
               </div>
             </motion.div>
           )}

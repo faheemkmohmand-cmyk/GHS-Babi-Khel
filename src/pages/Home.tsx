@@ -451,7 +451,7 @@ const Home = () => {
                 </div>
                 <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-2xl p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg"><Star className="w-6 h-6 text-white" /></div>
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-orange-500 flex items-center justify-center shadow-lg"><Star className="w-6 h-6 text-white" /></div>
                     <div><p className="text-2xl font-black text-foreground">{settings?.pass_percentage || 98}%</p><p className="text-xs text-muted-foreground font-medium">Pass Rate</p></div>
                   </div>
                 </motion.div>

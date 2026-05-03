@@ -58,7 +58,7 @@ const gradeHex = (g: string | null) => {
     case "A+": return "#0369A1";
     case "A":  return "#0EA5E9";
     case "B":  return "#0D9488";
-    case "C":  return "#D97706";
+    case "C":  return "#1e3a8a";
     case "D":  return "#EA580C";
     default:   return "#DC2626";
   }
@@ -148,8 +148,8 @@ const buildDMC = (r: ResultRecord, school: SchoolInfo): string => {
 
   .status-bar{margin:0 18px 10px;text-align:center;padding:9px;border-radius:7px}
 
-  .pos-badge{text-align:center;padding:6px;margin:0 18px 9px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:7px;font-size:12.5px;font-weight:700;color:#92400E}
-  .remarks-box{margin:0 18px 12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:5px;padding:7px 11px;font-size:11.5px;color:#78350F}
+  .pos-badge{text-align:center;padding:6px;margin:0 18px 9px;background:#EFF6FF;border:1px solid #bfdbfe;border-radius:7px;font-size:12.5px;font-weight:700;color:#1e3a8a}
+  .remarks-box{margin:0 18px 12px;background:#EFF6FF;border:1px solid #bfdbfe;border-radius:5px;padding:7px 11px;font-size:11.5px;color:#172554}
 
   .sig-section{margin:8px 18px 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;padding-top:8px;border-top:1px solid #E2E8F0}
   .sig-box{text-align:center}
@@ -454,7 +454,7 @@ const ResultCard = () => {
                             {r.is_pass ? "✓ PASS" : "✗ FAIL"}
                           </span>
                           {r.position && r.position <= 10 && (
-                            <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-xl text-sm font-semibold">
+                            <span className="inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 text-blue-900 px-3 py-1.5 rounded-xl text-sm font-semibold">
                               <Trophy className="w-4 h-4" />
                               {r.position === 1?"🥇 1st":r.position===2?"🥈 2nd":r.position===3?"🥉 3rd":`#${r.position}`} in Class
                             </span>

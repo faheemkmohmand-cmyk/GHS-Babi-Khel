@@ -207,9 +207,9 @@ const AdminVideos = () => {
       </div>
 
       {/* SQL reminder */}
-      <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-xs text-amber-800 dark:text-amber-300">
+      <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg p-3 text-xs text-blue-900 dark:text-blue-300">
         <strong>⚠ First time?</strong> Run this SQL in Supabase SQL Editor to create the videos table:
-        <code className="block mt-1 bg-amber-100 dark:bg-amber-900/50 rounded p-1.5 font-mono text-[10px] whitespace-pre-wrap">
+        <code className="block mt-1 bg-blue-100 dark:bg-blue-950/50 rounded p-1.5 font-mono text-[10px] whitespace-pre-wrap">
 {`CREATE TABLE IF NOT EXISTS public.videos (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   title text NOT NULL,

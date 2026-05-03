@@ -66,7 +66,7 @@ export default function OnlineClasses() {
 
   const stats = [
     { icon: Wifi,       label: "Live Now",     value: liveClasses.length,      suffix: "",  color: "text-red-500",     bg: "bg-red-50 dark:bg-red-950/30"      },
-    { icon: Calendar,   label: "Today",        value: todayClasses.length,     suffix: "",  color: "text-amber-500",   bg: "bg-amber-50 dark:bg-amber-950/30"  },
+    { icon: Calendar,   label: "Today",        value: todayClasses.length,     suffix: "",  color: "text-blue-500",   bg: "bg-blue-50 dark:bg-blue-950/30"  },
     { icon: Clock,      label: "Upcoming",     value: upcomingClasses.length,  suffix: "",  color: "text-primary",     bg: "bg-primary/5"                      },
     { icon: TrendingUp, label: "Completed",    value: completedClasses.length, suffix: "",  color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/30"},
   ];

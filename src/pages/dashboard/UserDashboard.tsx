@@ -44,7 +44,7 @@ interface HonorEntry { id: string; student_name: string; class: string; month: n
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const examTypes: Record<string, string[]> = { "6":["1st Semester","2nd Semester"],"7":["1st Semester","2nd Semester"],"8":["1st Semester","2nd Semester"],"9":["Annual-I","Annual-II"],"10":["Annual-I","Annual-II"] };
-const SUBJECT_COLORS = ["#6366f1","#f59e0b","#10b981","#ef4444","#8b5cf6","#14b8a6","#f97316","#06b6d4","#84cc16","#ec4899"];
+const SUBJECT_COLORS = ["#6366f1","#1e3a8a","#10b981","#ef4444","#8b5cf6","#14b8a6","#f97316","#06b6d4","#84cc16","#ec4899"];
 
 // ─── Homework Tab ─────────────────────────────────────────────────────────────
 function HomeworkTab() {
@@ -113,7 +113,7 @@ function HomeworkTab() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-semibold text-foreground">{hw.title}</span>
                       {overdue ? <span className="text-[10px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full flex items-center gap-1"><AlertTriangle className="w-2.5 h-2.5" />Overdue</span>
-                        : isToday(new Date(hw.due_date)) ? <span className="text-[10px] font-bold bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full flex items-center gap-1"><Clock className="w-2.5 h-2.5" />Due Today</span>
+                        : isToday(new Date(hw.due_date)) ? <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full flex items-center gap-1"><Clock className="w-2.5 h-2.5" />Due Today</span>
                         : diff <= 2 ? <span className="text-[10px] font-bold bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">{diff}d left</span>
                         : <span className="text-[10px] font-bold bg-green-100 text-green-600 px-2 py-0.5 rounded-full">{diff}d left</span>}
                     </div>
@@ -146,7 +146,7 @@ function HomeworkTab() {
 // ─── Exam Schedule Tab ─────────────────────────────────────────────────────────
 const SCHED_SUBJECT_COLORS: Record<string, { bg: string; text: string; pdfRgb: [number,number,number] }> = {
   English:{ bg:"bg-blue-100 dark:bg-blue-900/30", text:"text-blue-700 dark:text-blue-300", pdfRgb:[219,234,254] },
-  Urdu:{ bg:"bg-amber-100 dark:bg-amber-900/30", text:"text-amber-700 dark:text-amber-300", pdfRgb:[254,243,199] },
+  Urdu:{ bg:"bg-blue-100 dark:bg-blue-950/30", text:"text-blue-800 dark:text-blue-300", pdfRgb:[254,243,199] },
   Maths:{ bg:"bg-purple-100 dark:bg-purple-900/30", text:"text-purple-700 dark:text-purple-300", pdfRgb:[237,233,254] },
   Mathematics:{ bg:"bg-purple-100 dark:bg-purple-900/30", text:"text-purple-700 dark:text-purple-300", pdfRgb:[237,233,254] },
   Physics:{ bg:"bg-cyan-100 dark:bg-cyan-900/30", text:"text-cyan-700 dark:text-cyan-300", pdfRgb:[207,250,254] },
@@ -158,7 +158,7 @@ const SCHED_SUBJECT_COLORS: Record<string, { bg: string; text: string; pdfRgb: [
   "G.Science":{ bg:"bg-lime-100 dark:bg-lime-900/30", text:"text-lime-700 dark:text-lime-300", pdfRgb:[236,252,203] },
   Geography:{ bg:"bg-orange-100 dark:bg-orange-900/30", text:"text-orange-700 dark:text-orange-300", pdfRgb:[255,237,213] },
   History:{ bg:"bg-rose-100 dark:bg-rose-900/30", text:"text-rose-700 dark:text-rose-300", pdfRgb:[255,228,230] },
-  Pashto:{ bg:"bg-yellow-100 dark:bg-yellow-900/30", text:"text-yellow-700 dark:text-yellow-300", pdfRgb:[254,249,195] },
+  Pashto:{ bg:"bg-yellow-100 dark:bg-yellow-900/30", text:"text-yellow-700 dark:text-blue-300", pdfRgb:[254,249,195] },
   "M.Quran":{ bg:"bg-teal-100 dark:bg-teal-900/30", text:"text-teal-700 dark:text-teal-300", pdfRgb:[204,251,241] },
 };
 function schedSubjectStyle(s: string){ return SCHED_SUBJECT_COLORS[s]??{bg:"bg-secondary",text:"text-secondary-foreground",pdfRgb:[243,244,246] as [number,number,number]}; }
@@ -216,7 +216,7 @@ function ExamScheduleTab() {
         :schedule.length===0?<div className="bg-card rounded-2xl p-12 text-center border border-border"><Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3"/><p className="text-sm font-medium text-foreground">No exam schedule published yet</p><p className="text-xs text-muted-foreground mt-1">Admin will publish the schedule before exams begin.</p></div>
         :(<>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">{[{label:"Total",value:schedule.length,icon:"📋"},{label:"Upcoming",value:schedule.filter(e=>!isPast(new Date(e.exam_date))||isToday(new Date(e.exam_date))).length,icon:"⏳"},{label:"Today",value:schedule.filter(e=>isToday(new Date(e.exam_date))).length,icon:"📅"},{label:"Done",value:schedule.filter(e=>isPast(new Date(e.exam_date))&&!isToday(new Date(e.exam_date))).length,icon:"✅"}].map(s=><div key={s.label} className="bg-card border border-border rounded-xl p-3 text-center"><p className="text-2xl mb-1">{s.icon}</p><p className="text-xl font-bold text-foreground">{s.value}</p><p className="text-[11px] text-muted-foreground">{s.label}</p></div>)}</div>
-          <div className="space-y-2">{schedule.map(entry=>{ const date=new Date(entry.exam_date); const past=isPast(date)&&!isToday(date); const today=isToday(date); const diff=differenceInDays(date,new Date()); const style=schedSubjectStyle(entry.subject); return (<div key={entry.id} className={`bg-card rounded-xl border shadow-sm overflow-hidden ${today?"border-amber-400 ring-2 ring-amber-400/30":past?"opacity-55 border-border":"border-border hover:border-primary/40"}`}>{today&&<div className="bg-amber-400 text-amber-900 text-center text-[11px] font-black uppercase tracking-widest py-1">📢 EXAM TODAY</div>}<div className="p-4 flex items-center gap-4"><div className={`w-16 h-16 rounded-xl flex flex-col items-center justify-center shrink-0 font-black ${today?"bg-amber-500 text-white":past?"bg-muted text-muted-foreground":"bg-primary text-white"}`}><span className="text-2xl leading-none">{format(date,"dd")}</span><span className="text-[10px] font-semibold uppercase">{format(date,"MMM")}</span><span className="text-[9px] opacity-70">{format(date,"yyyy")}</span></div><div className="flex-1 min-w-0"><div className="flex items-center gap-2 flex-wrap mb-1"><span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${style.bg} ${style.text}`}>{entry.subject}</span>{(entry as any).paper_code&&<span className="text-[11px] font-mono font-bold bg-primary/10 text-primary dark:text-white px-2 py-0.5 rounded">{(entry as any).paper_code}</span>}{!past&&!today&&diff<=3&&diff>=0&&<span className="text-[10px] font-bold bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full animate-pulse">{diff===0?"Tomorrow!":`${diff}d left`}</span>}{past&&<span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Done</span>}</div><p className="text-sm font-bold text-foreground">{(entry as any).paper_name||entry.subject}</p><div className="flex flex-wrap items-center gap-3 mt-1"><span className="text-xs text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3"/>{format(date,"EEEE, dd MMMM yyyy")}</span>{entry.start_time&&<span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3"/>{entry.start_time}{entry.end_time?` – ${entry.end_time}`:""}</span>}{entry.hall&&<span className="text-xs text-muted-foreground flex items-center gap-1"><ChevronRight className="w-3 h-3"/>Hall: {entry.hall}</span>}{entry.notes&&<span className="text-xs italic text-muted-foreground">{entry.notes}</span>}</div></div>{!past&&!today&&diff>0&&<div className={`hidden sm:flex flex-col items-center justify-center w-14 h-14 rounded-xl shrink-0 ${diff<=7?"bg-orange-100":"bg-secondary"}`}><span className={`text-lg font-black ${diff<=7?"text-orange-600":"text-foreground"}`}>{diff}</span><span className="text-[9px] font-medium text-muted-foreground">days</span></div>}</div></div>); })}</div>
+          <div className="space-y-2">{schedule.map(entry=>{ const date=new Date(entry.exam_date); const past=isPast(date)&&!isToday(date); const today=isToday(date); const diff=differenceInDays(date,new Date()); const style=schedSubjectStyle(entry.subject); return (<div key={entry.id} className={`bg-card rounded-xl border shadow-sm overflow-hidden ${today?"border-blue-400 ring-2 ring-blue-400/30":past?"opacity-55 border-border":"border-border hover:border-primary/40"}`}>{today&&<div className="bg-blue-400 text-blue-950 text-center text-[11px] font-black uppercase tracking-widest py-1">📢 EXAM TODAY</div>}<div className="p-4 flex items-center gap-4"><div className={`w-16 h-16 rounded-xl flex flex-col items-center justify-center shrink-0 font-black ${today?"bg-blue-500 text-white":past?"bg-muted text-muted-foreground":"bg-primary text-white"}`}><span className="text-2xl leading-none">{format(date,"dd")}</span><span className="text-[10px] font-semibold uppercase">{format(date,"MMM")}</span><span className="text-[9px] opacity-70">{format(date,"yyyy")}</span></div><div className="flex-1 min-w-0"><div className="flex items-center gap-2 flex-wrap mb-1"><span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${style.bg} ${style.text}`}>{entry.subject}</span>{(entry as any).paper_code&&<span className="text-[11px] font-mono font-bold bg-primary/10 text-primary dark:text-white px-2 py-0.5 rounded">{(entry as any).paper_code}</span>}{!past&&!today&&diff<=3&&diff>=0&&<span className="text-[10px] font-bold bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full animate-pulse">{diff===0?"Tomorrow!":`${diff}d left`}</span>}{past&&<span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Done</span>}</div><p className="text-sm font-bold text-foreground">{(entry as any).paper_name||entry.subject}</p><div className="flex flex-wrap items-center gap-3 mt-1"><span className="text-xs text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3"/>{format(date,"EEEE, dd MMMM yyyy")}</span>{entry.start_time&&<span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3"/>{entry.start_time}{entry.end_time?` – ${entry.end_time}`:""}</span>}{entry.hall&&<span className="text-xs text-muted-foreground flex items-center gap-1"><ChevronRight className="w-3 h-3"/>Hall: {entry.hall}</span>}{entry.notes&&<span className="text-xs italic text-muted-foreground">{entry.notes}</span>}</div></div>{!past&&!today&&diff>0&&<div className={`hidden sm:flex flex-col items-center justify-center w-14 h-14 rounded-xl shrink-0 ${diff<=7?"bg-orange-100":"bg-secondary"}`}><span className={`text-lg font-black ${diff<=7?"text-orange-600":"text-foreground"}`}>{diff}</span><span className="text-[9px] font-medium text-muted-foreground">days</span></div>}</div></div>); })}</div>
         </>)}
     </div>
   );
@@ -225,7 +225,7 @@ function ExamScheduleTab() {
 
 // ─── Analytics Tab — School-wide class performance ───────────────────────────
 const ALL_CLASSES_ANALYTICS = ["6","7","8","9","10"];
-const CLASS_COLORS_A: Record<string,string> = { "6":"#6366f1","7":"#10b981","8":"#f59e0b","9":"#ef4444","10":"#8b5cf6" };
+const CLASS_COLORS_A: Record<string,string> = { "6":"#6366f1","7":"#10b981","8":"#1e3a8a","9":"#ef4444","10":"#8b5cf6" };
 
 function useSchoolAnalyticsData(yr: number) {
   return useQuery({
@@ -348,7 +348,7 @@ function AnalyticsTab() {
           {[
             {label:"Total Results",value:overall.total,color:"#6366f1"},
             {label:"School Avg",value:`${overall.avg}%`,color:"#10b981"},
-            {label:"Pass Rate",value:`${overall.passRate}%`,color:"#f59e0b"},
+            {label:"Pass Rate",value:`${overall.passRate}%`,color:"#1e3a8a"},
           ].map(s=>(
             <div key={s.label} className="bg-card border border-border rounded-2xl p-3 text-center shadow-sm">
               <p className="text-xl font-black" style={{color:s.color}}>{s.value}</p>
@@ -394,7 +394,7 @@ function AnalyticsTab() {
                 <YAxis tick={{fontSize:10}} domain={[0,100]} tickFormatter={(v: number)=>`${v}%`}/>
                 <Tooltip content={<CustomTip/>}/>
                 <Bar dataKey="passRate" name="Pass Rate" radius={[6,6,0,0]}>
-                  {classStats.map((e,i)=><Cell key={i} fill={e.passRate>=80?"#10b981":e.passRate>=60?"#f59e0b":"#ef4444"}/>)}
+                  {classStats.map((e,i)=><Cell key={i} fill={e.passRate>=80?"#10b981":e.passRate>=60?"#1e3a8a":"#ef4444"}/>)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -483,7 +483,7 @@ function AnalyticsTab() {
                   <Tooltip content={<CustomTip/>}/>
                   <Bar dataKey="avgPct" name="Avg %" radius={[0,6,6,0]}>
                     {subjectData.map((_,i)=>(
-                      <Cell key={i} fill={["#6366f1","#10b981","#f59e0b","#ef4444","#8b5cf6","#14b8a6","#f97316","#06b6d4","#84cc16","#ec4899"][i%10]}/>
+                      <Cell key={i} fill={["#6366f1","#10b981","#1e3a8a","#ef4444","#8b5cf6","#14b8a6","#f97316","#06b6d4","#84cc16","#ec4899"][i%10]}/>
                     ))}
                   </Bar>
                 </BarChart>
@@ -493,7 +493,7 @@ function AnalyticsTab() {
 
           <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
             <div className="bg-primary text-white px-4 py-3 flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-amber-400"/>
+              <BarChart3 className="w-4 h-4 text-blue-400"/>
               <span className="font-bold text-sm">Class Summary — {year}</span>
             </div>
             <div className="overflow-x-auto">
@@ -518,10 +518,10 @@ function AnalyticsTab() {
                       </td>
                       <td className="p-3 text-center font-medium text-foreground">{c.students}</td>
                       <td className="p-3 text-center">
-                        <span className={`font-bold text-sm ${c.avg>=70?"text-green-600":c.avg>=50?"text-amber-600":"text-red-500"}`}>{c.avg}%</span>
+                        <span className={`font-bold text-sm ${c.avg>=70?"text-green-600":c.avg>=50?"text-blue-700":"text-red-500"}`}>{c.avg}%</span>
                       </td>
                       <td className="p-3 text-center">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${c.passRate>=80?"bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400":c.passRate>=60?"bg-amber-100 text-amber-700":"bg-red-100 text-red-700"}`}>{c.passRate}%</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${c.passRate>=80?"bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400":c.passRate>=60?"bg-blue-100 text-blue-800":"bg-red-100 text-red-700"}`}>{c.passRate}%</span>
                       </td>
                       <td className="p-3 text-center text-green-600 font-semibold text-xs">{c.highest.toFixed(1)}%</td>
                     </tr>
@@ -554,8 +554,8 @@ function HonorRollTab() {
 
   return (
     <div className="space-y-5">
-      <div><h2 className="text-xl font-heading font-bold text-foreground flex items-center gap-2"><Trophy className="w-5 h-5 text-amber-500" />Honor Roll</h2><p className="text-xs text-muted-foreground">Students of the Month</p></div>
-      <div className="flex gap-1.5 flex-wrap">{MONTHS.map((m, i) => <button key={m} onClick={() => setMonth(i+1)} className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${month === i+1 ? "bg-amber-500 text-white" : "bg-secondary text-secondary-foreground"}`}>{m.slice(0,3)}</button>)}</div>
+      <div><h2 className="text-xl font-heading font-bold text-foreground flex items-center gap-2"><Trophy className="w-5 h-5 text-blue-500" />Honor Roll</h2><p className="text-xs text-muted-foreground">Students of the Month</p></div>
+      <div className="flex gap-1.5 flex-wrap">{MONTHS.map((m, i) => <button key={m} onClick={() => setMonth(i+1)} className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${month === i+1 ? "bg-blue-500 text-white" : "bg-secondary text-secondary-foreground"}`}>{m.slice(0,3)}</button>)}</div>
       <div className="flex gap-2 items-center"><label className="text-xs text-muted-foreground">Year:</label><input type="number" value={year} onChange={e => setYear(Number(e.target.value))} className="w-20 text-xs bg-secondary border-none rounded-lg px-2 py-1.5 outline-none focus:ring-1 focus:ring-primary" /></div>
       {isLoading ? <div className="grid grid-cols-2 gap-3">{[1,2,3,4].map(i => <Skeleton key={i} className="h-32 rounded-2xl" />)}</div>
         : entries.length === 0 ? <div className="bg-card rounded-2xl p-10 text-center shadow-card"><Trophy className="w-10 h-10 text-muted-foreground mx-auto mb-2" /><p className="text-sm text-muted-foreground">No honor roll for {MONTHS[month-1]} {year} yet.</p></div>
@@ -563,12 +563,12 @@ function HonorRollTab() {
           <div key={cls}><p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Class {cls}</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">{students.map(e => (
               <div key={e.id} className="bg-card rounded-2xl border border-border p-4 text-center shadow-sm">
-                {e.photo_url ? <img src={e.photo_url} alt={e.student_name} className="w-14 h-14 rounded-full object-cover mx-auto mb-2 border-2 border-amber-400" />
-                  : <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-black text-2xl mx-auto mb-2">{e.student_name[0]}</div>}
+                {e.photo_url ? <img src={e.photo_url} alt={e.student_name} className="w-14 h-14 rounded-full object-cover mx-auto mb-2 border-2 border-blue-400" />
+                  : <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-orange-500 flex items-center justify-center text-white font-black text-2xl mx-auto mb-2">{e.student_name[0]}</div>}
                 <p className="text-sm font-bold text-foreground">{e.student_name}</p>
                 <p className="text-xs text-muted-foreground">Class {e.class}</p>
                 {e.reason && <p className="text-[10px] text-muted-foreground mt-1.5 italic line-clamp-2">"{e.reason}"</p>}
-                <span className="inline-block mt-2 text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">🏅 {MONTHS[e.month-1]} {e.year}</span>
+                <span className="inline-block mt-2 text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-semibold">🏅 {MONTHS[e.month-1]} {e.year}</span>
               </div>
             ))}</div>
           </div>
@@ -824,7 +824,7 @@ function MeritListTab() {
   const isLoading = viewMode === "class" ? clsLoading : schoolLoading;
 
   const GBadge = ({ g }: { g: string }) => {
-    const c = g === "A+" ? "bg-primary text-white" : g === "A" ? "bg-primary text-primary-foreground" : g === "B" ? "bg-green-500 text-white" : g === "C" ? "bg-amber-500 text-white" : "bg-red-500 text-white";
+    const c = g === "A+" ? "bg-primary text-white" : g === "A" ? "bg-primary text-primary-foreground" : g === "B" ? "bg-green-500 text-white" : g === "C" ? "bg-blue-500 text-white" : "bg-red-500 text-white";
     return <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${c}`}>{g}</span>;
   };
 
@@ -838,7 +838,7 @@ function MeritListTab() {
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-heading font-bold text-foreground flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-500" /> Merit List
+            <Trophy className="w-5 h-5 text-blue-500" /> Merit List
           </h2>
           <p className="text-xs text-muted-foreground">School examination rankings</p>
         </div>
@@ -899,7 +899,7 @@ function MeritListTab() {
           {[
             { label: "Total", value: displayEntries.length, bg: "bg-blue-50 dark:bg-blue-900/20 text-blue-700" },
             { label: "Passed", value: displayEntries.filter(e => e.percentage >= 33).length, bg: "bg-green-50 dark:bg-green-900/20 text-green-700" },
-            { label: "Top Score", value: `${Math.max(...displayEntries.map(e => e.percentage))}%`, bg: "bg-amber-50 dark:bg-amber-900/20 text-amber-700" },
+            { label: "Top Score", value: `${Math.max(...displayEntries.map(e => e.percentage))}%`, bg: "bg-blue-50 dark:bg-blue-950/20 text-blue-800" },
             { label: "Average", value: `${Math.round(displayEntries.reduce((s, e) => s + e.percentage, 0) / displayEntries.length)}%`, bg: "bg-purple-50 dark:bg-purple-900/20 text-purple-700" },
           ].map(s => (
             <div key={s.label} className={`rounded-xl p-3 text-center ${s.bg}`}>
@@ -932,7 +932,7 @@ function MeritListTab() {
               <h3 className="font-bold text-sm">{tableTitle}</h3>
               <p className="text-xs text-blue-200">{displayEntries.length} students ranked</p>
             </div>
-            <Trophy className="w-5 h-5 text-amber-400" />
+            <Trophy className="w-5 h-5 text-blue-400" />
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

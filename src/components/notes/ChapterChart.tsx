@@ -18,7 +18,7 @@ interface ChapterChartProps {
 const ChapterChart = ({ config }: ChapterChartProps) => {
   if (!config) return null;
 
-  const { type = "line", title, equation, data: providedData, xKey = "x", yKey = "y", colors = ["#3B82F6", "#EF4444", "#10B981", "#F59E0B"] } = config;
+  const { type = "line", title, equation, data: providedData, xKey = "x", yKey = "y", colors = ["#3B82F6", "#EF4444", "#10B981", "#1e3a8a"] } = config;
 
   let data = providedData || [];
 

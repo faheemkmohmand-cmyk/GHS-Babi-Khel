@@ -61,7 +61,7 @@ const OverviewTab = ({ onNavigate }: Props) => {
         {isAdmin && (
           <Link
             to="/admin"
-            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-4 py-2.5 rounded-xl shadow-card hover:shadow-elevated transition-all duration-200 shrink-0 text-sm"
+            className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-700 text-white font-semibold px-4 py-2.5 rounded-xl shadow-card hover:shadow-elevated transition-all duration-200 shrink-0 text-sm"
           >
             <Shield className="w-4 h-4" />
             Admin Panel

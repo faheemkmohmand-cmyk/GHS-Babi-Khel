@@ -28,13 +28,13 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <div className="max-w-md w-full bg-card rounded-2xl shadow-elevated p-8 text-center">
-          <Clock className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+          <Clock className="w-12 h-12 text-blue-500 mx-auto mb-4" />
           <h1 className="text-xl font-heading font-bold text-foreground">Pending Approval</h1>
           <p className="text-sm text-muted-foreground mt-2">
             Your account is under review by the administrator. You'll be able to access the dashboard once approved.
           </p>
-          <div className="mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
-            <p className="text-xs text-amber-700 dark:text-amber-400">
+          <div className="mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20">
+            <p className="text-xs text-blue-800 dark:text-blue-400">
               This usually takes a short while. Please check back later.
             </p>
           </div>

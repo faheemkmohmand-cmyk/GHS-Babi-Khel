@@ -7,7 +7,7 @@ import { useNoteSubjects, useNoteChapters, useNoteProgress } from "@/hooks/useNo
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const DIFFICULTY_COLOR = { easy: "text-green-600 bg-green-100", medium: "text-amber-600 bg-amber-100", hard: "text-red-600 bg-red-100" };
+const DIFFICULTY_COLOR = { easy: "text-green-600 bg-green-100", medium: "text-blue-700 bg-blue-100", hard: "text-red-600 bg-red-100" };
 const DIFFICULTY_LABEL = { easy: "Easy", medium: "Medium", hard: "Hard" };
 
 const SubjectPage = () => {

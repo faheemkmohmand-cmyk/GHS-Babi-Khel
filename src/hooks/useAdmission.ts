@@ -51,6 +51,18 @@ export interface AdmissionDocument {
   uploaded_at: string;
 }
 
+// ── Helper: wrap any promise with a timeout ────────────────────────────────
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms / 1000}s. Check your internet connection.`)), ms);
+    promise.then(
+      (val) => { clearTimeout(timer); resolve(val); },
+      (err) => { clearTimeout(timer); reject(err); }
+    );
+  });
+}
+
+// ── Public: admission settings ────────────────────────────────────────────
 export function useAdmissionSettings() {
   return useQuery<AdmissionSettings | null>({
     queryKey: ["admission-settings"],
@@ -67,6 +79,7 @@ export function useAdmissionSettings() {
   });
 }
 
+// ── Public: track application ─────────────────────────────────────────────
 export function useTrackAdmission(query: string) {
   return useQuery({
     queryKey: ["track-admission", query],
@@ -80,6 +93,7 @@ export function useTrackAdmission(query: string) {
   });
 }
 
+// ── Admin: all admissions ─────────────────────────────────────────────────
 const PAGE_SIZE = 20;
 
 export function useAdminAdmissions(filters: {
@@ -104,6 +118,7 @@ export function useAdminAdmissions(filters: {
   });
 }
 
+// ── Admin: documents for one admission ───────────────────────────────────
 export function useAdmissionDocuments(admissionId: string) {
   return useQuery<AdmissionDocument[]>({
     queryKey: ["admission-docs", admissionId],
@@ -120,6 +135,7 @@ export function useAdmissionDocuments(admissionId: string) {
   });
 }
 
+// ── Admin: update admission ───────────────────────────────────────────────
 export function useUpdateAdmission() {
   const qc = useQueryClient();
   return useMutation({
@@ -131,6 +147,7 @@ export function useUpdateAdmission() {
   });
 }
 
+// ── Admin: update settings ────────────────────────────────────────────────
 export function useUpdateAdmissionSettings() {
   const qc = useQueryClient();
   return useMutation({
@@ -145,6 +162,7 @@ export function useUpdateAdmissionSettings() {
   });
 }
 
+// ── Submit new admission (public, no auth) ────────────────────────────────
 export async function submitAdmission(payload: {
   full_name: string; father_name: string; date_of_birth: string | null;
   b_form_no: string; contact_number: string; whatsapp_number: string | null;
@@ -152,40 +170,50 @@ export async function submitAdmission(payload: {
   admission_type: AdmissionType; previous_school: string | null;
   previous_class: string | null; previous_marks: string | null;
   year_of_passing: string | null;
-}) {
-  const { data, error } = await supabase
+}): Promise<{ id: string; reference_no: string }> {
+  const dbPromise = supabase
     .from("admissions")
     .insert(payload)
     .select("id, reference_no")
-    .single();
-  if (error) throw error;
-  return data as { id: string; reference_no: string };
+    .single()
+    .then(({ data, error }) => {
+      if (error) throw new Error(`Database error: ${error.message}`);
+      if (!data) throw new Error("No data returned from database.");
+      return data as { id: string; reference_no: string };
+    });
+
+  return withTimeout(dbPromise, 30_000, "Saving application");
 }
 
-// Upload file to Cloudinary, store resulting URL in Supabase
+// ── Upload document to Cloudinary, save URL in Supabase ──────────────────
+// Cloudinary handles both images AND PDFs via /auto/upload
 export async function uploadAdmissionDocument(
   admissionId: string,
   docType: string,
   file: File
 ): Promise<string> {
-  // Upload to Cloudinary — folder: admissions/admissionId
+  // 1. Upload file to Cloudinary (timeout handled inside cloudinary.ts)
   const cloudinaryUrl = await uploadToCloudinary(file, `admissions/${admissionId}`);
 
-  // Save the Cloudinary URL into Supabase admission_documents table
-  const { error } = await supabase
+  // 2. Save the returned Cloudinary URL into Supabase admission_documents
+  const dbPromise = supabase
     .from("admission_documents")
     .insert({
       admission_id: admissionId,
       doc_type:     docType,
-      file_path:    cloudinaryUrl,  // full https://res.cloudinary.com/... URL
+      file_path:    cloudinaryUrl,   // Cloudinary secure_url stored here
       file_name:    file.name,
+    })
+    .then(({ error }) => {
+      if (error) throw new Error(`Failed to save document record: ${error.message}`);
     });
-  if (error) throw error;
 
+  await withTimeout(dbPromise, 15_000, "Saving document record");
   return cloudinaryUrl;
 }
 
-// Already a full Cloudinary URL — return directly
+// ── Get document URL — already a full Cloudinary URL ─────────────────────
 export function getDocUrl(path: string): string {
   return path;
-        }
+    }
+                   

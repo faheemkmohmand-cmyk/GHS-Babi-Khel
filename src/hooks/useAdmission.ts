@@ -123,7 +123,7 @@ export async function submitAdmission(payload: {
   const { data, error } = await supabase.rpc("submit_admission_public", {
     p_full_name:      payload.full_name,
     p_father_name:    payload.father_name,
-    p_date_of_birth:  payload.date_of_birth ?? "",
+    p_date_of_birth:  payload.date_of_birth || null,
     p_b_form_no:      payload.b_form_no,
     p_contact_number: payload.contact_number,
     p_whatsapp_number:  payload.whatsapp_number  ?? null,

@@ -1,0 +1,210 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+
+export type AdmissionType   = "fresh" | "migration";
+export type AdmissionStatus = "pending" | "under_review" | "approved" | "rejected" | "documents_missing";
+
+export interface AdmissionSettings {
+  id: number;
+  is_open: boolean;
+  session_year: string;
+  open_date: string | null;
+  last_date: string | null;
+  banner_message: string | null;
+  notes: string | null;
+  updated_at: string;
+}
+
+export interface Admission {
+  id: string;
+  reference_no: string;
+  full_name: string;
+  father_name: string;
+  date_of_birth: string | null;
+  b_form_no: string;
+  contact_number: string;
+  whatsapp_number: string | null;
+  home_address: string | null;
+  gender: string | null;
+  applying_class: string;
+  admission_type: AdmissionType;
+  previous_school: string | null;
+  previous_class: string | null;
+  previous_marks: string | null;
+  year_of_passing: string | null;
+  status: AdmissionStatus;
+  admin_note: string | null;
+  rejection_reason: string | null;
+  admission_roll_no: string | null;
+  migration_step: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdmissionDocument {
+  id: string;
+  admission_id: string;
+  doc_type: string;
+  file_path: string;
+  file_name: string | null;
+  uploaded_at: string;
+}
+
+// ── Public: admission settings (banner / open status) ─────────────────────
+export function useAdmissionSettings() {
+  return useQuery<AdmissionSettings | null>({
+    queryKey: ["admission-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admission_settings")
+        .select("*")
+        .eq("id", 1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 2 * 60 * 1000,
+  });
+}
+
+// ── Public: track an application ─────────────────────────────────────────
+export function useTrackAdmission(query: string) {
+  return useQuery({
+    queryKey: ["track-admission", query],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("track_admission", { p_query: query });
+      if (error) throw error;
+      return (data ?? []) as Admission[];
+    },
+    enabled: query.length >= 5,
+    staleTime: 0,
+  });
+}
+
+// ── Admin: all admissions ─────────────────────────────────────────────────
+export function useAdminAdmissions(filters: {
+  status?: string; classFilter?: string; typeFilter?: string; page?: number;
+}) {
+  const PAGE_SIZE = 20;
+  const page = filters.page ?? 0;
+
+  return useQuery<{ admissions: Admission[]; count: number }>({
+    queryKey: ["admin-admissions", filters],
+    queryFn: async () => {
+      let q = supabase
+        .from("admissions")
+        .select("*", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+
+      if (filters.status && filters.status !== "all")
+        q = q.eq("status", filters.status);
+      if (filters.classFilter && filters.classFilter !== "all")
+        q = q.eq("applying_class", filters.classFilter);
+      if (filters.typeFilter && filters.typeFilter !== "all")
+        q = q.eq("admission_type", filters.typeFilter);
+
+      const { data, error, count } = await q;
+      if (error) throw error;
+      return { admissions: (data ?? []) as Admission[], count: count ?? 0 };
+    },
+  });
+}
+
+// ── Admin: documents for one admission ──────────────────────────────────
+export function useAdmissionDocuments(admissionId: string) {
+  return useQuery<AdmissionDocument[]>({
+    queryKey: ["admission-docs", admissionId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admission_documents")
+        .select("*")
+        .eq("admission_id", admissionId)
+        .order("uploaded_at");
+      if (error) throw error;
+      return (data ?? []) as AdmissionDocument[];
+    },
+    enabled: !!admissionId,
+  });
+}
+
+// ── Admin: update admission ───────────────────────────────────────────────
+export function useUpdateAdmission() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Admission> }) => {
+      const { error } = await supabase
+        .from("admissions")
+        .update(updates)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-admissions"] });
+    },
+  });
+}
+
+// ── Admin: update settings ────────────────────────────────────────────────
+export function useUpdateAdmissionSettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (updates: Partial<AdmissionSettings>) => {
+      const { error } = await supabase
+        .from("admission_settings")
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq("id", 1);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admission-settings"] });
+    },
+  });
+}
+
+// ── Submit new admission (public) ─────────────────────────────────────────
+export async function submitAdmission(payload: Omit<Admission,
+  "id" | "reference_no" | "status" | "admin_note" | "rejection_reason" |
+  "admission_roll_no" | "migration_step" | "created_at" | "updated_at"
+>) {
+  const { data, error } = await supabase
+    .from("admissions")
+    .insert({ ...payload })
+    .select("id, reference_no")
+    .single();
+  if (error) throw error;
+  return data as { id: string; reference_no: string };
+}
+
+// ── Upload document file ─────────────────────────────────────────────────
+export async function uploadAdmissionDocument(
+  admissionId: string,
+  docType: string,
+  file: File
+) {
+  const ext = file.name.split(".").pop();
+  const path = `${admissionId}/${docType}-${Date.now()}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("admissions")
+    .upload(path, file, { upsert: true });
+  if (uploadError) throw uploadError;
+
+  const { error: dbError } = await supabase
+    .from("admission_documents")
+    .insert({
+      admission_id: admissionId,
+      doc_type: docType,
+      file_path: path,
+      file_name: file.name,
+    });
+  if (dbError) throw dbError;
+
+  return path;
+}
+
+// ── Get public URL for a doc ─────────────────────────────────────────────
+export function getDocUrl(path: string) {
+  const { data } = supabase.storage.from("admissions").getPublicUrl(path);
+  return data.publicUrl;
+}

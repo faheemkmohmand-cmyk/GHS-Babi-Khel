@@ -67,7 +67,6 @@ const AdmissionsIndex = () => {
       <PageBanner
         title="Admissions"
         subtitle={`Apply online for Session ${data?.session_year || ""} — Class 6 to 10`}
-        icon={GraduationCap}
       />
 
       <section className="container mx-auto px-4 py-8 md:py-12">

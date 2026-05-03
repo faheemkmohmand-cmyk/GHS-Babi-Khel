@@ -110,16 +110,23 @@ export function useUpdateAdmissionSettings() {
   });
 }
 
-// Calls the secure server-side RPC function — bypasses RLS completely
+// Submits the admission form data to Supabase
 export async function submitAdmission(payload: {
-  full_name: string; father_name: string; date_of_birth: string | null;
-  b_form_no: string; contact_number: string; whatsapp_number: string | null;
-  home_address: string | null; gender: string | null; applying_class: string;
-  admission_type: AdmissionType; previous_school: string | null;
-  previous_class: string | null; previous_marks: string | null;
+  full_name: string;
+  father_name: string;
+  date_of_birth: string | null;
+  b_form_no: string;
+  contact_number: string;
+  whatsapp_number: string | null;
+  home_address: string | null;
+  gender: string | null;
+  applying_class: string;
+  admission_type: AdmissionType;
+  previous_school: string | null;
+  previous_class: string | null;
+  previous_marks: string | null;
   year_of_passing: string | null;
 }): Promise<{ id: string; reference_no: string }> {
-
   const { data, error } = await supabase.rpc("submit_admission_public", {
     p_full_name:       payload.full_name,
     p_father_name:     payload.father_name,
@@ -142,20 +149,19 @@ export async function submitAdmission(payload: {
   return data as { id: string; reference_no: string };
 }
 
+// Uploads a single document to Cloudinary then records it in Supabase
 export async function uploadAdmissionDocument(
   admissionId: string,
   docType: string,
   file: File
 ): Promise<string> {
   const cloudinaryUrl = await uploadToCloudinary(file, `admissions/${admissionId}`);
-
   const { error } = await supabase.from("admission_documents").insert({
     admission_id: admissionId,
     doc_type:     docType,
     file_path:    cloudinaryUrl,
     file_name:    file.name,
   });
-
   if (error) throw new Error(`Failed to record document: ${error.message}`);
   return cloudinaryUrl;
 }
@@ -163,4 +169,3 @@ export async function uploadAdmissionDocument(
 export function getDocUrl(path: string): string {
   return path;
     }
-  

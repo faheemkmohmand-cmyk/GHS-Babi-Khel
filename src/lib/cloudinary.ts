@@ -28,7 +28,7 @@ export async function uploadToCloudinary(file: File, folder: string): Promise<st
   let res: Response;
   try {
     res = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
       { method: "POST", body: formData, signal: controller.signal }
     );
   } catch (fetchErr: any) {

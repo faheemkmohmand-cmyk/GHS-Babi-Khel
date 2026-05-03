@@ -35,6 +35,9 @@ const NotFound         = lazy(() => import("./pages/NotFound"));
 const ProtectedRoute        = lazy(() => import("./components/layout/ProtectedRoute"));
 const AdminProtectedRoute   = lazy(() => import("./components/layout/AdminProtectedRoute"));
 const TeacherProtectedRoute = lazy(() => import("./components/layout/TeacherProtectedRoute"));
+const AdmissionsIndex       = lazy(() => import("./pages/admissions/AdmissionsIndex"));
+const AdmissionsApply       = lazy(() => import("./pages/admissions/ApplyPage"));
+const AdmissionsTrack       = lazy(() => import("./pages/admissions/TrackPage"));
 
 const PageSkeleton = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -110,6 +113,9 @@ const App = () => (
             />
             <Route path="/weather"                  element={<Weather />} />
             <Route path="/online-classes"          element={<OnlineClasses />} />
+            <Route path="/admissions"               element={<AdmissionsIndex />} />
+            <Route path="/admissions/apply"         element={<AdmissionsApply />} />
+            <Route path="/admissions/track"         element={<AdmissionsTrack />} />
             <Route path="/notes"                    element={<NotesPage />} />
             <Route path="/notes/:subject"           element={<SubjectPage />} />
             <Route path="/notes/:subject/:chapter"  element={<ChapterPage />} />

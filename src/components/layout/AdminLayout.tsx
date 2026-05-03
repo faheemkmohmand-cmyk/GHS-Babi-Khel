@@ -14,9 +14,9 @@ const navItems = [
   { id: "settings",          label: "School Settings",    icon: Settings       },
   { id: "teachers",          label: "Manage Teachers",    icon: Users          },
   { id: "students",          label: "Manage Students",    icon: GraduationCap  },
-  { id: "admissions",        label: "🎓 Admissions",      icon: GraduationCap  },
+  { id: "admissions",        label: "Admissions",      icon: GraduationCap  },
   { id: "results",           label: "Manage Results",     icon: ClipboardList  },
-  { id: "merit-list",        label: "🏆 Merit List",      icon: TrendingUp     },
+  { id: "merit-list",        label: "Merit List",      icon: TrendingUp     },
   { id: "attendance",        label: "Attendance",         icon: CheckSquare    },
   { id: "timetables",        label: "Timetables",         icon: Calendar       },
   { id: "notices",           label: "Notices",            icon: Bell           },
@@ -25,15 +25,15 @@ const navItems = [
   { id: "library",           label: "Library",            icon: BookOpen       },
   { id: "achievements",      label: "Achievements",       icon: Trophy         },
   { id: "exam-rolls",        label: "Exam Roll Numbers",  icon: Hash           },
-  { id: "notes",             label: "📚 Notes Manager",  icon: BookMarked     },
+  { id: "notes",             label: "Notes Manager",  icon: BookMarked     },
   { id: "tests",             label: "MCQ Tests",          icon: ClipboardCheck },
   { id: "videos",            label: "Videos",             icon: Video          },
   { id: "users",             label: "Users",              icon: UserCog        },
-  { id: "online-classes",    label: "📹 Online Classes",  icon: Video          },
-  { id: "extras",            label: "✨ Extras",          icon: Star           },
-  { id: "analytics",         label: "📊 Analytics",       icon: TrendingUp     },
+  { id: "online-classes",    label: "Online Classes",  icon: Video          },
+  { id: "extras",            label: "Extras",          icon: Star           },
+  { id: "analytics",         label: "Analytics",       icon: TrendingUp     },
   { id: "pending-requests",  label: "Pending Requests",   icon: Clock          },
-  { id: "site-analytics",    label: "🌐 Site Analytics",  icon: Globe          },
+  { id: "site-analytics",    label: "Site Analytics",  icon: Globe          },
 ];
 
 interface AdminLayoutProps {
@@ -252,6 +252,7 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
 
 export default AdminLayout;
         
+
 
 
 

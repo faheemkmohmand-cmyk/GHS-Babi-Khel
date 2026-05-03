@@ -121,7 +121,7 @@ export async function submitAdmission(payload: {
 }): Promise<{ id: string; reference_no: string }> {
 
   const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error("Server took too long. Please check your internet and try again.")), 20000)
+    setTimeout(() => reject(new Error("Server took too long. Please check your internet and try again.")), 120000)
   );
 
   const rpcPromise = supabase.rpc("submit_admission_public", {

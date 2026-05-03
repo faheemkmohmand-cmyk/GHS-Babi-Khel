@@ -10,7 +10,7 @@
 @tailwind utilities;
 
 @layer base {
-  /* ─── ROYAL SLATE — Light (Navy + Gold) ─── */
+  /* ─── ROYAL SLATE — Light (Navy Only) ─── */
   :root {
     --background: 210 40% 98%;
     --foreground: 222 47% 14%;
@@ -68,7 +68,7 @@
     --shadow-elevated: 0 12px 40px -8px hsl(222 47% 22% / 0.22);
   }
 
-  /* ─── ROYAL SLATE — Dark (Navy primary, Navy base) ─── */
+  /* ─── ROYAL SLATE — Dark (Navy Only) ─── */
   .dark {
     --background: 222 47% 8%;
     --foreground: 210 30% 96%;

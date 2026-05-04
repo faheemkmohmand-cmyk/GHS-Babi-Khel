@@ -14,8 +14,6 @@ const navLinks = [
   { to: "/notices",        label: "Notices" },
   { to: "/news",           label: "News" },
   { to: "/results",        label: "Results" },
-  { to: "/gallery",        label: "Gallery" },
-  { to: "/library",        label: "Library" },
   { to: "/notes",          label: "Notes" },
   { to: "/weather",        label: "Weather" },
   { to: "/online-classes", label: "Online Classes" },
@@ -250,4 +248,5 @@ const Navbar = () => {
 };
 
 export default Navbar;
-        
+
+              

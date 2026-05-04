@@ -27,12 +27,66 @@ export interface AdmissionDocument {
   file_path: string; file_name: string | null; uploaded_at: string;
 }
 
+export interface AdmissionPayload {
+  full_name: string;
+  father_name: string;
+  date_of_birth: string | null;
+  b_form_no: string;
+  contact_number: string;
+  whatsapp_number: string | null;
+  home_address: string | null;
+  gender: string | null;
+  applying_class: string;
+  admission_type: AdmissionType;
+  previous_school: string | null;
+  previous_class: string | null;
+  previous_marks: string | null;
+  year_of_passing: string | null;
+}
+
+export interface AdmissionDocumentPayload {
+  doc_type: string;
+  file_path: string;
+  file_name: string | null;
+}
+
+const ADMISSION_FIELDS = "id, reference_no, full_name, father_name, date_of_birth, b_form_no, contact_number, whatsapp_number, home_address, gender, applying_class, admission_type, previous_school, previous_class, previous_marks, year_of_passing, status, admin_note, rejection_reason, admission_roll_no, migration_step, created_at, updated_at";
+const ADMISSION_DOCUMENT_FIELDS = "id, admission_id, doc_type, file_path, file_name, uploaded_at";
+
+function withTimeout<T>(promise: PromiseLike<T>, ms: number, label: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(
+      () => reject(new Error(`${label} timed out after ${Math.round(ms / 1000)}s. Check your internet and try again.`)),
+      ms
+    );
+
+    promise.then(
+      (value) => { window.clearTimeout(timer); resolve(value); },
+      (error) => { window.clearTimeout(timer); reject(error); }
+    );
+  });
+}
+
+function isMissingRpcError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  return message.includes("submit_admission_public") || message.includes("PGRST202") || message.includes("Could not find the function");
+}
+
+function createFallbackReferenceNo() {
+  const year = new Date().getFullYear();
+  const suffix = `${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 90 + 10)}`;
+  return `OHS-${year}-${suffix}`;
+}
+
 export function useAdmissionSettings() {
   return useQuery<AdmissionSettings | null>({
     queryKey: ["admission-settings"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("admission_settings").select("*").eq("id", 1).maybeSingle();
+        .from("admission_settings")
+        .select("id, is_open, session_year, open_date, last_date, banner_message, notes, updated_at")
+        .eq("id", 1)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -61,7 +115,7 @@ export function useAdminAdmissions(filters: {
   return useQuery<{ admissions: Admission[]; count: number }>({
     queryKey: ["admin-admissions", filters],
     queryFn: async () => {
-      let q = supabase.from("admissions").select("*", { count: "exact" })
+      let q = supabase.from("admissions").select(ADMISSION_FIELDS, { count: "exact" })
         .order("created_at", { ascending: false })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
       if (filters.status && filters.status !== "all") q = q.eq("status", filters.status);
@@ -79,7 +133,7 @@ export function useAdmissionDocuments(admissionId: string) {
     queryKey: ["admission-docs", admissionId],
     queryFn: async () => {
       const { data, error } = await supabase.from("admission_documents")
-        .select("*").eq("admission_id", admissionId).order("uploaded_at");
+        .select(ADMISSION_DOCUMENT_FIELDS).eq("admission_id", admissionId).order("uploaded_at");
       if (error) throw error;
       return (data ?? []) as AdmissionDocument[];
     },
@@ -110,43 +164,68 @@ export function useUpdateAdmissionSettings() {
   });
 }
 
-// Submits the admission form data to Supabase
-export async function submitAdmission(payload: {
-  full_name: string;
-  father_name: string;
-  date_of_birth: string | null;
-  b_form_no: string;
-  contact_number: string;
-  whatsapp_number: string | null;
-  home_address: string | null;
-  gender: string | null;
-  applying_class: string;
-  admission_type: AdmissionType;
-  previous_school: string | null;
-  previous_class: string | null;
-  previous_marks: string | null;
-  year_of_passing: string | null;
-}): Promise<{ id: string; reference_no: string }> {
-  const { data, error } = await supabase.rpc("submit_admission_public", {
+// Submits the admission form and its already-uploaded Cloudinary document URLs.
+export async function submitAdmission(
+  payload: AdmissionPayload,
+  documents: AdmissionDocumentPayload[] = []
+): Promise<{ id: string; reference_no: string }> {
+  const rpcParams = {
     p_full_name:       payload.full_name,
     p_father_name:     payload.father_name,
     p_date_of_birth:   payload.date_of_birth || null,
     p_b_form_no:       payload.b_form_no,
     p_contact_number:  payload.contact_number,
-    p_whatsapp_number: payload.whatsapp_number  ?? null,
-    p_home_address:    payload.home_address     ?? null,
-    p_gender:          payload.gender           ?? null,
+    p_whatsapp_number: payload.whatsapp_number ?? null,
+    p_home_address:    payload.home_address ?? null,
+    p_gender:          payload.gender ?? null,
     p_applying_class:  payload.applying_class,
     p_admission_type:  payload.admission_type,
-    p_previous_school: payload.previous_school  ?? null,
-    p_previous_class:  payload.previous_class   ?? null,
-    p_previous_marks:  payload.previous_marks   ?? null,
-    p_year_of_passing: payload.year_of_passing  ?? null,
-  });
+    p_previous_school: payload.previous_school ?? null,
+    p_previous_class:  payload.previous_class ?? null,
+    p_previous_marks:  payload.previous_marks ?? null,
+    p_year_of_passing: payload.year_of_passing ?? null,
+    p_documents:       documents,
+  };
 
-  if (error) throw new Error(`Submission failed: ${error.message}`);
-  if (!data?.id) throw new Error("No response from server. Please try again.");
-  return data as { id: string; reference_no: string };
+  try {
+    const { data, error } = await withTimeout(
+      supabase.rpc("submit_admission_public", rpcParams),
+      25000,
+      "Admission submission"
+    );
+    if (error) throw new Error(error.message);
+
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row?.id || !row?.reference_no) throw new Error("No response from server. Please try again.");
+    return { id: row.id, reference_no: row.reference_no };
+  } catch (error) {
+    if (!isMissingRpcError(error)) {
+      throw new Error(`Submission failed: ${error instanceof Error ? error.message : "Please try again."}`);
+    }
+  }
+
+  const id = crypto.randomUUID();
+  const reference_no = createFallbackReferenceNo();
+
+  const { error: admissionError } = await withTimeout(
+    supabase.from("admissions").insert([{ id, reference_no, ...payload }]),
+    25000,
+    "Admission submission"
+  );
+  if (admissionError) throw new Error(`Submission failed: ${admissionError.message}`);
+
+  if (documents.length > 0) {
+    const { error: docsError } = await withTimeout(
+      supabase.from("admission_documents").insert(
+        documents.map(doc => ({ admission_id: id, ...doc }))
+      ),
+      25000,
+      "Document save"
+    );
+    if (docsError) throw new Error(`Application saved, but document links failed to save: ${docsError.message}`);
+  }
+
+  return { id, reference_no };
 }
 
 // Uploads a single document to Cloudinary then records it in Supabase

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Search, GraduationCap, FileCheck, Sparkles } from "lucide-react";
-import { useAdmissionSettings } from "@/hooks/useAdmissions";
+import { useAdmissionSettings } from "@/hooks/useAdmission";
 import { format, parseISO } from "date-fns";
 
 const AdmissionHero = () => {

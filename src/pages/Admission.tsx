@@ -14,10 +14,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   useAdmissionSettings, useTrackAdmission,
-  submitAdmission, uploadAdmissionDocument,
+  submitAdmission,
 } from "@/hooks/useAdmission";
 import { AdmissionType } from "@/hooks/useAdmission";
-import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
 
 type View = "home" | "apply" | "track" | "success";
@@ -250,24 +249,17 @@ const Admission = () => {
     if (!validateStep()) return;
     setSubmitting(true);
 
-    // Helper: run any promise with a hard timeout so it never hangs forever
-    function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
-      return new Promise((resolve, reject) => {
-        const timer = setTimeout(
-          () => reject(new Error(`${label} timed out after ${ms / 1000}s. Check your internet and try again.`)),
-          ms
-        );
-        promise.then(
-          (val) => { clearTimeout(timer); resolve(val); },
-          (err) => { clearTimeout(timer); reject(err); }
-        );
-      });
-    }
-
     try {
-      // ── 1. INSERT admission + read back id and reference_no in one call ──
-      const { data: inserted, error: insErr } = await withTimeout(
-        supabase.from("admissions").insert({
+      const docsPayload = Object.entries(fileEntries)
+        .filter(([, e]) => e?.status === "done" && e.url)
+        .map(([docType, e]) => ({
+          doc_type: docType,
+          file_path: e!.url!,
+          file_name: e!.file.name,
+        }));
+
+      const result = await submitAdmission(
+        {
           full_name:       form.full_name.trim(),
           father_name:     form.father_name.trim(),
           date_of_birth:   form.date_of_birth || null,
@@ -282,36 +274,11 @@ const Admission = () => {
           previous_class:  form.previous_class.trim() || null,
           previous_marks:  form.previous_marks.trim() || null,
           year_of_passing: form.year_of_passing.trim() || null,
-        }).select("id, reference_no").single(),
-        15000,
-        "Admission insert"
+        },
+        docsPayload
       );
-      if (insErr) throw new Error(`Submission failed: ${insErr.message}`);
-      const refNo = inserted?.reference_no ?? "";
 
-      // ── 3. SAVE document links (save_admission_docs from admissions_patch.sql) ──
-      const docsPayload = Object.entries(fileEntries)
-        .filter(([, e]) => e?.status === "done" && e.url)
-        .map(([docType, e]) => ({
-          doc_type:  docType,
-          file_path: e!.url!,
-          file_name: e!.file.name,
-        }));
-
-      if (docsPayload.length > 0) {
-        await withTimeout(
-          supabase.rpc("save_admission_docs", {
-            p_b_form_no: form.b_form_no.trim(),
-            p_docs:      JSON.stringify(docsPayload),
-          }),
-          15000,
-          "Document save"
-        ).catch(() => {
-          // Non-fatal — admission is saved, Cloudinary URLs are safe
-        });
-      }
-
-      setReferenceNo(refNo);
+      setReferenceNo(result.reference_no);
       setView("success");
       toast.success("Application submitted successfully!");
     } catch (err: any) {

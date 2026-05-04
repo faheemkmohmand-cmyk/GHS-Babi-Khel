@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { X, Megaphone, ArrowRight } from "lucide-react";
-import { useAdmissionSettings } from "@/hooks/useAdmissions";
+import { useAdmissionSettings } from "@/hooks/useAdmission";
 import { format, parseISO } from "date-fns";
 
 const KEY = "admissions-banner-dismissed-at";

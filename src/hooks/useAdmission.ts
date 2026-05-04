@@ -27,12 +27,55 @@ export interface AdmissionDocument {
   file_path: string; file_name: string | null; uploaded_at: string;
 }
 
+export interface AdmissionPayload {
+  full_name: string;
+  father_name: string;
+  date_of_birth: string | null;
+  b_form_no: string;
+  contact_number: string;
+  whatsapp_number: string | null;
+  home_address: string | null;
+  gender: string | null;
+  applying_class: string;
+  admission_type: AdmissionType;
+  previous_school: string | null;
+  previous_class: string | null;
+  previous_marks: string | null;
+  year_of_passing: string | null;
+}
+
+export interface AdmissionDocumentPayload {
+  doc_type: string;
+  file_path: string;
+  file_name: string | null;
+}
+
+const ADMISSION_FIELDS = "id, reference_no, full_name, father_name, date_of_birth, b_form_no, contact_number, whatsapp_number, home_address, gender, applying_class, admission_type, previous_school, previous_class, previous_marks, year_of_passing, status, admin_note, rejection_reason, admission_roll_no, migration_step, created_at, updated_at";
+const ADMISSION_DOCUMENT_FIELDS = "id, admission_id, doc_type, file_path, file_name, uploaded_at";
+
+function withTimeout<T>(promise: PromiseLike<T>, ms: number, label: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(
+      () => reject(new Error(`${label} timed out after ${Math.round(ms / 1000)}s. Check your internet and try again.`)),
+      ms
+    );
+
+    promise.then(
+      (value) => { window.clearTimeout(timer); resolve(value); },
+      (error) => { window.clearTimeout(timer); reject(error); }
+    );
+  });
+}
+
 export function useAdmissionSettings() {
   return useQuery<AdmissionSettings | null>({
     queryKey: ["admission-settings"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("admission_settings").select("*").eq("id", 1).maybeSingle();
+        .from("admission_settings")
+        .select("id, is_open, session_year, open_date, last_date, banner_message, notes, updated_at")
+        .eq("id", 1)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -61,7 +104,7 @@ export function useAdminAdmissions(filters: {
   return useQuery<{ admissions: Admission[]; count: number }>({
     queryKey: ["admin-admissions", filters],
     queryFn: async () => {
-      let q = supabase.from("admissions").select("*", { count: "exact" })
+      let q = supabase.from("admissions").select(ADMISSION_FIELDS, { count: "exact" })
         .order("created_at", { ascending: false })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
       if (filters.status && filters.status !== "all") q = q.eq("status", filters.status);
@@ -79,7 +122,7 @@ export function useAdmissionDocuments(admissionId: string) {
     queryKey: ["admission-docs", admissionId],
     queryFn: async () => {
       const { data, error } = await supabase.from("admission_documents")
-        .select("*").eq("admission_id", admissionId).order("uploaded_at");
+        .select(ADMISSION_DOCUMENT_FIELDS).eq("admission_id", admissionId).order("uploaded_at");
       if (error) throw error;
       return (data ?? []) as AdmissionDocument[];
     },

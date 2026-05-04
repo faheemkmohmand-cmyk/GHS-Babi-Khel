@@ -169,3 +169,46 @@ drop policy if exists "admissions_bucket_admin_manage" on storage.objects;
 create policy "admissions_bucket_admin_manage" on storage.objects for all
   using (bucket_id = 'admissions' and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'))
   with check (bucket_id = 'admissions' and exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'));
+
+-- Public atomic submission RPC: creates admission and document URL rows together.
+-- This avoids direct browser inserts that need RETURNING/SELECT through RLS.
+create or replace function public.submit_admission_public(
+  p_full_name text, p_father_name text, p_date_of_birth date, p_b_form_no text,
+  p_contact_number text, p_whatsapp_number text, p_home_address text, p_gender text,
+  p_applying_class text, p_admission_type text, p_previous_school text,
+  p_previous_class text, p_previous_marks text, p_year_of_passing text,
+  p_documents jsonb default '[]'::jsonb
+) returns table (id uuid, reference_no text)
+language plpgsql security definer set search_path = public as $$
+declare
+  v_id uuid := gen_random_uuid();
+  v_year text := to_char(now(), 'YYYY');
+  v_seq integer;
+  v_reference_no text;
+begin
+  perform pg_advisory_xact_lock(hashtext('admission-reference-' || v_year));
+  select count(*) + 1 into v_seq from public.admissions where admissions.reference_no like 'OHS-' || v_year || '-%';
+  v_reference_no := 'OHS-' || v_year || '-' || lpad(v_seq::text, 4, '0');
+
+  insert into public.admissions (
+    id, reference_no, full_name, father_name, date_of_birth, b_form_no, contact_number,
+    whatsapp_number, home_address, gender, applying_class, admission_type, previous_school,
+    previous_class, previous_marks, year_of_passing, migration_step
+  ) values (
+    v_id, v_reference_no, trim(p_full_name), trim(p_father_name), p_date_of_birth, trim(p_b_form_no),
+    trim(p_contact_number), nullif(trim(coalesce(p_whatsapp_number, '')), ''),
+    nullif(trim(coalesce(p_home_address, '')), ''), nullif(trim(coalesce(p_gender, '')), ''),
+    trim(p_applying_class), p_admission_type, nullif(trim(coalesce(p_previous_school, '')), ''),
+    nullif(trim(coalesce(p_previous_class, '')), ''), nullif(trim(coalesce(p_previous_marks, '')), ''),
+    nullif(trim(coalesce(p_year_of_passing, '')), ''), case when p_admission_type = 'migration' then 1 else null end
+  );
+
+  insert into public.admission_documents (admission_id, doc_type, file_path, file_name)
+  select v_id, d.doc_type, d.file_path, nullif(d.file_name, '')
+  from jsonb_to_recordset(coalesce(p_documents, '[]'::jsonb)) as d(doc_type text, file_path text, file_name text)
+  where nullif(d.doc_type, '') is not null and nullif(d.file_path, '') is not null;
+
+  return query select v_id, v_reference_no;
+end;
+$$;
+grant execute on function public.submit_admission_public(text, text, date, text, text, text, text, text, text, text, text, text, text, text, jsonb) to anon, authenticated;

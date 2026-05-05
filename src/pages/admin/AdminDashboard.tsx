@@ -27,7 +27,6 @@ const AdminOnlineClasses     = lazy(() => import("./tabs/AdminOnlineClasses") as
 const AdminAnalytics         = lazy(() => import("../dashboard/tabs/SchoolAnalyticsTab") as any);
 const AdminSiteAnalytics     = lazy(() => import("./tabs/AdminSiteAnalytics"));
 const AdminAdmissions        = lazy(() => import("./tabs/AdminAdmissions"));
-const AdminExamAttendance    = lazy(() => import("./tabs/AdminExamAttendance"));
 
 const tabMap: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
   overview:           AdminOverview,
@@ -54,7 +53,6 @@ const tabMap: Record<string, React.LazyExoticComponent<React.ComponentType<any>>
   extras:             AdminExtras,
   "online-classes":   AdminOnlineClasses,
   admissions:         AdminAdmissions,
-  "exam-attendance":  AdminExamAttendance,
 };
 
 const Fallback = () => (

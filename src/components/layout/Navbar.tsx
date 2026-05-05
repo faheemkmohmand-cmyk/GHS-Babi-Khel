@@ -12,7 +12,6 @@ const navLinks = [
   { to: "/about",          label: "About" },
   { to: "/teachers",       label: "Teachers" },
   { to: "/notices",        label: "Notices" },
-  { to: "/news",           label: "News" },
   { to: "/results",        label: "Results" },
   { to: "/notes",          label: "Notes" },
   { to: "/weather",        label: "Weather" },
@@ -249,4 +248,5 @@ const Navbar = () => {
 
 export default Navbar;
 
-              
+
+        

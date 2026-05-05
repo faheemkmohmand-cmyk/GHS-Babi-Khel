@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Home, Calendar, BarChart3, Bell, BookOpen, Image, Trophy,
   Users, User, LogOut, GraduationCap, Menu, X, Shield, ExternalLink, Moon, Sun,
-  Video, FileText, BookMarked, ClipboardCheck, MessageSquare
+  Video, FileText, BookMarked, ClipboardCheck
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/shared/NotificationBell";
@@ -22,7 +22,6 @@ const navItems = [
   { id: "tests",          label: "MCQ Tests",        icon: ClipboardCheck },
   { id: "homework",       label: "Homework",         icon: FileText       },
   { id: "teachers",       label: "Teachers",         icon: Users          },
-  { id: "messages",       label: "Messages",         icon: MessageSquare  },
   { id: "profile",        label: "My Profile",       icon: User           },
 ];
 
@@ -266,4 +265,4 @@ export default DashboardLayout;
 
 
 
-          
+                                          

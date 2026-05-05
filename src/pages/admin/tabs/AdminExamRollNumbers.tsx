@@ -634,42 +634,30 @@ const AdminExamRollNumbers = () => {
     const w = doc.internal.pageSize.getWidth();
     const h = doc.internal.pageSize.getHeight();
 
-    // ── Header ──
+    // ── Header (no logo) ──
     doc.setFillColor(4, 44, 83);
-    doc.rect(0, 0, w, 42, "F");
+    doc.rect(0, 0, w, 36, "F");
     doc.setFillColor(212, 175, 55);
-    doc.rect(0, 42, w, 2.5, "F");
-
-    // Emblem
-    doc.setFillColor(212, 175, 55);
-    doc.circle(w / 2, 14, 8, "F");
-    doc.setFillColor(4, 44, 83);
-    doc.circle(w / 2, 14, 6, "F");
-    doc.setTextColor(212, 175, 55);
-    doc.setFontSize(6);
-    doc.setFont("helvetica", "bold");
-    doc.text("GHS", w / 2, 15.5, { align: "center" });
+    doc.rect(0, 36, w, 1.2, "F");
 
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(13);
+    doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("Government High School Babi Khel", w / 2, 28, { align: "center" });
+    doc.text("Government High School Babi Khel", w / 2, 14, { align: "center" });
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(180, 200, 220);
-    doc.text("District Mohmand, KPK", w / 2, 33, { align: "center" });
-
+    doc.setTextColor(200, 215, 230);
+    doc.text("District Mohmand, KPK", w / 2, 21, { align: "center" });
     doc.setTextColor(212, 175, 55);
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
-    doc.text("EXAM ATTENDANCE REPORT", w / 2, 39, { align: "center" });
+    doc.text("EXAM ATTENDANCE REPORT", w / 2, 30, { align: "center" });
 
     // ── Info box ──
-    doc.setFillColor(240, 247, 255);
-    doc.roundedRect(12, 48, w - 24, 18, 2, 2, "F");
-    doc.setDrawColor(4, 44, 83);
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(200, 210, 220);
     doc.setLineWidth(0.3);
-    doc.roundedRect(12, 48, w - 24, 18, 2, 2, "S");
+    doc.roundedRect(12, 44, w - 24, 14, 2, 2, "FD");
 
     const infoItems = [
       { label: "CLASS", value: `Class ${attClass}` },
@@ -684,43 +672,49 @@ const AdminExamRollNumbers = () => {
       doc.setTextColor(100, 120, 140);
       doc.setFontSize(6);
       doc.setFont("helvetica", "normal");
-      doc.text(item.label, cx, 54, { align: "center" });
+      doc.text(item.label, cx, 49, { align: "center" });
       doc.setTextColor(4, 44, 83);
       doc.setFontSize(9);
       doc.setFont("helvetica", "bold");
-      doc.text(item.value, cx, 61, { align: "center" });
+      doc.text(item.value, cx, 55, { align: "center" });
     });
 
     // ── Table with autoTable ──
-    const tableBody = attendance.map((r, idx) => {
-      const statusStr = r.status === "present" ? "P" : r.status === "absent" ? "A" : "L";
-      return [String(idx + 1), r.class_roll_no, r.exam_roll_no, r.student_name, statusStr, r.scanned_at ? new Date(r.scanned_at).toLocaleTimeString() : "Manual"];
-    });
+    const statusLabel = (s: string) => s === "present" ? "Present" : s === "absent" ? "Absent" : "Leave";
+    const tableBody = attendance.map((r, idx) => [
+      String(idx + 1), r.class_roll_no, r.exam_roll_no, r.student_name,
+      statusLabel(r.status),
+      r.scanned_at ? new Date(r.scanned_at).toLocaleTimeString() : "Manual",
+    ]);
 
     autoTable(doc, {
-      startY: 72,
+      startY: 64,
       head: [["#", "Class Roll", "Exam Roll", "Student Name", "Status", "Time"]],
       body: tableBody,
-      headStyles: { fillColor: [4, 44, 83], textColor: [255, 255, 255], fontStyle: "bold", fontSize: 8, halign: "center", cellPadding: 4 },
-      bodyStyles: { fontSize: 8, cellPadding: 3.5, valign: "middle" },
+      headStyles: { fillColor: [4, 44, 83], textColor: [255, 255, 255], fontStyle: "bold", fontSize: 9, halign: "center", cellPadding: 3 },
+      bodyStyles: { fontSize: 9, cellPadding: 3, valign: "middle", textColor: [30, 41, 59] },
       columnStyles: {
-        0: { cellWidth: 12, halign: "center" },
-        1: { cellWidth: 22, halign: "center" },
-        2: { cellWidth: 26, halign: "center", fontStyle: "bold" },
+        0: { cellWidth: 10, halign: "center" },
+        1: { cellWidth: 20, halign: "center" },
+        2: { cellWidth: 25, halign: "center", fontStyle: "bold" },
         3: { cellWidth: 55 },
-        4: { cellWidth: 18, halign: "center", fontStyle: "bold" },
+        4: { cellWidth: 22, halign: "center", fontStyle: "bold" },
         5: { cellWidth: 28, halign: "center" },
       },
-      alternateRowStyles: { fillColor: [248, 252, 255] },
+      alternateRowStyles: { fillColor: [249, 250, 251] },
       didParseCell: (data: any) => {
         if (data.section === "body" && data.column.index === 4) {
-          const val = data.cell.raw;
-          if (val === "P") { data.cell.styles.textColor = [16, 185, 129]; data.cell.styles.fillColor = [209, 250, 229]; }
-          else if (val === "A") { data.cell.styles.textColor = [239, 68, 68]; data.cell.styles.fillColor = [254, 226, 226]; }
-          else if (val === "L") { data.cell.styles.textColor = [59, 130, 246]; data.cell.styles.fillColor = [219, 234, 254]; }
+          const val = String(data.cell.raw);
+          if (val === "Present") { data.cell.styles.textColor = [16, 122, 80]; data.cell.styles.fillColor = [209, 250, 229]; }
+          else if (val === "Absent") { data.cell.styles.textColor = [185, 28, 28]; data.cell.styles.fillColor = [254, 226, 226]; }
+          else if (val === "Leave") { data.cell.styles.textColor = [29, 78, 216]; data.cell.styles.fillColor = [219, 234, 254]; }
+        }
+        if (data.section === "body" && data.column.index === 3) {
+          const text = String(data.cell.raw || "");
+          data.cell.text = doc.splitTextToSize(text, 53);
         }
       },
-      margin: { left: 12, right: 12, bottom: 28 },
+      margin: { left: 12, right: 12, bottom: 30 },
     });
 
     // ── Signature area on each page ──

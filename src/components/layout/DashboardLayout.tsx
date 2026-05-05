@@ -18,7 +18,7 @@ const navItems = [
   { id: "notes",          label: "Study Notes",      icon: BookMarked     },
   { id: "library",        label: "Library",          icon: BookOpen       },
   { id: "gallery",        label: "Media",            icon: Image          },
-  { id: "online-classes", label: "📹 Online Classes", icon: Video         },
+  { id: "online-classes", label: "Online Classes",   icon: Video         },
   { id: "tests",          label: "MCQ Tests",        icon: ClipboardCheck },
   { id: "homework",       label: "Homework",         icon: FileText       },
   { id: "teachers",       label: "Teachers",         icon: Users          },

@@ -209,7 +209,7 @@ const AdminExamRollNumbers = () => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   // Scan state
   const [manualRoll, setManualRoll] = useState<string>("");
-  const [qrInput, setQrInput] = useState<string>("");
+  
   const [scanLog, setScanLog] = useState<{ name: string; roll: string; time: string; status: string }[]>([]);
   const [showScanner, setShowScanner] = useState(false);
 

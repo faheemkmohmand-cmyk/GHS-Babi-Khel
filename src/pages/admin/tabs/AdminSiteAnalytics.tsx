@@ -2,7 +2,9 @@
 // Site visitor analytics — reads from site_visits table only.
 // Uses recharts (already a project dependency).
 
+import { lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,6 +18,7 @@ import {
   TrendingUp, Globe, BarChart3, Clock,
 } from "lucide-react";
 import { format, subDays, startOfDay, parseISO } from "date-fns";
+const AdminPendingRequests = lazy(() => import("./AdminPendingRequests"));
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Visit {
@@ -327,4 +330,37 @@ const AdminSiteAnalytics = () => {
 };
 
 export default AdminSiteAnalytics;
+
+// ─── WRAPPER with Pending Requests tab ────────────────────────────────────────
+export const AdminAnalyticsHub = () => (
+  <div className="space-y-4">
+    <div>
+      <h2 className="text-xl font-heading font-bold text-foreground flex items-center gap-2">
+        <Globe className="w-5 h-5 text-primary" /> Analytics & Requests
+      </h2>
+      <p className="text-sm text-muted-foreground mt-0.5">Site analytics and pending user requests</p>
+    </div>
+    <Tabs defaultValue="analytics" className="w-full">
+      <TabsList className="w-full grid grid-cols-2 sm:inline-flex sm:w-auto">
+        <TabsTrigger value="analytics" className="gap-1.5 text-xs sm:text-sm">
+          <Globe className="w-3.5 h-3.5" />
+          <span>Site Analytics</span>
+        </TabsTrigger>
+        <TabsTrigger value="pending" className="gap-1.5 text-xs sm:text-sm">
+          <Clock className="w-3.5 h-3.5" />
+          <span>Pending Requests</span>
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="analytics" className="mt-4">
+        <AdminSiteAnalytics />
+      </TabsContent>
+      <TabsContent value="pending" className="mt-4">
+        <Suspense fallback={<div className="space-y-2">{[...Array(4)].map((_,i)=><div key={i} className="h-12 rounded-lg bg-muted animate-pulse"/>)}</div>}>
+          <AdminPendingRequests />
+        </Suspense>
+      </TabsContent>
+    </Tabs>
+  </div>
+);
+
         

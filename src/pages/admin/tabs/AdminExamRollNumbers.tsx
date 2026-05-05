@@ -27,6 +27,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { triggerConfetti } from "@/lib/confetti";
 import QRCode from "qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 import {
   encodeExamQRData, decodeExamQRData,
   useExamSessions as useAttExamSessions,
@@ -111,98 +112,61 @@ function CountdownTimer({ targetDate, label }: { targetDate: string; label: stri
   );
 }
 
-// ── Camera QR Scanner component ─────────────────────────────────────────────────
+// ── Camera QR Scanner using html5-qrcode ───────────────────────────────────
 function QRScanner({ onScan, enabled }: { onScan: (data: string) => void; enabled: boolean }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const scanningRef = useRef(false);
-  const [cameraError, setCameraError] = useState<string | null>(null);
-  const [cameraOn, setCameraOn] = useState(false);
-  const detectorRef = useRef<any>(null);
+  const [active, setActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const containerIdRef = useRef(`qr-reader-${Math.random().toString(36).slice(2)}`);
 
-  const startCamera = useCallback(async () => {
-    try {
-      setCameraError(null);
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-        setCameraOn(true);
-        scanningRef.current = true;
-
-        // Try BarcodeDetector API (available in Chrome/Edge)
-        if ("BarcodeDetector" in window) {
-          try {
-            detectorRef.current = new (window as any).BarcodeDetector({ formats: ["qr_code"] });
-            const detectLoop = async () => {
-              if (!scanningRef.current || !videoRef.current || !detectorRef.current) return;
-              try {
-                const barcodes = await detectorRef.current.detect(videoRef.current);
-                if (barcodes.length > 0) {
-                  onScan(barcodes[0].rawValue);
-                  scanningRef.current = false;
-                  stopCamera();
-                  return;
-                }
-              } catch {}
-              if (scanningRef.current) requestAnimationFrame(detectLoop);
-            };
-            setTimeout(detectLoop, 1000); // wait for camera to stabilize
-          } catch (e) {
-            // BarcodeDetector not supported, fallback to manual
-          }
-        }
-      }
-    } catch (err: any) {
-      setCameraError(err.message || "Camera access denied");
-      setCameraOn(false);
+  const stop = useCallback(async () => {
+    const inst = scannerRef.current;
+    if (inst) {
+      try { if ((inst as any).isScanning) await inst.stop(); } catch {}
+      try { await inst.clear(); } catch {}
+      scannerRef.current = null;
     }
-  }, [onScan]);
-
-  const stopCamera = useCallback(() => {
-    scanningRef.current = false;
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
-      streamRef.current = null;
-    }
-    if (videoRef.current) videoRef.current.srcObject = null;
-    setCameraOn(false);
+    setActive(false);
   }, []);
 
-  useEffect(() => {
-    return () => { stopCamera(); };
-  }, [stopCamera]);
+  const start = useCallback(async () => {
+    setError(null);
+    setActive(true);
+    await new Promise(r => setTimeout(r, 80));
+    try {
+      const qr = new Html5Qrcode(containerIdRef.current);
+      scannerRef.current = qr;
+      await qr.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 200, height: 200 } },
+        (decodedText: string) => { onScan(decodedText); stop(); },
+        () => {}
+      );
+    } catch (e: any) {
+      setError(e?.message || "Camera access failed");
+      setActive(false);
+    }
+  }, [onScan, stop]);
+
+  useEffect(() => () => { stop(); }, [stop]);
 
   return (
     <div className="space-y-3">
-      {!cameraOn ? (
-        <Button onClick={startCamera} className="gap-2 w-full bg-emerald-500 hover:bg-emerald-600 text-white" size="lg" disabled={!enabled}>
+      {!active ? (
+        <Button onClick={start} disabled={!enabled} className="gap-2 w-full bg-emerald-500 hover:bg-emerald-600 text-white" size="lg">
           <Camera className="w-5 h-5" /> Scan QR Code
         </Button>
       ) : (
         <div className="space-y-3">
-          <div className="relative rounded-xl overflow-hidden bg-black aspect-video max-w-md mx-auto border-2 border-emerald-400/50">
-            <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-44 h-44 border-3 border-emerald-400 rounded-2xl opacity-80 animate-pulse" />
-            </div>
-            <div className="absolute bottom-2 left-0 right-0 text-center">
-              <span className="text-[10px] bg-black/60 text-white px-2 py-1 rounded-md">
-                {"BarcodeDetector" in window ? "Auto-detecting QR..." : "Point camera at QR, then paste result below"}
-              </span>
-            </div>
-          </div>
-          <Button onClick={stopCamera} variant="outline" className="w-full gap-1.5">
-            <X className="w-4 h-4" /> Stop Camera
+          <div id={containerIdRef.current} className="w-full rounded-xl overflow-hidden bg-black border-2 border-emerald-400/50" style={{ minHeight: 250 }} />
+          <Button onClick={stop} variant="outline" className="w-full gap-1.5">
+            <X className="w-4 h-4" /> Close Scanner
           </Button>
         </div>
       )}
-      {cameraError && (
+      {error && (
         <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50 rounded-xl p-3 text-sm text-red-600 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" /> {cameraError}
+          <AlertCircle className="w-4 h-4 shrink-0" /> {error}
         </div>
       )}
     </div>
@@ -245,7 +209,7 @@ const AdminExamRollNumbers = () => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   // Scan state
   const [manualRoll, setManualRoll] = useState<string>("");
-  const [qrInput, setQrInput] = useState<string>("");
+  
   const [scanLog, setScanLog] = useState<{ name: string; roll: string; time: string; status: string }[]>([]);
   const [showScanner, setShowScanner] = useState(false);
 
@@ -407,179 +371,133 @@ const AdminExamRollNumbers = () => {
     toast.success("CSV Downloaded!");
   };
 
-  // ── Professional Admit Card PDF (4 per A4) ─────────────────────────────
+  // ── Clean Admit Card PDF — 4 per A4 page, no logo ──────────────────────
   const downloadPrint = async () => {
     if (!selectedSession || rollNumbers.length === 0) return;
-
-    const genToast = toast.loading("Generating professional admit cards with QR codes...");
+    const genToast = toast.loading("Generating admit cards...");
 
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-    const pageW = 210;
-    const pageH = 297;
-    const margin = 8;
+    const pageW = 210, pageH = 297;
+    const cardW = pageW / 2;   // 105
+    const cardH = pageH / 2;   // 148.5
 
-    // 2 columns × 2 rows = 4 slips per A4
-    const cols = 2;
-    const rows = 2;
-    const gapX = 4;
-    const gapY = 4;
-    const slipW = (pageW - margin * 2 - gapX) / cols;
-    const slipH = (pageH - margin * 2 - gapY) / rows;
-
-    // Sort by class order
     const ordered: ExamRollEntry[] = [];
     for (const cls of selectedSession.class_order) {
-      const group = rollNumbers.filter(r => r.class === cls).sort((a, b) => a.serial_number - b.serial_number);
-      ordered.push(...group);
+      ordered.push(...rollNumbers.filter(r => r.class === cls).sort((a, b) => a.serial_number - b.serial_number));
     }
 
-    // Pre-generate all QR code images
     const qrImages = new Map<string, string>();
     for (const slip of ordered) {
-      const qrData = encodeExamQRData(selectedSession.id, slip.student_id, slip.exam_roll_no);
-      const qrDataURL = await QRCode.toDataURL(qrData, { width: 300, margin: 1, errorCorrectionLevel: "M", color: { dark: "#042C53", light: "#FFFFFF" } });
-      qrImages.set(slip.id, qrDataURL);
+      const data = encodeExamQRData(selectedSession.id, slip.student_id, slip.exam_roll_no);
+      qrImages.set(slip.id, await QRCode.toDataURL(data, { width: 300, margin: 1, errorCorrectionLevel: "M", color: { dark: "#042C53", light: "#FFFFFF" } }));
     }
 
-    const drawSlip = (slip: ExamRollEntry, x: number, y: number) => {
-      const w = slipW;
-      const h = slipH;
+    const truncate = (s: string, n: number) => s.length > n ? s.slice(0, n - 1) + "…" : s;
 
-      // ── OUTER BORDER — navy with gold accent ──
+    const drawCard = (slip: ExamRollEntry, x: number, y: number) => {
+      const pad = 3;
+      // Outer thin navy border
       doc.setDrawColor(4, 44, 83);
-      doc.setLineWidth(0.6);
-      doc.roundedRect(x, y, w, h, 2.5, 2.5, "S");
+      doc.setLineWidth(0.3);
+      doc.rect(x + pad, y + pad, cardW - pad * 2, cardH - pad * 2, "S");
 
-      // ── TOP ACCENT BAR — gradient navy ──
+      // Header bar (8mm)
+      const headerX = x + pad, headerY = y + pad, headerW = cardW - pad * 2, headerH = 8;
       doc.setFillColor(4, 44, 83);
-      doc.roundedRect(x, y, w, 18, 2.5, 2.5, "F");
-      // Fix bottom corners of header
-      doc.setFillColor(4, 44, 83);
-      doc.rect(x + 2.5, y + 15, w - 5, 3, "F");
-
-      // Gold line under header
-      doc.setFillColor(212, 175, 55);
-      doc.rect(x, y + 18, w, 1.5, "F");
-
-      // School emblem circle
-      doc.setFillColor(212, 175, 55);
-      doc.circle(x + 10, y + 9, 6, "F");
-      doc.setFillColor(4, 44, 83);
-      doc.circle(x + 10, y + 9, 4.5, "F");
+      doc.rect(headerX, headerY, headerW, headerH, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.text("GOVT. HIGH SCHOOL BABI KHEL", headerX + headerW / 2, headerY + 3.4, { align: "center" });
       doc.setTextColor(212, 175, 55);
       doc.setFontSize(5);
-      doc.setFont("helvetica", "bold");
-      doc.text("GHS", x + 10, y + 10.5, { align: "center" });
+      doc.text("EXAMINATION ADMIT CARD", headerX + headerW / 2, headerY + 6.6, { align: "center" });
 
-      // School name
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(7.5);
-      doc.setFont("helvetica", "bold");
-      doc.text("GOVT. HIGH SCHOOL BABI KHEL", x + w / 2 + 4, y + 7.5, { align: "center" });
+      // Gold separator
+      doc.setDrawColor(212, 175, 55);
+      doc.setLineWidth(0.4);
+      doc.line(headerX, headerY + headerH + 0.5, headerX + headerW, headerY + headerH + 0.5);
 
-      // "ADMIT CARD" label
-      doc.setTextColor(212, 175, 55);
-      doc.setFontSize(6.5);
-      doc.setFont("helvetica", "bold");
-      doc.text("EXAMINATION ADMIT CARD", x + w / 2 + 4, y + 13, { align: "center" });
-
-      // ── CONTENT AREA ──
-      const contentY = y + 22;
-      const contentH = h - 22 - 10; // leave 10mm for footer
-
-      // QR Code — positioned on right side
-      const qrImg = qrImages.get(slip.id);
-      const qrSize = 30;
-      const qrX = x + w - qrSize - 5;
-      const qrY = contentY + 4;
-      if (qrImg) {
-        // QR border
-        doc.setDrawColor(4, 44, 83);
-        doc.setLineWidth(0.3);
-        doc.roundedRect(qrX - 1, qrY - 1, qrSize + 2, qrSize + 2, 1, 1, "S");
-        doc.addImage(qrImg, "PNG", qrX, qrY, qrSize, qrSize);
-        // "Scan for attendance" label
-        doc.setFontSize(4.5);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(100, 100, 100);
-        doc.text("Scan for Attendance", qrX + qrSize / 2, qrY + qrSize + 3, { align: "center" });
-      }
-
-      // Left side info
-      const leftX = x + 5;
-      const infoW = qrX - leftX - 4;
-
-      // Exam Roll Number — big and prominent
-      doc.setFillColor(240, 247, 255);
-      doc.roundedRect(leftX, contentY, infoW, 14, 2, 2, "F");
-      doc.setDrawColor(14, 165, 233);
+      // Roll number box
+      const contentTop = headerY + headerH + 3;
+      const boxW = headerW - 26, boxH = 13;
+      doc.setFillColor(235, 245, 251);
+      doc.setDrawColor(176, 212, 241);
       doc.setLineWidth(0.3);
-      doc.roundedRect(leftX, contentY, infoW, 14, 2, 2, "S");
-
-      doc.setTextColor(14, 165, 233);
-      doc.setFontSize(4.5);
+      doc.roundedRect(headerX, contentTop, boxW, boxH, 1.5, 1.5, "FD");
+      doc.setTextColor(14, 116, 165);
       doc.setFont("helvetica", "normal");
-      doc.text("EXAM ROLL NUMBER", leftX + infoW / 2, contentY + 4.5, { align: "center" });
+      doc.setFontSize(5);
+      doc.text("EXAM ROLL NUMBER", headerX + boxW / 2, contentTop + 4, { align: "center" });
       doc.setTextColor(4, 44, 83);
-      doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.text(slip.exam_roll_no, leftX + infoW / 2, contentY + 11, { align: "center" });
+      doc.setFontSize(14);
+      doc.text(slip.exam_roll_no, headerX + boxW / 2, contentTop + 11, { align: "center" });
 
-      // Student details
-      let detailY = contentY + 18;
-      const drawDetailRow = (label: string, value: string, yy: number) => {
+      // QR (20x20)
+      const qrSize = 20;
+      const qrX = headerX + headerW - qrSize;
+      const qrY = contentTop;
+      const qr = qrImages.get(slip.id);
+      if (qr) doc.addImage(qr, "PNG", qrX, qrY, qrSize, qrSize);
+      doc.setFontSize(4);
+      doc.setTextColor(120, 120, 120);
+      doc.setFont("helvetica", "normal");
+      doc.text("Scan for Attendance", qrX + qrSize / 2, qrY + qrSize + 2.5, { align: "center" });
+
+      // Two-column details
+      const detailsTop = contentTop + Math.max(boxH, qrSize + 4) + 4;
+      const colGap = 3;
+      const colW = (headerW - colGap) / 2;
+      const rowH = 6;
+      const rows: [string, string][] = [
+        ["Student Name", truncate(slip.student_name, 22)],
+        ["Father Name", truncate(slip.father_name || "—", 22)],
+        ["Class", `Class ${slip.class}`],
+        ["Class Roll No", slip.class_roll_no],
+        ["Session", truncate(`${selectedSession!.exam_term} ${selectedSession!.exam_year}`, 22)],
+      ];
+      rows.forEach((r, i) => {
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        const cx = headerX + col * (colW + colGap);
+        const cy = detailsTop + row * rowH;
         doc.setFontSize(5.5);
         doc.setFont("helvetica", "normal");
-        doc.setTextColor(100, 116, 139);
-        doc.text(label, leftX, yy);
+        doc.setTextColor(110, 120, 135);
+        doc.text(r[0], cx, cy);
         doc.setFont("helvetica", "bold");
-        doc.setTextColor(17, 24, 39);
-        const valStr = value.length > 24 ? value.slice(0, 22) + "..." : value;
-        doc.text(valStr, leftX + 22, yy);
-        // Thin line
-        doc.setDrawColor(226, 232, 240);
-        doc.setLineWidth(0.15);
-        doc.line(leftX, yy + 1.5, leftX + infoW, yy + 1.5);
-        return yy + 5.5;
-      };
+        doc.setTextColor(4, 44, 83);
+        doc.text(r[1], cx, cy + 3);
+      });
 
-      detailY = drawDetailRow("Student Name:", slip.student_name, detailY);
-      detailY = drawDetailRow("Father Name:", (slip.father_name || "—"), detailY);
-      detailY = drawDetailRow("Class:", `Class ${slip.class}`, detailY);
-      detailY = drawDetailRow("Class Roll No:", slip.class_roll_no, detailY);
-      detailY = drawDetailRow("Session:", `${selectedSession!.exam_term} ${selectedSession!.exam_year}`, detailY);
-
-      // ── FOOTER BAR ──
-      const footerY = y + h - 9;
+      // Footer (5mm)
+      const footH = 5;
+      const footY = y + cardH - pad - footH;
       doc.setFillColor(4, 44, 83);
-      doc.rect(x, footerY, w, 9, "F");
+      doc.rect(headerX, footY, headerW, footH, "F");
       doc.setTextColor(212, 175, 55);
-      doc.setFontSize(4.5);
       doc.setFont("helvetica", "bold");
-      doc.text("GHS BABI KHEL  |  DISTRICT MOHMAND  |  KPK", x + w / 2, footerY + 4, { align: "center" });
-      doc.setTextColor(160, 180, 200);
-      doc.setFontSize(3.8);
+      doc.setFontSize(4.5);
+      doc.text("GHS BABI KHEL | DISTRICT MOHMAND | KPK", headerX + headerW / 2, footY + 2, { align: "center" });
+      doc.setTextColor(255, 255, 255);
       doc.setFont("helvetica", "normal");
-      doc.text("Bring this admit card to the examination hall. Keep it safe.", x + w / 2, footerY + 7, { align: "center" });
+      doc.setFontSize(3.5);
+      doc.text("Bring this admit card to the examination hall.", headerX + headerW / 2, footY + 4.2, { align: "center" });
     };
 
-    let slipIdx = 0;
+    let i = 0;
     for (const slip of ordered) {
-      const posOnPage = slipIdx % (cols * rows);
-      if (posOnPage === 0 && slipIdx > 0) {
-        doc.addPage();
-      }
-      const col = posOnPage % cols;
-      const row = Math.floor(posOnPage / cols);
-      const sx = margin + col * (slipW + gapX);
-      const sy = margin + row * (slipH + gapY);
-      drawSlip(slip, sx, sy);
-      slipIdx++;
+      const pos = i % 4;
+      if (pos === 0 && i > 0) doc.addPage();
+      const col = pos % 2, row = Math.floor(pos / 2);
+      drawCard(slip, col * cardW, row * cardH);
+      i++;
     }
 
     doc.save(`AdmitCards-${selectedSession.title}-${selectedSession.exam_year}.pdf`);
     toast.dismiss(genToast);
-    toast.success(`${ordered.length} professional admit cards with QR codes downloaded!`);
+    toast.success(`${ordered.length} admit cards downloaded!`);
   };
 
   const filteredRolls = detailSearch
@@ -716,42 +634,30 @@ const AdminExamRollNumbers = () => {
     const w = doc.internal.pageSize.getWidth();
     const h = doc.internal.pageSize.getHeight();
 
-    // ── Header ──
+    // ── Header (no logo) ──
     doc.setFillColor(4, 44, 83);
-    doc.rect(0, 0, w, 42, "F");
+    doc.rect(0, 0, w, 36, "F");
     doc.setFillColor(212, 175, 55);
-    doc.rect(0, 42, w, 2.5, "F");
-
-    // Emblem
-    doc.setFillColor(212, 175, 55);
-    doc.circle(w / 2, 14, 8, "F");
-    doc.setFillColor(4, 44, 83);
-    doc.circle(w / 2, 14, 6, "F");
-    doc.setTextColor(212, 175, 55);
-    doc.setFontSize(6);
-    doc.setFont("helvetica", "bold");
-    doc.text("GHS", w / 2, 15.5, { align: "center" });
+    doc.rect(0, 36, w, 1.2, "F");
 
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(13);
+    doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("Government High School Babi Khel", w / 2, 28, { align: "center" });
+    doc.text("Government High School Babi Khel", w / 2, 14, { align: "center" });
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(180, 200, 220);
-    doc.text("District Mohmand, KPK", w / 2, 33, { align: "center" });
-
+    doc.setTextColor(200, 215, 230);
+    doc.text("District Mohmand, KPK", w / 2, 21, { align: "center" });
     doc.setTextColor(212, 175, 55);
     doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
-    doc.text("EXAM ATTENDANCE REPORT", w / 2, 39, { align: "center" });
+    doc.text("EXAM ATTENDANCE REPORT", w / 2, 30, { align: "center" });
 
     // ── Info box ──
-    doc.setFillColor(240, 247, 255);
-    doc.roundedRect(12, 48, w - 24, 18, 2, 2, "F");
-    doc.setDrawColor(4, 44, 83);
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(200, 210, 220);
     doc.setLineWidth(0.3);
-    doc.roundedRect(12, 48, w - 24, 18, 2, 2, "S");
+    doc.roundedRect(12, 44, w - 24, 14, 2, 2, "FD");
 
     const infoItems = [
       { label: "CLASS", value: `Class ${attClass}` },
@@ -766,43 +672,49 @@ const AdminExamRollNumbers = () => {
       doc.setTextColor(100, 120, 140);
       doc.setFontSize(6);
       doc.setFont("helvetica", "normal");
-      doc.text(item.label, cx, 54, { align: "center" });
+      doc.text(item.label, cx, 49, { align: "center" });
       doc.setTextColor(4, 44, 83);
       doc.setFontSize(9);
       doc.setFont("helvetica", "bold");
-      doc.text(item.value, cx, 61, { align: "center" });
+      doc.text(item.value, cx, 55, { align: "center" });
     });
 
     // ── Table with autoTable ──
-    const tableBody = attendance.map((r, idx) => {
-      const statusStr = r.status === "present" ? "P" : r.status === "absent" ? "A" : "L";
-      return [String(idx + 1), r.class_roll_no, r.exam_roll_no, r.student_name, statusStr, r.scanned_at ? new Date(r.scanned_at).toLocaleTimeString() : "Manual"];
-    });
+    const statusLabel = (s: string) => s === "present" ? "Present" : s === "absent" ? "Absent" : "Leave";
+    const tableBody = attendance.map((r, idx) => [
+      String(idx + 1), r.class_roll_no, r.exam_roll_no, r.student_name,
+      statusLabel(r.status),
+      r.scanned_at ? new Date(r.scanned_at).toLocaleTimeString() : "Manual",
+    ]);
 
     autoTable(doc, {
-      startY: 72,
+      startY: 64,
       head: [["#", "Class Roll", "Exam Roll", "Student Name", "Status", "Time"]],
       body: tableBody,
-      headStyles: { fillColor: [4, 44, 83], textColor: [255, 255, 255], fontStyle: "bold", fontSize: 8, halign: "center", cellPadding: 4 },
-      bodyStyles: { fontSize: 8, cellPadding: 3.5, valign: "middle" },
+      headStyles: { fillColor: [4, 44, 83], textColor: [255, 255, 255], fontStyle: "bold", fontSize: 9, halign: "center", cellPadding: 3 },
+      bodyStyles: { fontSize: 9, cellPadding: 3, valign: "middle", textColor: [30, 41, 59] },
       columnStyles: {
-        0: { cellWidth: 12, halign: "center" },
-        1: { cellWidth: 22, halign: "center" },
-        2: { cellWidth: 26, halign: "center", fontStyle: "bold" },
+        0: { cellWidth: 10, halign: "center" },
+        1: { cellWidth: 20, halign: "center" },
+        2: { cellWidth: 25, halign: "center", fontStyle: "bold" },
         3: { cellWidth: 55 },
-        4: { cellWidth: 18, halign: "center", fontStyle: "bold" },
+        4: { cellWidth: 22, halign: "center", fontStyle: "bold" },
         5: { cellWidth: 28, halign: "center" },
       },
-      alternateRowStyles: { fillColor: [248, 252, 255] },
+      alternateRowStyles: { fillColor: [249, 250, 251] },
       didParseCell: (data: any) => {
         if (data.section === "body" && data.column.index === 4) {
-          const val = data.cell.raw;
-          if (val === "P") { data.cell.styles.textColor = [16, 185, 129]; data.cell.styles.fillColor = [209, 250, 229]; }
-          else if (val === "A") { data.cell.styles.textColor = [239, 68, 68]; data.cell.styles.fillColor = [254, 226, 226]; }
-          else if (val === "L") { data.cell.styles.textColor = [59, 130, 246]; data.cell.styles.fillColor = [219, 234, 254]; }
+          const val = String(data.cell.raw);
+          if (val === "Present") { data.cell.styles.textColor = [16, 122, 80]; data.cell.styles.fillColor = [209, 250, 229]; }
+          else if (val === "Absent") { data.cell.styles.textColor = [185, 28, 28]; data.cell.styles.fillColor = [254, 226, 226]; }
+          else if (val === "Leave") { data.cell.styles.textColor = [29, 78, 216]; data.cell.styles.fillColor = [219, 234, 254]; }
+        }
+        if (data.section === "body" && data.column.index === 3) {
+          const text = String(data.cell.raw || "");
+          data.cell.text = doc.splitTextToSize(text, 53);
         }
       },
-      margin: { left: 12, right: 12, bottom: 28 },
+      margin: { left: 12, right: 12, bottom: 30 },
     });
 
     // ── Signature area on each page ──
@@ -1154,17 +1066,6 @@ const AdminExamRollNumbers = () => {
                       <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><ScanLine className="w-4 h-4 text-emerald-500" /> Scan QR Code for Attendance</CardTitle></CardHeader>
                       <CardContent className="space-y-3">
                         <QRScanner onScan={handleQRScan} enabled={!!attSession && !!attSubject} />
-                        {/* QR Data paste */}
-                        <div>
-                          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Paste QR Data (from scanner app)</label>
-                          <div className="flex gap-2">
-                            <input className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-emerald-500/30 font-mono"
-                              placeholder="Paste QR data..." value={qrInput} onChange={e => setQrInput(e.target.value)}
-                              onKeyDown={e => { if (e.key === "Enter" && qrInput.trim()) { handleQRScan(qrInput.trim()); setQrInput(""); } }} />
-                            <Button onClick={() => { handleQRScan(qrInput.trim()); setQrInput(""); }} disabled={!qrInput.trim()}
-                              className="bg-emerald-500 hover:bg-emerald-600 text-white gap-1.5 shrink-0"><CheckCircle2 className="w-4 h-4" /> Mark</Button>
-                          </div>
-                        </div>
                         {/* Manual roll entry */}
                         <div>
                           <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1"><Keyboard className="w-3 h-3" />Manual Roll Number</label>

@@ -78,93 +78,93 @@ const ExamRollNumbers = () => {
   const downloadMySlip = async (r: RollEntry) => {
     if (!selectedSession) return;
     try {
-      const doc = new jsPDF({ unit: "mm", format: "a5" }); // 148 x 210
-      const W = 148;
-      const NAVY = "#042C53";
-      const GOLD = "#D4AF37";
-      const SKY = "#E0F2FE";
-      const SKY_BORDER = "#0EA5E9";
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a5" });
+      const W = doc.internal.pageSize.getWidth();
+      const H = doc.internal.pageSize.getHeight();
+      const truncate = (s: string, n: number) => s.length > n ? s.slice(0, n - 1) + "…" : s;
 
-      // Header bar
-      doc.setFillColor(NAVY);
-      doc.rect(0, 0, W, 26, "F");
-      doc.setTextColor("#FFFFFF");
+      // Header (navy, 18mm)
+      doc.setFillColor(4, 44, 83);
+      doc.rect(0, 0, W, 18, "F");
+      doc.setTextColor(255, 255, 255);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(13);
-      doc.text("Government High School Babi Khel", W / 2, 11, { align: "center" });
-      doc.setTextColor(GOLD);
-      doc.setFontSize(10);
-      doc.text("EXAMINATION ADMIT CARD", W / 2, 19, { align: "center" });
+      doc.setFontSize(11);
+      doc.text("Government High School Babi Khel", W / 2, 8, { align: "center" });
+      doc.setTextColor(212, 175, 55);
+      doc.setFontSize(8);
+      doc.text("EXAMINATION ADMIT CARD", W / 2, 14, { align: "center" });
 
-      // Gold accent
-      doc.setFillColor(GOLD);
-      doc.rect(0, 26, W, 1.2, "F");
+      // Gold separator
+      doc.setDrawColor(212, 175, 55);
+      doc.setLineWidth(0.4);
+      doc.line(0, 18.5, W, 18.5);
+
+      // Roll number box
+      const boxX = 10, boxY = 26, boxW = 55, boxH = 22;
+      doc.setFillColor(235, 245, 251);
+      doc.setDrawColor(176, 212, 241);
+      doc.setLineWidth(0.4);
+      doc.roundedRect(boxX, boxY, boxW, boxH, 2.5, 2.5, "FD");
+      doc.setTextColor(14, 116, 165);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.text("EXAM ROLL NUMBER", boxX + boxW / 2, boxY + 7, { align: "center" });
+      doc.setTextColor(4, 44, 83);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      doc.text(String(r.exam_roll_no), boxX + boxW / 2, boxY + 17.5, { align: "center" });
 
       // QR
       const qrPayload = encodeExamQRData(selectedSession.id, r.student_id, r.exam_roll_no);
-      const qrDataUrl = await QRCode.toDataURL(qrPayload, { margin: 1, width: 256 });
+      const qrUrl = await QRCode.toDataURL(qrPayload, { width: 400, margin: 1, errorCorrectionLevel: "M", color: { dark: "#042C53", light: "#FFFFFF" } });
       const qrSize = 28;
       const qrX = W - qrSize - 10;
-      const qrY = 34;
-      doc.addImage(qrDataUrl, "PNG", qrX, qrY, qrSize, qrSize);
-      doc.setTextColor("#6B7280");
+      const qrY = 26;
+      doc.addImage(qrUrl, "PNG", qrX, qrY, qrSize, qrSize);
+      doc.setFontSize(6);
+      doc.setTextColor(120, 120, 120);
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(7);
-      doc.text("Scan for Attendance", qrX + qrSize / 2, qrY + qrSize + 4, { align: "center" });
-
-      // Roll number box (centered horizontally, but leaves room for QR)
-      const boxW = 90;
-      const boxH = 22;
-      const boxX = 10;
-      const boxY = 38;
-      doc.setFillColor(SKY);
-      doc.setDrawColor(SKY_BORDER);
-      doc.setLineWidth(0.6);
-      doc.roundedRect(boxX, boxY, boxW, boxH, 3, 3, "FD");
-      doc.setTextColor("#0369A1");
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(8);
-      doc.text("EXAM ROLL NUMBER", boxX + boxW / 2, boxY + 7, { align: "center" });
-      doc.setFontSize(22);
-      doc.setTextColor(NAVY);
-      doc.text(String(r.exam_roll_no), boxX + boxW / 2, boxY + 17, { align: "center" });
+      doc.text("Scan for Attendance", qrX + qrSize / 2, qrY + qrSize + 3.5, { align: "center" });
 
       // Detail rows
       const rows: [string, string][] = [
-        ["Student Name", r.student_name],
-        ["Father Name", r.father_name || "—"],
-        ["Class", r.class],
+        ["Student Name", truncate(r.student_name, 38)],
+        ["Father Name", truncate(r.father_name || "—", 38)],
+        ["Class", `Class ${r.class}`],
         ["Class Roll No", r.class_roll_no],
         ["Examination", `${selectedSession.exam_term} ${selectedSession.exam_year}`],
       ];
-      let y = 78;
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
+      let y = 72;
+      const leftX = 10;
+      const rightX = W - 10;
       rows.forEach(([k, v]) => {
-        doc.setTextColor("#6B7280");
-        doc.text(k, 12, y);
-        doc.setTextColor("#111827");
-        doc.setFont("helvetica", "bold");
-        doc.text(String(v), W - 12, y, { align: "right" });
         doc.setFont("helvetica", "normal");
-        doc.setDrawColor("#E5E7EB");
+        doc.setFontSize(8);
+        doc.setTextColor(110, 120, 135);
+        doc.text(k, leftX, y);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(4, 44, 83);
+        doc.text(v, rightX, y, { align: "right" });
+        doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.2);
-        doc.line(12, y + 2, W - 12, y + 2);
-        y += 9;
+        doc.line(leftX, y + 2.5, rightX, y + 2.5);
+        y += 11;
       });
 
-      // Note
-      doc.setTextColor("#6B7280");
-      doc.setFontSize(8);
-      doc.text("Bring this admit card to the examination hall.", W / 2, 190, { align: "center" });
-
-      // Footer bar
-      doc.setFillColor(NAVY);
-      doc.rect(0, 198, W, 12, "F");
-      doc.setTextColor(GOLD);
+      // Footer (14mm)
+      const footH = 14;
+      const footY = H - footH;
+      doc.setFillColor(4, 44, 83);
+      doc.rect(0, footY, W, footH, "F");
+      doc.setTextColor(212, 175, 55);
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(9);
-      doc.text("GHS BABI KHEL | DISTRICT MOHMAND | KPK", W / 2, 205, { align: "center" });
+      doc.setFontSize(7);
+      doc.text("GHS BABI KHEL | DISTRICT MOHMAND | KPK", W / 2, footY + 5.5, { align: "center" });
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6);
+      doc.text("Bring this admit card to the examination hall. Keep it safe.", W / 2, footY + 10, { align: "center" });
 
       doc.save(`AdmitCard-${r.exam_roll_no}-${r.student_name}.pdf`);
       toast.success("Admit card with QR downloaded!");

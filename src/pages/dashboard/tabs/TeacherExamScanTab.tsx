@@ -19,6 +19,7 @@ import {
 import toast from "react-hot-toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { Html5Qrcode } from "html5-qrcode";
 import {
   useExamSessions, useExamRollNumbers, useExamAttendance,
   useInitExamAttendance, useScanExamAttendance, useUpdateExamAttendance,
@@ -34,108 +35,61 @@ const statusConfig: Record<Status, { icon: React.ReactNode; label: string; color
   leave:   { icon: <Palmtree className="w-4 h-4" />, label: "Leave",  color: "text-blue-600", bg: "bg-blue-100 dark:bg-blue-900/30" },
 };
 
-// ── Camera QR Scanner with BarcodeDetector API ──────────────────────────────
+// ── Camera QR Scanner using html5-qrcode ───────────────────────────────────
 function QRScanner({ onScan, enabled }: { onScan: (data: string) => void; enabled: boolean }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const scanningRef = useRef(false);
-  const [cameraError, setCameraError] = useState<string | null>(null);
-  const [cameraOn, setCameraOn] = useState(false);
-  const [scanResult, setScanResult] = useState<string | null>(null);
-  const detectorRef = useRef<any>(null);
+  const [active, setActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const containerIdRef = useRef(`tqr-reader-${Math.random().toString(36).slice(2)}`);
 
-  const startCamera = useCallback(async () => {
-    try {
-      setCameraError(null);
-      setScanResult(null);
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-        setCameraOn(true);
-        scanningRef.current = true;
-
-        // Try BarcodeDetector API (available in Chrome/Edge on Android)
-        if ("BarcodeDetector" in window) {
-          try {
-            detectorRef.current = new (window as any).BarcodeDetector({ formats: ["qr_code"] });
-            const detectLoop = async () => {
-              if (!scanningRef.current || !videoRef.current || !detectorRef.current) return;
-              try {
-                const barcodes = await detectorRef.current.detect(videoRef.current);
-                if (barcodes.length > 0) {
-                  const data = barcodes[0].rawValue;
-                  setScanResult(data);
-                  onScan(data);
-                  scanningRef.current = false;
-                  setTimeout(() => stopCamera(), 500);
-                  return;
-                }
-              } catch {}
-              if (scanningRef.current) requestAnimationFrame(detectLoop);
-            };
-            setTimeout(detectLoop, 1500); // Wait for camera to stabilize
-          } catch {}
-        }
-      }
-    } catch (err: any) {
-      setCameraError(err.message || "Camera access denied");
-      setCameraOn(false);
+  const stop = useCallback(async () => {
+    const inst = scannerRef.current;
+    if (inst) {
+      try { if ((inst as any).isScanning) await inst.stop(); } catch {}
+      try { await inst.clear(); } catch {}
+      scannerRef.current = null;
     }
-  }, [onScan]);
-
-  const stopCamera = useCallback(() => {
-    scanningRef.current = false;
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
-      streamRef.current = null;
-    }
-    if (videoRef.current) videoRef.current.srcObject = null;
-    setCameraOn(false);
+    setActive(false);
   }, []);
 
-  useEffect(() => {
-    return () => { stopCamera(); };
-  }, [stopCamera]);
+  const start = useCallback(async () => {
+    setError(null);
+    setActive(true);
+    await new Promise(r => setTimeout(r, 80));
+    try {
+      const qr = new Html5Qrcode(containerIdRef.current);
+      scannerRef.current = qr;
+      await qr.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 200, height: 200 } },
+        (decodedText: string) => { onScan(decodedText); stop(); },
+        () => {}
+      );
+    } catch (e: any) {
+      setError(e?.message || "Camera access failed");
+      setActive(false);
+    }
+  }, [onScan, stop]);
+
+  useEffect(() => () => { stop(); }, [stop]);
 
   return (
     <div className="space-y-3">
-      {!cameraOn ? (
-        <Button onClick={startCamera} className="gap-2 w-full bg-emerald-500 hover:bg-emerald-600 text-white" size="lg" disabled={!enabled}>
+      {!active ? (
+        <Button onClick={start} disabled={!enabled} className="gap-2 w-full bg-emerald-500 hover:bg-emerald-600 text-white" size="lg">
           <Camera className="w-5 h-5" /> Scan QR Code
         </Button>
       ) : (
         <div className="space-y-3">
-          <div className="relative rounded-xl overflow-hidden bg-black aspect-video max-w-md mx-auto border-2 border-emerald-400/50">
-            <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
-            {/* Scan overlay */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-44 h-44 border-3 border-emerald-400 rounded-2xl opacity-80 animate-pulse" />
-            </div>
-            {/* Status indicator */}
-            <div className="absolute bottom-2 left-0 right-0 text-center">
-              <span className="text-[10px] bg-black/60 text-white px-2 py-1 rounded-md">
-                {"BarcodeDetector" in window ? "Auto-detecting QR code..." : "Point camera at QR, then paste result manually below"}
-              </span>
-            </div>
-          </div>
-          {scanResult && (
-            <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 rounded-xl p-3 text-sm text-emerald-700 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 shrink-0" /> QR Code detected!
-            </div>
-          )}
-          <Button onClick={stopCamera} variant="outline" className="w-full gap-1.5">
-            <X className="w-4 h-4" /> Stop Camera
+          <div id={containerIdRef.current} className="w-full rounded-xl overflow-hidden bg-black border-2 border-emerald-400/50" style={{ minHeight: 250 }} />
+          <Button onClick={stop} variant="outline" className="w-full gap-1.5">
+            <X className="w-4 h-4" /> Close Scanner
           </Button>
         </div>
       )}
-      {cameraError && (
+      {error && (
         <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50 rounded-xl p-3 text-sm text-red-600 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" /> {cameraError}
-          <p className="text-xs mt-1">Use "Paste QR Data" or "Manual Entry" below instead.</p>
+          <AlertCircle className="w-4 h-4 shrink-0" /> {error}
         </div>
       )}
     </div>
@@ -156,7 +110,6 @@ const TeacherExamScanTab = () => {
 
   // Manual entry
   const [manualRoll, setManualRoll] = useState<string>("");
-  const [qrInput, setQrInput] = useState<string>("");
   const [showScanner, setShowScanner] = useState(false);
 
   // Scan history
@@ -423,17 +376,6 @@ const TeacherExamScanTab = () => {
                   <CardContent className="space-y-3">
                     {/* Camera scanner */}
                     <QRScanner onScan={handleQRScan} enabled={!!selectedSession && !!selectedSubject} />
-                    {/* QR paste */}
-                    <div>
-                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 block">Paste QR Data (from scanner app)</label>
-                      <div className="flex gap-2">
-                        <input className="flex-1 px-3 py-2.5 rounded-xl bg-secondary/50 border border-border text-sm placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-emerald-500/30 font-mono"
-                          placeholder="Paste QR data..." value={qrInput} onChange={e => setQrInput(e.target.value)}
-                          onKeyDown={e => { if (e.key === "Enter" && qrInput.trim()) { handleQRScan(qrInput.trim()); setQrInput(""); } }} />
-                        <Button onClick={() => { handleQRScan(qrInput.trim()); setQrInput(""); }} disabled={!qrInput.trim()}
-                          className="bg-emerald-500 hover:bg-emerald-600 text-white gap-1.5 shrink-0"><CheckCircle2 className="w-4 h-4" /> Mark</Button>
-                      </div>
-                    </div>
                     {/* Manual entry */}
                     <div>
                       <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1"><Keyboard className="w-3 h-3" />Manual Roll Number</label>

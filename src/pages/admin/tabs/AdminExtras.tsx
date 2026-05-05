@@ -1,7 +1,9 @@
 // src/pages/admin/tabs/AdminExtras.tsx
-// Manages: Daily Quotes (Feature 3), Honor Roll (Feature 8), Exam Schedule (Feature 6)
+// Manages: Daily Quotes (Feature 3), Honor Roll (Feature 8), Exam Schedule (Feature 6), Users
 
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
+import { UserCog } from "lucide-react";
+const AdminUsers = lazy(() => import("./AdminUsers"));
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -276,7 +278,7 @@ function ExamScheduleManager() {
           <span>Subject *</span><span className="col-span-2">Paper Name</span><span>Paper Code</span><span>Date *</span><span>Start</span><span>End</span><span>Hall / Notes</span>
         </div>
 
-          {/* Rows */}
+        {/* Rows */}
         <div className="space-y-2">
           {rows.map((row, i) => (
             <div key={i} className="grid grid-cols-2 sm:grid-cols-8 gap-1.5 items-center bg-secondary/30 rounded-xl p-2">
@@ -346,12 +348,22 @@ function ExamScheduleManager() {
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
 const AdminExtras = () => (
   <div className="space-y-5">
-    <div><h2 className="text-xl font-heading font-bold text-foreground">Extras Management</h2><p className="text-sm text-muted-foreground">Daily quotes, honor roll, exam schedule</p></div>
+    <div><h2 className="text-xl font-heading font-bold text-foreground">Extras Management</h2><p className="text-sm text-muted-foreground">Daily quotes, honor roll, exam schedule & users</p></div>
     <Tabs defaultValue="quotes">
-      <TabsList><TabsTrigger value="quotes">🌙 Daily Quotes</TabsTrigger><TabsTrigger value="honor">🏅 Honor Roll</TabsTrigger><TabsTrigger value="schedule">📅 Exam Schedule</TabsTrigger></TabsList>
+      <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 sm:inline-flex sm:w-auto gap-0">
+        <TabsTrigger value="quotes" className="text-xs sm:text-sm">🌙 <span className="ml-1">Quotes</span></TabsTrigger>
+        <TabsTrigger value="honor" className="text-xs sm:text-sm">🏅 <span className="ml-1">Honor Roll</span></TabsTrigger>
+        <TabsTrigger value="schedule" className="text-xs sm:text-sm">📅 <span className="ml-1">Schedule</span></TabsTrigger>
+        <TabsTrigger value="users" className="gap-1.5 text-xs sm:text-sm"><UserCog className="w-3.5 h-3.5" /><span>Users</span></TabsTrigger>
+      </TabsList>
       <TabsContent value="quotes" className="mt-4"><QuotesManager /></TabsContent>
       <TabsContent value="honor" className="mt-4"><HonorRollManager /></TabsContent>
       <TabsContent value="schedule" className="mt-4"><ExamScheduleManager /></TabsContent>
+      <TabsContent value="users" className="mt-4">
+        <Suspense fallback={<div className="space-y-2">{[...Array(4)].map((_,i)=><div key={i} className="h-12 rounded-lg bg-muted animate-pulse"/>)}</div>}>
+          <AdminUsers />
+        </Suspense>
+      </TabsContent>
     </Tabs>
   </div>
 );

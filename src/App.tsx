@@ -63,18 +63,20 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <Toaster
-        position="top-right"
-        toastOptions={{ duration: 3000 }}
-        containerStyle={{ top: 16 }}
-      />
-      <OfflineBanner />
-      <BrowserRouter>
-        <PageTracker />
-        <Suspense fallback={<PageSkeleton />}>
-          <Routes>
-            <Route path="/"                     element={<Home />} />
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <SiteSchema />
+        <Toaster
+          position="top-right"
+          toastOptions={{ duration: 3000 }}
+          containerStyle={{ top: 16 }}
+        />
+        <OfflineBanner />
+        <BrowserRouter>
+          <PageTracker />
+          <Suspense fallback={<PageSkeleton />}>
+            <Routes>
+              <Route path="/"                     element={<Home />} />
             <Route path="/about"                element={<About />} />
             <Route path="/teachers"             element={<Teachers />} />
             <Route path="/notices"              element={<Notices />} />

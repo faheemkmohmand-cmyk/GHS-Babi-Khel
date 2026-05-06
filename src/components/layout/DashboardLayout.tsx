@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Home, Calendar, BarChart3, Bell, BookOpen, Image, Trophy,
   Users, User, LogOut, GraduationCap, Menu, X, Shield, ExternalLink, Moon, Sun,
-  Video, FileText, BookMarked, ClipboardCheck
+  Video, FileText, BookMarked, ClipboardCheck, DollarSign
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/shared/NotificationBell";
@@ -21,6 +21,7 @@ const navItems = [
   { id: "online-classes", label: "Online Classes",   icon: Video         },
   { id: "tests",          label: "MCQ Tests",        icon: ClipboardCheck },
   { id: "homework",       label: "Homework",         icon: FileText       },
+  { id: "finance",        label: "My Fees",          icon: DollarSign     },
   { id: "teachers",       label: "Teachers",         icon: Users          },
   { id: "profile",        label: "My Profile",       icon: User           },
 ];
@@ -265,4 +266,5 @@ export default DashboardLayout;
 
 
 
-                                          
+
+            

@@ -123,7 +123,8 @@ const App = () => (
           </Routes>
         </Suspense>
       </BrowserRouter>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
   </ErrorBoundary>
 );
 

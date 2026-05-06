@@ -18,6 +18,30 @@ const NotificationBell = () => {
   const navigate = useNavigate();
   const qc = useQueryClient();
 
+  // ── Polling fallback — refresh notifications every 45s and on tab focus.
+  // This guarantees users see new notices/news/results/homework even when
+  // Supabase Realtime is not enabled on the project's publication.
+  useEffect(() => {
+    const refreshAll = () => {
+      qc.invalidateQueries({ queryKey: ["notices"] });
+      qc.invalidateQueries({ queryKey: ["news"] });
+      qc.invalidateQueries({ queryKey: ["news-list"] });
+      qc.invalidateQueries({ queryKey: ["results"] });
+      qc.invalidateQueries({ queryKey: ["home-school-toppers"] });
+      qc.invalidateQueries({ queryKey: ["homework"] });
+    };
+    const interval = window.setInterval(refreshAll, 45_000);
+    const onFocus = () => refreshAll();
+    const onVisible = () => { if (document.visibilityState === "visible") refreshAll(); };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [qc]);
+
   // ── Supabase Realtime — live updates when admin adds notices/news/results ──
   useEffect(() => {
     const channel = supabase

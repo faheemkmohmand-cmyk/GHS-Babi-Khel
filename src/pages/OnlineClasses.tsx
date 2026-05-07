@@ -76,7 +76,7 @@ export default function OnlineClasses() {
       <div className="min-h-screen bg-background">
 
         {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-[hsl(var(--primary-dark))] via-primary to-[hsl(var(--primary-light))] pt-20 sm:pt-28 pb-10 sm:pb-16 px-4">
+        <section className="relative overflow-hidden bg-gradient-to-br from-[hsl(var(--primary-dark))] via-primary to-[hsl(var(--primary-light))] pt-10 sm:pt-20 md:pt-28 pb-8 sm:pb-12 md:pb-16 px-4">
           {/* Decorative blobs */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/3 blur-3xl pointer-events-none" />

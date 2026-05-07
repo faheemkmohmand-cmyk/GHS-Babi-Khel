@@ -458,32 +458,39 @@ const Admission = () => {
     }
   };
 
-  const validateStep = () => {
+  const validateStep = (): boolean => {
+    const fail = (msg: string) => { toast.error(msg); return false; };
+    // Basic format guards
+    const digitsOnly = (v: string) => v.replace(/\D/g, "");
+
     if (step === 1) {
-      if (!form.full_name.trim())      return toast.error("Please enter student full name");
-      if (!form.father_name.trim())    return toast.error("Please enter father name");
-      if (!form.b_form_no.trim())      return toast.error("Please enter B-Form number");
-      if (!form.contact_number.trim()) return toast.error("Please enter contact number");
-      if (!form.gender)                return toast.error("Please select gender");
+      if (!form.full_name.trim() || form.full_name.trim().length < 3)
+        return fail("Please enter student full name (min 3 letters)");
+      if (!form.father_name.trim() || form.father_name.trim().length < 3)
+        return fail("Please enter father name (min 3 letters)");
+      if (!form.b_form_no.trim() || digitsOnly(form.b_form_no).length < 13)
+        return fail("Please enter a valid 13-digit B-Form number");
+      if (!form.contact_number.trim() || digitsOnly(form.contact_number).length < 10)
+        return fail("Please enter a valid contact number");
+      if (!form.gender) return fail("Please select gender");
       return true;
     }
     if (step === 2) {
-      if (!form.applying_class)  return toast.error("Please select class");
-      if (!form.admission_type)  return toast.error("Please select admission type");
+      if (!form.applying_class)  return fail("Please select class");
+      if (!form.admission_type)  return fail("Please select admission type");
       return true;
     }
     if (step === 3) {
       if (!fileEntries.b_form || fileEntries.b_form.status !== "done")
-        return toast.error("B-Form scan must be uploaded first");
+        return fail("B-Form scan must be uploaded first");
       if (!fileEntries.photo || fileEntries.photo.status !== "done")
-        return toast.error("Passport photo must be uploaded first");
+        return fail("Passport photo must be uploaded first");
       if (isMigration && (!fileEntries.migration_certificate || fileEntries.migration_certificate.status !== "done"))
-        return toast.error("Migration certificate must be uploaded first");
+        return fail("Migration certificate must be uploaded first");
       if (isMigration && isClass10 && (!fileEntries.signed_letter || fileEntries.signed_letter.status !== "done"))
-        return toast.error("Signed letter must be uploaded first");
-      // Check nothing still uploading
+        return fail("Signed letter must be uploaded first");
       const stillUploading = Object.values(fileEntries).some(e => e?.status === "uploading");
-      if (stillUploading) return toast.error("Please wait — files are still uploading");
+      if (stillUploading) return fail("Please wait — files are still uploading");
       return true;
     }
     return true;

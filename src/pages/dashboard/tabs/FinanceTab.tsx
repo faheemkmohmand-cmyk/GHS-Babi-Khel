@@ -527,10 +527,138 @@ function PaymentHistoryTab() {
   );
 }
 
+// ─── All Students Overview ────────────────────────────────────────────────────
+
+function AllStudentsTab() {
+  const [search, setSearch] = useState("");
+  const [classFilter, setClassFilter] = useState<string>("all");
+
+  const { data: rows = [], isLoading } = useQuery({
+    queryKey: ["all-student-ledgers"],
+    queryFn: getAllStudentLedgers,
+    staleTime: 60_000,
+  });
+
+  const classes = Array.from(new Set(rows.map((r) => r.class).filter(Boolean))).sort();
+  const q = search.trim().toLowerCase();
+  const filtered = rows.filter((r) => {
+    if (classFilter !== "all" && r.class !== classFilter) return false;
+    if (!q) return true;
+    return (
+      (r.full_name || "").toLowerCase().includes(q) ||
+      (r.roll_number || "").toLowerCase().includes(q) ||
+      (r.class || "").toLowerCase().includes(q)
+    );
+  });
+
+  const totals = filtered.reduce(
+    (acc, r) => {
+      acc.charged += r.total_charged;
+      acc.paid += r.total_paid;
+      acc.balance += r.balance;
+      return acc;
+    },
+    { charged: 0, paid: 0, balance: 0 }
+  );
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-xl font-heading font-bold text-foreground flex items-center gap-2">
+          <Users className="w-5 h-5 text-primary" /> All Students — Fees Overview
+        </h2>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Browse fee status across every class and student
+        </p>
+      </div>
+
+      {/* Totals */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <div className="bg-card border border-border rounded-2xl p-3 text-center">
+          <p className="text-sm font-black text-foreground">{fmt(totals.charged)}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">Charged</p>
+        </div>
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-3 text-center">
+          <p className="text-sm font-black text-green-600">{fmt(totals.paid)}</p>
+          <p className="text-[10px] text-green-600/70 mt-0.5">Paid</p>
+        </div>
+        <div className={`border rounded-2xl p-3 text-center ${totals.balance > 0 ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800" : "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"}`}>
+          <p className={`text-sm font-black ${totals.balance > 0 ? "text-red-600" : "text-green-600"}`}>
+            {totals.balance <= 0 ? "✓ Clear" : fmt(totals.balance)}
+          </p>
+          <p className="text-[10px] mt-0.5 text-muted-foreground">Balance</p>
+        </div>
+      </div>
+
+      {/* Search + class filter */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search name, roll no, class…"
+            className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-secondary border border-border text-sm outline-none focus:ring-2 focus:ring-primary/30"
+          />
+        </div>
+        <select
+          value={classFilter}
+          onChange={(e) => setClassFilter(e.target.value)}
+          className="px-3 py-2.5 rounded-xl bg-secondary border border-border text-sm font-medium outline-none"
+        >
+          <option value="all">All Classes</option>
+          {classes.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-2">{[1,2,3,4].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-card border border-border rounded-2xl p-10 text-center">
+          <Users className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">No students match your filters</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {filtered.map((r) => {
+            const cleared = r.balance <= 0;
+            return (
+              <div key={r.student_id} className="bg-card border border-border rounded-xl p-3 sm:p-4 flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-bold text-sm ${cleared ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                  {(r.full_name || "?").charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">{r.full_name || "—"}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {r.class || "—"} · Roll {r.roll_number || "—"}
+                  </p>
+                  <div className="mt-1 flex items-center gap-2 text-[11px] flex-wrap">
+                    <span className="text-muted-foreground">Charged <span className="font-semibold text-foreground">{fmt(r.total_charged)}</span></span>
+                    <span className="text-muted-foreground">Paid <span className="font-semibold text-green-600">{fmt(r.total_paid)}</span></span>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className={`text-sm font-bold ${cleared ? "text-green-600" : "text-red-600"}`}>
+                    {cleared ? "✓ Clear" : fmt(r.balance)}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">{cleared ? "no dues" : "due"}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Student Finance Tab ─────────────────────────────────────────────────
 
 const TABS = [
   { id: "fees", label: "My Fees", icon: FileText },
+  { id: "all", label: "All Students", icon: Users },
   { id: "pay", label: "Pay Now", icon: CreditCard },
   { id: "history", label: "History", icon: Receipt },
 ] as const;
@@ -565,6 +693,7 @@ export default function FinanceTab() {
       </div>
 
       {activeTab === "fees" && <MyFeesTab onPayNow={handlePayNow} />}
+      {activeTab === "all" && <AllStudentsTab />}
       {activeTab === "pay" && <PayFeeTab preselectedCharges={preselectedCharges} />}
       {activeTab === "history" && <PaymentHistoryTab />}
     </div>

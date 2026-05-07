@@ -20,6 +20,7 @@ interface NavItem {
   label: string;
   icon: React.ElementType;
   children?: NavChild[];
+  alwaysExpanded?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -28,7 +29,7 @@ const navItems: NavItem[] = [
   { id: "results",        label: "Results",          icon: BarChart3      },
   { id: "merit-list",     label: "Merit List",       icon: Trophy         },
   { id: "notices",        label: "Notices & News",   icon: Bell           },
-  { id: "notes",          label: "Notes Manager",    icon: BookMarked, children: [
+  { id: "notes",          label: "Notes Manager",    icon: BookMarked, alwaysExpanded: true, children: [
     { id: "notes",          label: "Study Notes",    icon: BookMarked     },
     { id: "tests",          label: "MCQ Tests",      icon: ClipboardCheck },
   ]},
@@ -98,28 +99,38 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
 
   const renderNavItem = (item: NavItem, isMobile = false) => {
     const hasChildren = item.children && item.children.length > 0;
-    const isExpanded = expandedParents.includes(item.id);
+    const isExpanded = item.alwaysExpanded || expandedParents.includes(item.id);
     const isParentActive = hasChildren && isChildOf(navItems, item.id, activeTab);
     const isSelfActive = activeTab === item.id;
 
     if (hasChildren) {
       return (
         <div key={item.id}>
-          <button
-            onClick={() => toggleParent(item.id)}
-            className={`w-full flex items-center gap-3 px-3 ${isMobile ? 'py-2.5' : 'py-2'} rounded-lg text-sm font-medium transition-colors ${
-              isParentActive
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-            }`}
-          >
-            <item.icon className="w-4 h-4 shrink-0" />
-            <span className="flex-1 text-left">{item.label}</span>
-            <ChevronDown
-              className={`w-3.5 h-3.5 shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-            />
-          </button>
-          {(isExpanded || isParentActive) && (
+          {/* Parent label — clickable only if not alwaysExpanded */}
+          {item.alwaysExpanded ? (
+            <div className={`w-full flex items-center gap-3 px-3 ${isMobile ? 'py-2.5' : 'py-2'} rounded-lg text-sm font-medium ${
+              isParentActive ? "text-primary" : "text-muted-foreground"
+            }`}>
+              <item.icon className="w-4 h-4 shrink-0" />
+              <span className="flex-1 text-left">{item.label}</span>
+            </div>
+          ) : (
+            <button
+              onClick={() => toggleParent(item.id)}
+              className={`w-full flex items-center gap-3 px-3 ${isMobile ? 'py-2.5' : 'py-2'} rounded-lg text-sm font-medium transition-colors ${
+                isParentActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              }`}
+            >
+              <item.icon className="w-4 h-4 shrink-0" />
+              <span className="flex-1 text-left">{item.label}</span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 shrink-0 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+              />
+            </button>
+          )}
+          {isExpanded && (
             <div className="ml-4 mt-0.5 space-y-0.5 border-l-2 border-border pl-2">
               {item.children!.map((child) => (
                 <button
@@ -349,3 +360,4 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
 };
 
 export default DashboardLayout;
+        

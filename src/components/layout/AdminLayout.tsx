@@ -4,7 +4,7 @@ import {
   BarChart3, Settings, Users, GraduationCap, ClipboardList, CheckSquare,
   Calendar, Bell, BookOpen, Trophy, LogOut,
   Menu, X, ExternalLink, Shield, Moon, Sun, Video, Hash,
-  BookMarked, TrendingUp, Star, Globe, DollarSign, ChevronDown
+  BookMarked, TrendingUp, Star, Globe, DollarSign
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useDarkMode } from "@/hooks/useDarkMode";
@@ -20,10 +20,8 @@ const navItems = [
   { id: "timetables",        label: "Timetables",         icon: Calendar       },
   { id: "announcements",     label: "Announcements",      icon: Bell           },
   { id: "library",           label: "Library",            icon: BookOpen       },
-  { id: "achievements",      label: "Achievements",       icon: Trophy,        children: [
-    { id: "achievements",    label: "Achievements",       icon: Trophy         },
-    { id: "merit-list",      label: "Merit List",         icon: TrendingUp     },
-  ]},
+  { id: "achievements",      label: "Achievements",       icon: Trophy         },
+  { id: "merit-list",        label: "Merit List",         icon: TrendingUp,    indent: true },
   { id: "exam-rolls",        label: "Exam Roll Numbers",  icon: Hash           },
   { id: "notes",             label: "Notes Manager",      icon: BookMarked     },
   { id: "videos",            label: "Videos & Gallery",   icon: Video          },
@@ -32,7 +30,7 @@ const navItems = [
   { id: "extras",            label: "Extras",             icon: Star           },
   { id: "site-analytics",    label: "Site Analytics",     icon: Globe          },
   { id: "finance",           label: "Finance & Fees",     icon: DollarSign     },
-];
+] as const;
 
 interface AdminLayoutProps {
   activeTab: string;
@@ -43,12 +41,8 @@ interface AdminLayoutProps {
 const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => {
   const { profile, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(["achievements"]);
   const navigate = useNavigate();
   const { isDark, toggle } = useDarkMode();
-
-  const toggleGroup = (id: string) =>
-    setExpandedGroups((prev) => prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -97,55 +91,20 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
         </div>
 
         <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-          {navItems.map((item) =>
-            item.children ? (
-              <div key={item.id}>
-                <button
-                  onClick={() => toggleGroup(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    item.children.some((c) => c.id === activeTab)
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                  }`}
-                >
-                  <item.icon className="w-4 h-4 shrink-0" />
-                  <span className="flex-1 text-left">{item.label}</span>
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expandedGroups.includes(item.id) ? "rotate-180" : ""}`} />
-                </button>
-                {expandedGroups.includes(item.id) && (
-                  <div className="ml-4 mt-0.5 space-y-0.5 border-l border-border pl-3">
-                    {item.children.map((child) => (
-                      <button
-                        key={child.id}
-                        onClick={() => onTabChange(child.id)}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          activeTab === child.id
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                        }`}
-                      >
-                        <child.icon className="w-3.5 h-3.5 shrink-0" />
-                        {child.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <button
-                key={item.id}
-                onClick={() => onTabChange(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === item.id
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                }`}
-              >
-                <item.icon className="w-4 h-4 shrink-0" />
-                {item.label}
-              </button>
-            )
-          )}
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => onTabChange(item.id)}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${'indent' in item && item.indent ? 'ml-4 w-[calc(100%-1rem)] pl-2 text-xs border-l-2 border-border' : ''} ${
+                activeTab === item.id
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              }`}
+            >
+              <item.icon className={`shrink-0 ${'indent' in item && item.indent ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+              {item.label}
+            </button>
+          ))}
         </nav>
 
         <div className="p-3 border-t border-border space-y-1">
@@ -179,7 +138,7 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
             <Menu className="w-5 h-5" />
           </button>
           <h1 className="font-heading font-semibold text-foreground">
-            {navItems.flatMap((n) => n.children ?? [n]).find((n) => n.id === activeTab)?.label || "Admin Dashboard"}
+            {navItems.find((n) => n.id === activeTab)?.label || "Admin Dashboard"}
           </h1>
           <div className="ml-auto flex items-center gap-2">
             <a
@@ -248,55 +207,20 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
               </button>
             </div>
             <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-              {navItems.map((item) =>
-                item.children ? (
-                  <div key={item.id}>
-                    <button
-                      onClick={() => toggleGroup(item.id)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                        item.children.some((c) => c.id === activeTab)
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                      }`}
-                    >
-                      <item.icon className="w-4 h-4 shrink-0" />
-                      <span className="flex-1 text-left">{item.label}</span>
-                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expandedGroups.includes(item.id) ? "rotate-180" : ""}`} />
-                    </button>
-                    {expandedGroups.includes(item.id) && (
-                      <div className="ml-4 mt-0.5 space-y-0.5 border-l border-border pl-3">
-                        {item.children.map((child) => (
-                          <button
-                            key={child.id}
-                            onClick={() => { onTabChange(child.id); setSidebarOpen(false); }}
-                            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                              activeTab === child.id
-                                ? "bg-primary text-primary-foreground"
-                                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                            }`}
-                          >
-                            <child.icon className="w-3.5 h-3.5 shrink-0" />
-                            {child.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <button
-                    key={item.id}
-                    onClick={() => { onTabChange(item.id); setSidebarOpen(false); }}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                      activeTab === item.id
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                    }`}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    {item.label}
-                  </button>
-                )
-              )}
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => { onTabChange(item.id); setSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${'indent' in item && item.indent ? 'ml-4 w-[calc(100%-1rem)] pl-2 text-xs border-l-2 border-border' : ''} ${
+                    activeTab === item.id
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  }`}
+                >
+                  <item.icon className={`shrink-0 ${'indent' in item && item.indent ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
+                  {item.label}
+                </button>
+              ))}
             </nav>
             <div className="p-3 border-t border-border space-y-1">
               <Link
@@ -333,4 +257,4 @@ export default AdminLayout;
 
 
 
-                        
+        

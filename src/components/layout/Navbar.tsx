@@ -37,8 +37,8 @@ const Navbar = () => {
 
   return (
     <nav className={`sticky top-0 z-50 border-b transition-all duration-300 ${
-      scrolled ? "bg-card/90 backdrop-blur-xl border-border shadow-card"
-               : "bg-card/70 backdrop-blur-lg border-transparent"
+      scrolled ? "bg-card/95 backdrop-blur-xl border-border shadow-card"
+               : "bg-card border-border/80"
     }`}>
       {/* ── Top bar ── */}
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
@@ -87,11 +87,11 @@ const Navbar = () => {
                 <NotificationBell />
                 <ThemeSwitcher />
                 {isAdmin && (
-                  <Link to="/admin" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold bg-amber-500 text-white hover:bg-amber-600 transition-all">
+                  <Link to="/admin" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all">
                     <Shield className="w-4 h-4" /> Admin
                   </Link>
                 )}
-                <Link to="/dashboard" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold gradient-accent text-primary-foreground shadow-card hover:shadow-elevated transition-all">
+                <Link to="/dashboard" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold bg-accent text-accent-foreground shadow-card hover:bg-accent/90 hover:shadow-elevated transition-all">
                   <LayoutDashboard className="w-4 h-4" /> Dashboard
                 </Link>
                 <button onClick={signOut}
@@ -106,7 +106,7 @@ const Navbar = () => {
                 <Link to="/auth/signin" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors">
                   <LogIn className="w-4 h-4" /> Sign In
                 </Link>
-                <Link to="/auth/signup" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold gradient-accent text-primary-foreground shadow-card hover:shadow-elevated transition-all">
+                <Link to="/auth/signup" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold bg-accent text-accent-foreground shadow-card hover:bg-accent/90 hover:shadow-elevated transition-all">
                   <UserPlus className="w-4 h-4" /> Sign Up
                 </Link>
               </>
@@ -185,11 +185,12 @@ const Navbar = () => {
                       </Link>
                     )}
                     <Link to="/dashboard" onClick={() => setOpen(false)}
-                      className="gradient-accent"
+                      className=""
                       style={{
                         display: "flex", alignItems: "center", gap: "10px",
                         padding: "13px 16px", borderRadius: "12px",
-                        color: "hsl(var(--primary-foreground))",
+                        color: "hsl(var(--accent-foreground))",
+                        backgroundColor: "hsl(var(--accent))",
                         fontWeight: 600, fontSize: "14px", textDecoration: "none",
                       }}>
                       <LayoutDashboard style={{ width: "18px", height: "18px" }} />
@@ -225,11 +226,12 @@ const Navbar = () => {
                       Sign In
                     </Link>
                     <Link to="/auth/signup" onClick={() => setOpen(false)}
-                      className="gradient-accent"
+                      className=""
                       style={{
                         display: "flex", alignItems: "center", gap: "10px",
                         padding: "13px 16px", borderRadius: "12px",
-                        color: "hsl(var(--primary-foreground))",
+                        color: "hsl(var(--accent-foreground))",
+                        backgroundColor: "hsl(var(--accent))",
                         fontWeight: 600, fontSize: "14px", textDecoration: "none",
                       }}>
                       <UserPlus style={{ width: "18px", height: "18px" }} />

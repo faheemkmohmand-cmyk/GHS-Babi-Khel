@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -192,12 +192,6 @@ const TopperSection = () => {
    MAIN HOME COMPONENT
 ══════════════════════════════════ */
 const Home = () => {
-  const { scrollY } = useScroll();
-  const heroContentY = useTransform(scrollY, [0, 500], [0, 120]);
-  const heroOpacity  = useTransform(scrollY, [0, 350], [1, 0]);
-  const heroBgY      = useTransform(scrollY, [0, 600], [0, 80]);
-  const blobY        = useTransform(scrollY, [0, 600], [0, 60]);
-
   const statsRef    = useRef(null);
   const statsInView = useInView(statsRef, { once: true, margin: "-100px" });
 
@@ -219,72 +213,74 @@ const Home = () => {
       <NewsTicker />
 
       {/* ══ 2. HERO ══ */}
-      <section id="hero-section" className="relative min-h-[100vh] flex items-center overflow-hidden">
-        <motion.div style={{ y: heroBgY }} className="absolute inset-0 will-change-transform">
-          {settings?.banner_url
-            ? <img src={settings.banner_url} alt="School banner" className="absolute inset-0 w-full h-full object-cover" loading="eager" decoding="async" fetchPriority="high" style={{ height: "110%", top: "-5%" }} />
-            : <div className="absolute inset-0 gradient-hero" />
-          }
-          <div className="absolute inset-0 opacity-20">
-            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" strokeWidth="0.15" opacity="0.4" /></pattern></defs>
-              <rect width="100" height="100" fill="url(#grid)" />
-            </svg>
-          </div>
-        </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/72 via-primary/45 to-transparent" />
-
-        <motion.div style={{ y: blobY }} className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div animate={{ x: [0, 40, 0], y: [0, -30, 0] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-20 -left-20 w-96 h-96 rounded-full bg-primary/20 blur-3xl" />
-          <motion.div animate={{ x: [0, -50, 0], y: [0, 40, 0] }} transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-10 right-0 w-[500px] h-[500px] rounded-full bg-accent/15 blur-3xl" />
-        </motion.div>
-
-        <motion.div style={{ y: heroContentY, opacity: heroOpacity }} className="container mx-auto px-4 relative z-10 py-24 will-change-transform">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <section id="hero-section" className="relative section-y bg-background overflow-hidden border-b border-border/70">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-24 -left-20 w-72 h-72 rounded-full bg-primary/5 blur-3xl" />
+          <div className="absolute -bottom-20 right-0 w-80 h-80 rounded-full bg-accent/10 blur-3xl" />
+        </div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
             {/* Left: text */}
             <motion.div initial="hidden" animate="visible" variants={stagger.parent} className="max-w-2xl">
               <motion.div variants={stagger.child}>
-                <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md rounded-full px-4 py-1.5 text-sm text-white/90 border border-white/20">
-                  <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <span className="inline-flex items-center gap-2 bg-card rounded-full px-4 py-1.5 text-sm text-foreground border border-border/80 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
                   Est. {settings?.established_year || 2018} · EMIS {settings?.emis_code || "60673"}
                 </span>
               </motion.div>
-              <motion.h1 variants={stagger.child} className="mt-6 text-4xl md:text-6xl lg:text-7xl font-heading font-extrabold italic text-white leading-[0.95] min-h-[1em]">
-                <span className="bg-gradient-to-r from-white via-primary-light to-accent bg-clip-text text-transparent">{displayedSchoolName}</span>
-                <span className="inline-block w-1 h-[0.85em] bg-white/70 ml-1 align-middle" style={{ animation: "blink 1s step-end infinite" }} />
+              <motion.h1 variants={stagger.child} className="mt-6 text-4xl md:text-6xl lg:text-7xl font-heading font-extrabold italic text-foreground leading-[0.95] min-h-[1em]">
+                <span>{displayedSchoolName}</span>
+                <span className="inline-block w-1 h-[0.85em] bg-foreground/60 ml-1 align-middle" style={{ animation: "blink 1s step-end infinite" }} />
               </motion.h1>
-              <motion.h2 variants={stagger.child} className="mt-4 text-xl md:text-2xl font-heading font-semibold text-white/90 min-h-[2rem]">
+              <motion.h2 variants={stagger.child} className="mt-4 text-xl md:text-2xl font-heading font-semibold text-foreground min-h-[2rem]">
                 {displayed}
-                <span className="inline-block w-0.5 h-6 bg-white/80 ml-1 align-middle" style={{ animation: "blink 1s step-end infinite" }} />
+                <span className="inline-block w-0.5 h-6 bg-foreground/70 ml-1 align-middle" style={{ animation: "blink 1s step-end infinite" }} />
                 <style>{`@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }`}</style>
               </motion.h2>
-              <motion.p variants={stagger.child} className="mt-5 text-base md:text-lg text-white/80 max-w-xl leading-relaxed">
+              <motion.p variants={stagger.child} className="mt-5 text-base md:text-lg text-muted-foreground max-w-xl leading-relaxed">
                 {settings?.description || "Government High School Babi Khel is committed to providing quality education and nurturing the future leaders of Pakistan."}
               </motion.p>
               <motion.div variants={stagger.child} className="mt-8 flex flex-wrap gap-4">
                 <Link to="/results">
                   <motion.button whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }}
-                  className="inline-flex items-center gap-2 gradient-accent text-primary-foreground font-semibold px-7 py-3.5 rounded-xl shadow-elevated transition-all duration-200">
+                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-7 py-3.5 rounded-xl shadow-card hover:shadow-elevated transition-all duration-200">
                     View Results <ArrowRight className="w-4 h-4" />
                   </motion.button>
                 </Link>
                 <Link to="/auth/signin">
                   <motion.button whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }}
-                    className="inline-flex items-center gap-2 bg-white text-primary font-semibold px-7 py-3.5 rounded-xl shadow-elevated transition-all duration-200">
+                    className="inline-flex items-center gap-2 bg-accent text-accent-foreground font-semibold px-7 py-3.5 rounded-xl shadow-card hover:shadow-elevated transition-all duration-200">
                     Student Portal
                   </motion.button>
                 </Link>
                 <Link to="/about">
                   <motion.button whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }}
-                    className="inline-flex items-center gap-2 bg-white/12 backdrop-blur-sm border border-white/25 text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-white/22 transition-all duration-200">
+                    className="inline-flex items-center gap-2 bg-card border border-border text-foreground font-semibold px-7 py-3.5 rounded-xl hover:bg-secondary transition-all duration-200">
                     Learn More
                   </motion.button>
                 </Link>
               </motion.div>
             </motion.div>
 
-            {/* Right: stats cards */}
-            <motion.div ref={statsRef} initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7, duration: 0.7 }} className="hidden lg:grid grid-cols-2 gap-4">
+            {/* Right: school image card + stats */}
+            <motion.div ref={statsRef} initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5, duration: 0.7 }} className="space-y-4">
+              <div className="rounded-3xl overflow-hidden border border-border/80 bg-card shadow-elevated">
+                {settings?.banner_url ? (
+                  <img
+                    src={settings.banner_url}
+                    alt="Government High School Babi Khel campus"
+                    className="w-full h-[280px] sm:h-[320px] lg:h-[360px] object-cover"
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
+                  />
+                ) : (
+                  <div className="h-[280px] sm:h-[320px] lg:h-[360px] bg-secondary flex items-center justify-center">
+                    <GraduationCap className="w-20 h-20 text-primary/50" />
+                  </div>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
               {[
                 { icon: Users,         label: "Total Students",     value: settings?.total_students  || 500, suffix: "+" },
                 { icon: GraduationCap, label: "Qualified Teachers", value: settings?.total_teachers  || 25,  suffix: "+" },
@@ -292,30 +288,16 @@ const Home = () => {
                 { icon: BookOpen,      label: "Years of Excellence",value: new Date().getFullYear() - (settings?.established_year || 2018), suffix: "" },
               ].map((stat, i) => (
                 <motion.div key={stat.label} initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 + i * 0.15, duration: 0.5 }} whileHover={{ scale: 1.04, y: -4 }}
-                  className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all shadow-2xl cursor-default">
-                  <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center mb-4 shadow-lg border border-white/20">
-                    <stat.icon className="w-7 h-7 text-white" />
+                  className="bg-card rounded-2xl p-5 border border-border/80 hover:bg-secondary/40 transition-all shadow-card cursor-default">
+                  <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-3 border border-border/70">
+                    <stat.icon className="w-6 h-6 text-primary" />
                   </div>
-                  <p className="text-3xl sm:text-4xl font-bold text-white"><AnimCounter value={stat.value} suffix={stat.suffix} isInView={statsInView} /></p>
-                  <p className="text-sm text-white/70 mt-2 font-medium">{stat.label}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-foreground"><AnimCounter value={stat.value} suffix={stat.suffix} isInView={statsInView} /></p>
+                  <p className="text-sm text-muted-foreground mt-1.5 font-medium">{stat.label}</p>
                 </motion.div>
               ))}
+              </div>
             </motion.div>
-          </div>
-        </motion.div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3 select-none pointer-events-none">
-          <motion.span animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="text-[11px] font-bold uppercase tracking-[0.3em] text-white/70">Scroll</motion.span>
-          <div className="w-7 h-12 rounded-full border-2 border-white/50 flex items-start justify-center pt-2 relative overflow-hidden">
-            <motion.div animate={{ y: [0, 20, 0], opacity: [1, 0, 1] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }} className="w-1.5 h-3 rounded-full bg-white/80" />
-          </div>
-          <div className="flex flex-col items-center gap-0.5">
-            {[0, 1, 2].map((i) => (
-              <motion.svg key={i} xmlns="http://www.w3.org/2000/svg" width="16" height="10" viewBox="0 0 16 10" fill="none" animate={{ opacity: [0, 1, 0], y: [0, 4, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut", delay: i * 0.25 }}>
-                <path d="M1 1L8 8L15 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </motion.svg>
-            ))}
           </div>
         </div>
       </section>
@@ -508,48 +490,48 @@ const Home = () => {
       </motion.section>
 
       {/* ══ 15. ADMISSION / FINAL CTA ══ */}
-      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y cv-auto relative overflow-hidden">
+      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y cv-auto relative overflow-hidden bg-secondary/35">
         <div className="absolute inset-0 pointer-events-none">
           <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
           <motion.div animate={{ scale: [1.2, 1, 1.2] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 right-0 w-96 h-96 bg-accent/5 rounded-full translate-x-1/2 translate-y-1/2" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="gradient-hero rounded-3xl p-10 md:p-16 text-center relative overflow-hidden">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="bg-card border border-border/80 rounded-3xl p-10 md:p-16 text-center relative overflow-hidden shadow-elevated">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
             <ScrollReveal>
               <div className="relative z-10">
                 {admSettings?.is_open ? (
                   <>
                     {/* Admissions OPEN */}
-                    <div className="inline-flex items-center gap-2 bg-green-400/20 text-white border border-green-300/40 backdrop-blur-sm text-sm font-bold px-4 py-2 rounded-full mb-5">
-                      <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
+                    <div className="inline-flex items-center gap-2 bg-success/10 text-success border border-success/30 text-sm font-bold px-4 py-2 rounded-full mb-5">
+                      <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
                       Admissions Open — Session {admSettings.session_year}
                     </div>
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-primary-foreground mb-4 leading-tight">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-foreground mb-4 leading-tight">
                       Apply for Admission{" "}
-                      <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">Today</span>
+                      <span className="text-accent">Today</span>
                     </h2>
                     {admSettings.last_date && (
-                      <p className="text-white/80 text-base mb-3">
+                      <p className="text-muted-foreground text-base mb-3">
                         Last Date:{" "}
-                        <span className="font-bold text-white">
+                        <span className="font-bold text-foreground">
                           {new Date(admSettings.last_date).toLocaleDateString("en-PK", { day: "numeric", month: "long", year: "numeric" })}
                         </span>
                       </p>
                     )}
-                    <p className="text-primary-foreground/75 text-base mb-8 max-w-xl mx-auto">
+                    <p className="text-muted-foreground text-base mb-8 max-w-xl mx-auto">
                       {admSettings.banner_message ?? "Classes 6 to 10 — Fresh admissions and migration cases welcome. Apply online in minutes."}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Link to="/admission">
                         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                          className="w-full sm:w-auto px-10 py-5 bg-white text-primary rounded-2xl font-bold shadow-2xl flex items-center justify-center gap-2 text-lg">
+                          className="w-full sm:w-auto px-10 py-5 bg-primary text-primary-foreground rounded-2xl font-bold shadow-card flex items-center justify-center gap-2 text-lg">
                           Apply Now <ArrowRight className="w-5 h-5" />
                         </motion.button>
                       </Link>
                       <Link to="/admission">
                         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                          className="w-full sm:w-auto px-10 py-5 bg-white/10 backdrop-blur-md text-white rounded-2xl font-semibold border border-white/30 hover:bg-white/20 transition-all flex items-center justify-center gap-2 text-lg">
+                          className="w-full sm:w-auto px-10 py-5 bg-accent text-accent-foreground rounded-2xl font-semibold border border-accent/40 hover:bg-accent/90 transition-all flex items-center justify-center gap-2 text-lg">
                           Track Application
                         </motion.button>
                       </Link>
@@ -563,7 +545,7 @@ const Home = () => {
                         { label: "Track",     icon: GraduationCap },
                       ].map(item => (
                         <Link key={item.label} to="/admission">
-                          <div className="bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl py-2.5 px-3 flex items-center gap-2 text-white text-xs font-semibold transition-all cursor-pointer">
+                          <div className="bg-secondary hover:bg-secondary/80 border border-border rounded-xl py-2.5 px-3 flex items-center gap-2 text-foreground text-xs font-semibold transition-all cursor-pointer">
                             <item.icon className="w-3.5 h-3.5 shrink-0" />
                             {item.label}
                           </div>
@@ -575,28 +557,28 @@ const Home = () => {
                   <>
                     {/* Admissions CLOSED — show portal CTA */}
                     <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-block mb-4">
-                      <Heart className="w-8 h-8 text-primary-foreground/60 mx-auto" />
+                      <Heart className="w-8 h-8 text-primary/60 mx-auto" />
                     </motion.div>
-                    <div className="inline-flex items-center gap-2 bg-white/20 text-white border border-white/30 backdrop-blur-sm text-sm font-medium px-4 py-2 rounded-full mb-6">
+                    <div className="inline-flex items-center gap-2 bg-secondary text-foreground border border-border text-sm font-medium px-4 py-2 rounded-full mb-6">
                       <Heart className="w-4 h-4" /> Join Our Community
                     </div>
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-primary-foreground mb-6 leading-tight">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-foreground mb-6 leading-tight">
                       Ready to Begin Your{" "}
-                      <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">Educational Journey?</span>
+                      <span className="text-accent">Educational Journey?</span>
                     </h2>
-                    <p className="text-primary-foreground/75 text-lg mb-10 max-w-2xl mx-auto">
+                    <p className="text-muted-foreground text-lg mb-10 max-w-2xl mx-auto">
                       Access your student portal to view results, attendance, timetables, and stay connected with your academic progress.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Link to="/auth/signin">
                         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                          className="w-full sm:w-auto px-10 py-5 bg-white text-primary rounded-2xl font-bold shadow-2xl flex items-center justify-center gap-2 text-lg">
+                          className="w-full sm:w-auto px-10 py-5 bg-primary text-primary-foreground rounded-2xl font-bold shadow-card flex items-center justify-center gap-2 text-lg">
                           Sign In to Portal <ArrowRight className="w-5 h-5" />
                         </motion.button>
                       </Link>
                       <Link to="/results">
                         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                          className="w-full sm:w-auto px-10 py-5 bg-white/10 backdrop-blur-md text-white rounded-2xl font-semibold border border-white/30 hover:bg-white/20 transition-all flex items-center justify-center gap-2 text-lg">
+                          className="w-full sm:w-auto px-10 py-5 bg-accent text-accent-foreground rounded-2xl font-semibold border border-accent/40 hover:bg-accent/90 transition-all flex items-center justify-center gap-2 text-lg">
                           Check Results
                         </motion.button>
                       </Link>
@@ -610,19 +592,18 @@ const Home = () => {
       </motion.section>
 
       {/* ══ 16. ABOUT PREVIEW ══ */}
-      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y cv-auto relative overflow-hidden">
-        <div className="absolute inset-0 gradient-hero" />
-        <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
-          <motion.div animate={{ rotate: 360 }}  transition={{ duration: 60, repeat: Infinity, ease: "linear" }} className="absolute -top-20 -right-20 w-80 h-80 rounded-full border-4 border-white" />
-          <motion.div animate={{ rotate: -360 }} transition={{ duration: 80, repeat: Infinity, ease: "linear" }} className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full border-4 border-white" />
+      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y cv-auto relative overflow-hidden bg-background">
+        <div className="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
+          <motion.div animate={{ rotate: 360 }}  transition={{ duration: 60, repeat: Infinity, ease: "linear" }} className="absolute -top-20 -right-20 w-80 h-80 rounded-full border-2 border-primary/20" />
+          <motion.div animate={{ rotate: -360 }} transition={{ duration: 80, repeat: Infinity, ease: "linear" }} className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full border-2 border-accent/20" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <ScrollReveal direction="left">
-              <div className="text-white">
-                <span className="inline-block bg-white/20 text-white border border-white/30 backdrop-blur-sm text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full mb-4">About Us</span>
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-6 leading-tight">Building Future Leaders Since {settings?.established_year || 2018}</h2>
-                <p className="text-white/80 text-lg leading-relaxed mb-8">
+              <div>
+                <span className="inline-block bg-secondary text-foreground border border-border text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full mb-4">About Us</span>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-foreground mb-6 leading-tight">Building Future Leaders Since {settings?.established_year || 2018}</h2>
+                <p className="text-muted-foreground text-lg leading-relaxed mb-8">
                   {settings?.description || "Government High School Babi Khel has been serving the community of District Mohmand with dedication and excellence. We believe in nurturing every student's potential through quality education and modern teaching methodologies."}
                 </p>
                 <div className="grid sm:grid-cols-2 gap-4 mb-8">
@@ -633,14 +614,14 @@ const Home = () => {
                     { icon: Clock,  text: "Mon-Fri, 8:00 AM - 3:00 PM" },
                   ].map((item, i) => (
                     <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                      className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-3">
-                      <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center shrink-0"><item.icon className="w-5 h-5 text-white" /></div>
-                      <span className="text-sm text-white/90">{item.text}</span>
+                      className="flex items-center gap-3 bg-card border border-border/80 rounded-xl p-3 shadow-sm">
+                      <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shrink-0"><item.icon className="w-5 h-5 text-primary" /></div>
+                      <span className="text-sm text-muted-foreground">{item.text}</span>
                     </motion.div>
                   ))}
                 </div>
                 <Link to="/about">
-                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} className="px-8 py-4 bg-white text-primary rounded-2xl font-bold shadow-xl flex items-center gap-2">
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} className="px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-bold shadow-card flex items-center gap-2">
                     Learn More About Us <ArrowRight className="w-5 h-5" />
                   </motion.button>
                 </Link>
@@ -648,14 +629,14 @@ const Home = () => {
             </ScrollReveal>
             <ScrollReveal direction="right" delay={0.2}>
               <div className="relative">
-                <div className="aspect-square rounded-3xl bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl border border-white/20 p-2 shadow-2xl">
-                  <div className="w-full h-full rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center overflow-hidden">
-                    <GraduationCap className="w-40 h-40 text-white/30" />
+                <div className="aspect-square rounded-3xl bg-card border border-border/80 p-2 shadow-elevated">
+                  <div className="w-full h-full rounded-2xl bg-secondary/70 flex items-center justify-center overflow-hidden">
+                    <GraduationCap className="w-40 h-40 text-primary/30" />
                   </div>
                 </div>
                 <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-2xl p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg"><Star className="w-6 h-6 text-white" /></div>
+                    <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center shadow-lg"><Star className="w-6 h-6 text-accent-foreground" /></div>
                     <div><p className="text-2xl font-black text-foreground">{settings?.pass_percentage || 98}%</p><p className="text-xs text-muted-foreground font-medium">Pass Rate</p></div>
                   </div>
                 </motion.div>

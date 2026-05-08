@@ -34,10 +34,10 @@ const NewsTicker = () => {
   const durationSecs = Math.max(8, baseItems.length * 4);
 
   return (
-    <div className="bg-red-600 text-white py-2 overflow-hidden">
+    <div className="bg-primary text-primary-foreground py-2 overflow-hidden border-b border-primary/70">
       <div className="container mx-auto px-4 flex items-center gap-3">
         {/* Label */}
-        <div className="flex items-center gap-1.5 shrink-0 bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+        <div className="flex items-center gap-1.5 shrink-0 bg-white/15 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
           <Megaphone className="w-3 h-3 animate-pulse" />
           Announcements
         </div>
@@ -45,8 +45,8 @@ const NewsTicker = () => {
         {/* Scrolling text */}
         <div className="flex-1 overflow-hidden relative">
           {/* Fade edges */}
-          <div className="absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-red-600 to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-red-600 to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-primary to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-primary to-transparent z-10 pointer-events-none" />
 
           <div
             className="flex gap-12 whitespace-nowrap"

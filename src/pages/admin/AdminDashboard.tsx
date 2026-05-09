@@ -11,7 +11,6 @@ const AdminAttendance        = lazy(() => import("./tabs/AdminAttendance"));
 const AdminTimetables        = lazy(() => import("./tabs/AdminTimetables"));
 const AdminAnnouncements     = lazy(() => import("./tabs/AdminAnnouncements"));
 const AdminLibrary           = lazy(() => import("./tabs/AdminLibrary"));
-const AdminAchievements      = lazy(() => import("./tabs/AchievementsHub"));
 const AdminExamRollNumbers   = lazy(() => import("./tabs/AdminExamRollNumbers"));
 const AdminVideos            = lazy(() => import("./tabs/AdminVideos"));
 const AdminNotes             = lazy(() => import("../notes/AdminNotes"));
@@ -35,7 +34,6 @@ const tabMap: Record<string, React.LazyExoticComponent<React.ComponentType<any>>
   timetables:         AdminTimetables,
   announcements:      AdminAnnouncements,
   library:            AdminLibrary,
-  achievements:       AdminAchievements,
   "exam-rolls":       AdminExamRollNumbers,
   notes:              AdminNotes,
   videos:             AdminVideos,

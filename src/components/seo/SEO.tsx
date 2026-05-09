@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 
-const SITE_URL = "https://ghsbabkhel.lovable.app";
+const SITE_URL = "https://ghsbabikhel.indevs.in";
 const SITE_NAME = "GHS Babi Khel";
 const DEFAULT_IMAGE = `${SITE_URL}/apple-touch-icon.png`;
 

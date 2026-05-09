@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GHS Babi Khel - Government High School</title>
+    <meta name="description" content="Government High School Babi Khel, District Mohmand, KPK Pakistan. Excellence in Education since 2018." />
+    <meta name="author" content="GHS Babi Khel" />
+
+    <!-- ✅ Custom favicon — removes any default branding from search results -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#1e2a53" />
+
+    <meta property="og:title" content="GHS Babi Khel - Government High School" />
+    <meta property="og:description" content="Government High School Babi Khel, District Mohmand, KPK Pakistan." />
+    <meta property="og:type" content="website" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- ✅ Preconnect to speed up font loading & Supabase -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- ✅ DNS-prefetch as fallback for older browsers -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+
+    <!-- ✅ DNS-prefetch for Supabase (actual URL injected at deploy) -->
+    <link rel="dns-prefetch" href="https://supabase.co" />
+
+    <!-- ✅ Non-blocking font load: print trick loads fonts without blocking render -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Inter:wght@400;500;600&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <!-- Fallback for no-JS -->
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Inter:wght@400;500;600&display=swap"
+      />
+    </noscript>
+
+    <!-- ✅ Inline critical CSS so text and bg show instantly -->
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 0;
+        background: hsl(210, 40%, 98%);
+      }
+      #root { min-height: 100vh; }
+    </style>
+
+    <!-- ✅ Theme bootstrap — applies saved theme before paint to prevent flash -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('ghs-theme');
+          var root = document.documentElement;
+          ['dark','theme-midnight','theme-forest','theme-violet'].forEach(function(c){ root.classList.remove(c); });
+          if (t === 'dark' || t === 'midnight' || t === 'forest' || t === 'violet') {
+            root.classList.add(t === 'dark' ? 'dark' : 'theme-' + t);
+          } else if (t === 'light') {
+            // no class
+          } else {
+            // legacy auto dark schedule
+            var manual = localStorage.getItem('ghs-dark-mode-manual');
+            var saved = localStorage.getItem('ghs-dark-mode');
+            var isDark;
+            if (manual !== null) isDark = JSON.parse(manual);
+            else if (saved !== null) isDark = JSON.parse(saved);
+            else {
+              var h = new Date(Date.now() + 5*3600*1000).getUTCHours();
+              isDark = h >= 18 || h < 6;
+            }
+            if (isDark) root.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- ✅ JSON-LD structured data for rich search results -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "HighSchool",
+      "name": "Government High School Babi Khel",
+      "description": "Government High School Babi Khel, District Mohmand, KPK Pakistan. Excellence in Education since 2018.",
+      "url": "https://ghsbabkhel.lovable.app",
+      "foundingDate": "2018",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Babi Khel",
+        "addressRegion": "KPK",
+        "addressCountry": "PK"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

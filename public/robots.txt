@@ -20,4 +20,4 @@ Disallow: /teacher
 Disallow: /dashboard
 Disallow: /auth/
 
-Sitemap: https://ghsbabkhel.lovable.app/sitemap.xml
+Sitemap: https://ghsbabikhel.indevs.in/sitemap.xml

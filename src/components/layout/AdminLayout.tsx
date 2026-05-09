@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   BarChart3, Settings, Users, GraduationCap, ClipboardList, CheckSquare,
-  Calendar, Bell, BookOpen, Trophy, LogOut,
+  Calendar, Bell, BookOpen, LogOut,
   Menu, X, ExternalLink, Shield, Moon, Sun, Video, Hash,
   BookMarked, TrendingUp, Star, Globe, DollarSign
 } from "lucide-react";
@@ -20,7 +20,6 @@ const navItems = [
   { id: "timetables",        label: "Timetables",         icon: Calendar       },
   { id: "announcements",     label: "Announcements",      icon: Bell           },
   { id: "library",           label: "Library",            icon: BookOpen       },
-  { id: "achievements",      label: "Achievements",       icon: Trophy         },
   { id: "exam-rolls",        label: "Exam Roll Numbers",  icon: Hash           },
   { id: "notes",             label: "Notes Manager",      icon: BookMarked     },
   { id: "videos",            label: "Videos & Gallery",   icon: Video          },
@@ -256,4 +255,4 @@ export default AdminLayout;
 
 
 
-        
+    

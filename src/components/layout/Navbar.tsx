@@ -37,8 +37,8 @@ const Navbar = () => {
 
   return (
     <nav className={`sticky top-0 z-50 border-b transition-all duration-300 ${
-      scrolled ? "bg-[#FFFDF9]/95 backdrop-blur-xl border-border shadow-card"
-               : "bg-[#FFFDF9] border-border/80"
+      scrolled ? "bg-background/95 backdrop-blur-xl border-border shadow-card"
+               : "bg-background border-border/80"
     }`}>
       {/* ── Top bar ── */}
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
@@ -47,7 +47,7 @@ const Navbar = () => {
           {settings?.logo_url ? (
             <img src={settings.logo_url} alt="Logo" className="w-10 h-10 rounded-xl object-cover" />
           ) : (
-            <div className="w-10 h-10 rounded-xl bg-[#0F172A] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <GraduationCap className="w-6 h-6 text-white" />
             </div>
           )}
@@ -87,7 +87,7 @@ const Navbar = () => {
                 <NotificationBell />
                 <ThemeSwitcher />
                 {isAdmin && (
-                  <Link to="/admin" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold bg-[#0F172A] text-white hover:bg-[#0F172A]/90 transition-all">
+                  <Link to="/admin" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all">
                     <Shield className="w-4 h-4" /> Admin
                   </Link>
                 )}
@@ -177,7 +177,7 @@ const Navbar = () => {
                         style={{
                           display: "flex", alignItems: "center", gap: "10px",
                           padding: "13px 16px", borderRadius: "12px",
-                          backgroundColor: "#0F172A", color: "#fff",
+                          backgroundColor: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))",
                           fontWeight: 600, fontSize: "14px", textDecoration: "none",
                         }}>
                         <Shield style={{ width: "18px", height: "18px" }} />
@@ -251,4 +251,5 @@ const Navbar = () => {
 export default Navbar;
 
 
-        
+
+          

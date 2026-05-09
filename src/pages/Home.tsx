@@ -135,7 +135,7 @@ const TopperSection = () => {
   const gradients = [
     "from-[#0c4a6e] via-[#0369a1] to-[#0ea5e9]", "from-[#075985] via-[#0284c7] to-[#38bdf8]",
     "from-[#0c4a6e] via-[#0e7490] to-[#22d3ee]",  "from-[#1e3a8a] via-[#1d4ed8] to-[#3b82f6]",
-    "from-[#0f172a] via-[#1e40af] to-[#0ea5e9]",
+    "from-primary-dark via-primary to-primary-light",
   ];
   return (
     <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y cv-auto">
@@ -206,6 +206,41 @@ const Home = () => {
   const { data: achievements = [], isLoading: achievementsLoading }   = useAchievements(3);
   const { data: admSettings }                                          = useAdmissionSettings();
 
+  // Theme-aware hero styles — reads the class/data-theme on <html> reactively
+  const [resolvedTheme, setResolvedTheme] = useState<string>(() => {
+    if (typeof document !== "undefined") {
+      return document.documentElement.getAttribute("data-theme") ||
+        (document.documentElement.classList.contains("dark") ? "dark" : "light");
+    }
+    return "light";
+  });
+  useEffect(() => {
+    const html = document.documentElement;
+    const update = () => {
+      const dt = html.getAttribute("data-theme");
+      if (dt) { setResolvedTheme(dt); return; }
+      setResolvedTheme(html.classList.contains("dark") ? "dark" : "light");
+    };
+    const obs = new MutationObserver(update);
+    obs.observe(html, { attributes: true, attributeFilter: ["class", "data-theme"] });
+    return () => obs.disconnect();
+  }, []);
+  const isDark = resolvedTheme === "dark";
+  const heroOverlay = isDark
+    ? "bg-gradient-to-b from-black/70 via-black/60 to-black/80"
+    : "bg-gradient-to-b from-black/30 via-black/20 to-black/40";
+  const heroBadgeBg   = "bg-white/20 border border-white/30 text-white";
+  const heroTextColor = "text-white";
+  const heroSubColor  = isDark ? "text-white/90" : "text-white/95";
+  const heroDescColor = isDark ? "text-white/80" : "text-white/90";
+  const heroCursorColor = "bg-white/80";
+  const heroLearnMoreBtn = isDark
+    ? "bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30"
+    : "bg-white/30 backdrop-blur-sm border border-white/50 text-white hover:bg-white/40";
+  const heroStatCard = isDark
+    ? "bg-white/15 backdrop-blur-md border border-white/20"
+    : "bg-black/20 backdrop-blur-md border border-white/20";
+
   const { displayed } = useTypingAnimation({ words: TYPING_WORDS, typingSpeed: 70, deletingSpeed: 35, pauseTime: 2500 });
   const schoolName = settings?.school_name || "GHS Babi Khel";
   const { displayed: displayedSchoolName } = useTypingAnimation({ words: [schoolName], typingSpeed: 90, deletingSpeed: 45, pauseTime: 3500 });
@@ -217,32 +252,51 @@ const Home = () => {
       <NewsTicker />
 
       {/* ══ 2. HERO ══ */}
-      <section id="hero-section" className="relative min-h-[88vh] flex items-center overflow-hidden bg-[#F5F1EB]">
+      <section id="hero-section" className="relative min-h-[88vh] flex items-center overflow-hidden">
+
+        {/* ── Background banner image (full section) ── */}
+        {settings?.banner_url ? (
+          <img
+            src={settings.banner_url}
+            alt="School campus"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-background" />
+        )}
+
+        {/* ── Dark gradient overlay so text stays readable ── */}
+        <div className={`absolute inset-0 ${heroOverlay}`} />
+
+        {/* ── Foreground content ── */}
         <motion.div style={{ y: heroContentY, opacity: heroOpacity }} className="container mx-auto px-4 relative z-10 py-20 md:py-24 will-change-transform">
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
             <motion.div initial="hidden" animate="visible" variants={stagger.parent} className="max-w-2xl">
               <motion.div variants={stagger.child}>
-                <span className="inline-flex items-center gap-2 bg-white border border-[#E5E7EB] rounded-full px-4 py-1.5 text-sm text-[#5B5B5B] shadow-sm">
+                <span className={`inline-flex items-center gap-2 ${heroBadgeBg} backdrop-blur-sm rounded-full px-4 py-1.5 text-sm shadow-sm`}>
                   <span className="w-2 h-2 rounded-full bg-[#C96B3B] animate-pulse" />
                   Est. {settings?.established_year || 2018} · EMIS {settings?.emis_code || "60673"}
                 </span>
               </motion.div>
-              <motion.h1 variants={stagger.child} className="mt-6 text-4xl md:text-6xl lg:text-7xl font-heading font-extrabold leading-[0.95] min-h-[1em] text-[#111827]">
+              <motion.h1 variants={stagger.child} className={`mt-6 text-4xl md:text-6xl lg:text-7xl font-heading font-extrabold leading-[0.95] min-h-[1em] ${heroTextColor} drop-shadow-lg`}>
                 {displayedSchoolName}
-                <span className="inline-block w-1 h-[0.85em] bg-[#111827]/60 ml-1 align-middle" style={{ animation: "blink 1s step-end infinite" }} />
+                <span className={`inline-block w-1 h-[0.85em] ${heroCursorColor} ml-1 align-middle`} style={{ animation: "blink 1s step-end infinite" }} />
               </motion.h1>
-              <motion.h2 variants={stagger.child} className="mt-4 text-xl md:text-2xl font-heading font-semibold text-[#111827] min-h-[2rem]">
+              <motion.h2 variants={stagger.child} className={`mt-4 text-xl md:text-2xl font-heading font-semibold ${heroSubColor} min-h-[2rem] drop-shadow`}>
                 {displayed}
-                <span className="inline-block w-0.5 h-6 bg-[#111827]/60 ml-1 align-middle" style={{ animation: "blink 1s step-end infinite" }} />
+                <span className={`inline-block w-0.5 h-6 ${heroCursorColor} ml-1 align-middle`} style={{ animation: "blink 1s step-end infinite" }} />
                 <style>{`@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }`}</style>
               </motion.h2>
-              <motion.p variants={stagger.child} className="mt-5 text-base md:text-lg text-[#5B5B5B] max-w-xl leading-relaxed">
+              <motion.p variants={stagger.child} className={`mt-5 text-base md:text-lg ${heroDescColor} max-w-xl leading-relaxed`}>
                 {settings?.description || "Government High School Babi Khel is committed to providing quality education and nurturing the future leaders of Pakistan."}
               </motion.p>
               <motion.div variants={stagger.child} className="mt-8 flex flex-wrap gap-4">
                 <Link to="/results">
                   <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}
-                    className="inline-flex items-center gap-2 bg-[#0F172A] text-white font-semibold px-7 py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
+                    className="inline-flex items-center gap-2 bg-primary text-white font-semibold px-7 py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
                     View Results <ArrowRight className="w-4 h-4" />
                   </motion.button>
                 </Link>
@@ -254,40 +308,30 @@ const Home = () => {
                 </Link>
                 <Link to="/about">
                   <motion.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}
-                    className="inline-flex items-center gap-2 bg-white border border-[#E5E7EB] text-[#111827] font-semibold px-7 py-3.5 rounded-xl shadow-sm hover:bg-[#FAFAFA] transition-all duration-200">
+                    className={`inline-flex items-center gap-2 ${heroLearnMoreBtn} font-semibold px-7 py-3.5 rounded-xl shadow-sm transition-all duration-200`}>
                     Learn More
                   </motion.button>
                 </Link>
               </motion.div>
             </motion.div>
 
-            <motion.div ref={statsRef} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4, duration: 0.6 }} className="space-y-4">
-              <div className="rounded-3xl bg-white border border-[#E5E7EB] p-2 shadow-lg overflow-hidden">
-                {settings?.banner_url ? (
-                  <img src={settings.banner_url} alt="School campus" className="w-full h-[250px] md:h-[320px] object-cover rounded-2xl" loading="eager" decoding="async" fetchPriority="high" />
-                ) : (
-                  <div className="w-full h-[250px] md:h-[320px] rounded-2xl bg-[#E5E7EB] flex items-center justify-center">
-                    <GraduationCap className="w-14 h-14 text-[#0F172A]/50" />
+            {/* Stats cards on desktop right column */}
+            <motion.div ref={statsRef} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4, duration: 0.6 }} className="hidden lg:grid grid-cols-2 gap-3">
+              {[
+                { icon: Users,         label: "Students",    value: settings?.total_students   || 500,  suffix: "+" },
+                { icon: GraduationCap, label: "Teachers",    value: settings?.total_teachers   || 25,   suffix: "+" },
+                { icon: Trophy,        label: "Pass Rate",   value: settings?.pass_percentage  || 98,   suffix: "%" },
+                { icon: BookOpen,      label: "Established", value: settings?.established_year || 2018, suffix: ""  },
+              ].map((stat, i) => (
+                <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 + i * 0.1 }}
+                  className={`${heroStatCard} rounded-2xl p-4 shadow-sm`}>
+                  <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-2">
+                    <stat.icon className="w-5 h-5 text-white" />
                   </div>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { icon: Users,         label: "Students", value: settings?.total_students  || 500, suffix: "+" },
-                  { icon: GraduationCap, label: "Teachers", value: settings?.total_teachers  || 25,  suffix: "+" },
-                  { icon: Trophy,        label: "Pass Rate", value: settings?.pass_percentage || 98, suffix: "%" },
-                  { icon: BookOpen,      label: "Established", value: settings?.established_year || 2018, suffix: "" },
-                ].map((stat, i) => (
-                  <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 + i * 0.1 }}
-                    className="bg-white rounded-2xl p-4 border border-[#E5E7EB] shadow-sm">
-                    <div className="w-10 h-10 rounded-xl bg-[#0F172A]/5 flex items-center justify-center mb-2">
-                      <stat.icon className="w-5 h-5 text-[#0F172A]" />
-                    </div>
-                    <p className="text-2xl font-bold text-[#111827]"><AnimCounter value={stat.value} suffix={stat.suffix} isInView={statsInView} /></p>
-                    <p className="text-xs text-[#5B5B5B] mt-1 font-medium">{stat.label}</p>
-                  </motion.div>
-                ))}
-              </div>
+                  <p className="text-2xl font-bold text-white"><AnimCounter value={stat.value} suffix={stat.suffix} isInView={statsInView} /></p>
+                  <p className="text-xs text-white/70 mt-1 font-medium">{stat.label}</p>
+                </motion.div>
+              ))}
             </motion.div>
           </div>
         </motion.div>
@@ -313,7 +357,7 @@ const Home = () => {
       </motion.section>
 
       {/* ══ 4. SUBJECTS MARQUEE ══ */}
-      <section className="py-5 bg-[#F5F1EB] overflow-hidden border-y border-border mt-16">
+      <section className="py-5 bg-background overflow-hidden border-y border-border mt-16">
         <div className="relative flex overflow-hidden">
           <div className="flex gap-8 shrink-0" style={{ animation: "marqueeScroll 28s linear infinite", willChange: "transform" }}>
             {["📐 Mathematics","⚡ Physics","🧪 Chemistry","🌿 Biology","📖 English","✍️ Urdu","🗺️ Pakistan Studies","☪️ Islamiyat","💻 Computer Science",
@@ -335,7 +379,7 @@ const Home = () => {
       </section>
 
       {/* ══ 6. WHY CHOOSE US ══ */}
-      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y bg-[#F5F1EB] cv-auto">
+      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y bg-background cv-auto">
         <div className="container mx-auto px-4">
           <ScrollReveal><SectionHeader eyebrow="Our Strengths" title="Why Choose Us" subtitle="We provide a comprehensive educational experience that nurtures young minds" /></ScrollReveal>
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger.parent} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -343,7 +387,7 @@ const Home = () => {
               <ScrollReveal key={f.title} delay={idx * 0.08}>
                 <motion.div variants={stagger.child} whileHover={{ y: -8, scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   className="group bg-card rounded-2xl p-6 shadow-card hover:shadow-elevated transition-all duration-300 border border-transparent hover:border-primary/20 h-full">
-                  <div className="w-12 h-12 rounded-xl bg-[#0F172A] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-md">
+                  <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-md">
                     <f.icon className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="font-heading font-semibold text-foreground text-lg">{f.title}</h3>
@@ -359,7 +403,7 @@ const Home = () => {
       <TopperSection />
 
       {/* ══ 9. LATEST NOTICES ══ */}
-      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y bg-[#F5F1EB] cv-auto">
+      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y bg-background cv-auto">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-10">
             <ScrollReveal direction="left"><div><span className="eyebrow">Stay Updated</span><h2 className="section-title">Latest Notices</h2></div></ScrollReveal>
@@ -408,7 +452,7 @@ const Home = () => {
                 <div className="h-48 overflow-hidden bg-secondary">
                   {item.image_url
                     ? <img src={item.image_url} alt={item.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    : <div className="w-full h-full bg-[#F3F4F6] flex items-center justify-center"><Bell className="w-10 h-10 text-[#0F172A]/40" /></div>
+                    : <div className="w-full h-full bg-muted flex items-center justify-center"><Bell className="w-10 h-10 text-primary/40" /></div>
                   }
                 </div>
                 <div className="p-5">
@@ -424,7 +468,7 @@ const Home = () => {
       </motion.section>
 
       {/* ══ 11. TEACHERS ══ */}
-      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y bg-[#F5F1EB] cv-auto">
+      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y bg-background cv-auto">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-10">
             <div><span className="eyebrow">Our Faculty</span><h2 className="section-title">Meet Our Teachers</h2></div>
@@ -438,7 +482,7 @@ const Home = () => {
                 className="bg-card rounded-2xl p-6 text-center shadow-card hover:shadow-elevated transition-all duration-300 group">
                 {teacher.photo_url
                   ? <img src={teacher.photo_url} alt={teacher.full_name} loading="lazy" decoding="async" className="w-20 h-20 rounded-full mx-auto mb-4 object-cover ring-4 ring-secondary group-hover:ring-primary/30 transition-all" />
-                  : <div className="w-20 h-20 rounded-full mx-auto mb-4 bg-[#0F172A] flex items-center justify-center text-white text-xl font-heading font-bold">{teacher.full_name.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}</div>
+                  : <div className="w-20 h-20 rounded-full mx-auto mb-4 bg-primary flex items-center justify-center text-white text-xl font-heading font-bold">{teacher.full_name.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}</div>
                 }
                 <h3 className="font-heading font-semibold text-foreground">{teacher.full_name}</h3>
                 {teacher.subject       && <p className="text-sm text-primary font-medium mt-1">{teacher.subject}</p>}
@@ -470,7 +514,7 @@ const Home = () => {
       </motion.section>
 
       {/* ══ 13. DAILY QUOTE + WEATHER (side-by-side) ══ */}
-      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y bg-[#F5F1EB] cv-auto">
+      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y bg-background cv-auto">
         <div className="container mx-auto px-4 max-w-4xl">
           <ScrollReveal><SectionHeader eyebrow="Daily Inspiration" title="Thought of the Day" /></ScrollReveal>
           <div className="grid md:grid-cols-2 gap-6 items-start">
@@ -487,36 +531,36 @@ const Home = () => {
           <motion.div animate={{ scale: [1.2, 1, 1.2] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 right-0 w-96 h-96 bg-accent/5 rounded-full translate-x-1/2 translate-y-1/2" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
-          <div className="bg-white border border-[#E5E7EB] rounded-3xl p-10 md:p-16 text-center relative overflow-hidden shadow-card">
+          <div className="bg-white border border-border rounded-3xl p-10 md:p-16 text-center relative overflow-hidden shadow-card">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#C96B3B]/5 rounded-full blur-3xl pointer-events-none" />
             <ScrollReveal>
               <div className="relative z-10">
                 {admSettings?.is_open ? (
                   <>
                     {/* Admissions OPEN */}
-                    <div className="inline-flex items-center gap-2 bg-[#0F172A]/5 text-[#111827] border border-[#0F172A]/15 text-sm font-bold px-4 py-2 rounded-full mb-5">
+                    <div className="inline-flex items-center gap-2 bg-primary/5 text-foreground border border-primary/15 text-sm font-bold px-4 py-2 rounded-full mb-5">
                       <span className="w-2 h-2 rounded-full bg-[#C96B3B] animate-pulse" />
                       Admissions Open — Session {admSettings.session_year}
                     </div>
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-[#111827] mb-4 leading-tight">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-foreground mb-4 leading-tight">
                       Apply for Admission{" "}
                       <span className="text-[#C96B3B]">Today</span>
                     </h2>
                     {admSettings.last_date && (
-                      <p className="text-[#5B5B5B] text-base mb-3">
+                      <p className="text-muted-foreground text-base mb-3">
                         Last Date:{" "}
-                        <span className="font-bold text-[#111827]">
+                        <span className="font-bold text-foreground">
                           {new Date(admSettings.last_date).toLocaleDateString("en-PK", { day: "numeric", month: "long", year: "numeric" })}
                         </span>
                       </p>
                     )}
-                    <p className="text-[#5B5B5B] text-base mb-8 max-w-xl mx-auto">
+                    <p className="text-muted-foreground text-base mb-8 max-w-xl mx-auto">
                       {admSettings.banner_message ?? "Classes 6 to 10 — Fresh admissions and migration cases welcome. Apply online in minutes."}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Link to="/admission">
                         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                          className="w-full sm:w-auto px-10 py-5 bg-[#0F172A] text-white rounded-2xl font-bold shadow-md flex items-center justify-center gap-2 text-lg">
+                          className="w-full sm:w-auto px-10 py-5 bg-primary text-white rounded-2xl font-bold shadow-md flex items-center justify-center gap-2 text-lg">
                           Apply Now <ArrowRight className="w-5 h-5" />
                         </motion.button>
                       </Link>
@@ -536,7 +580,7 @@ const Home = () => {
                         { label: "Track",     icon: GraduationCap },
                       ].map(item => (
                         <Link key={item.label} to="/admission">
-                          <div className="bg-[#F9FAFB] hover:bg-[#F3F4F6] border border-[#E5E7EB] rounded-xl py-2.5 px-3 flex items-center gap-2 text-[#111827] text-xs font-semibold transition-all cursor-pointer">
+                          <div className="bg-muted hover:bg-muted border border-border rounded-xl py-2.5 px-3 flex items-center gap-2 text-foreground text-xs font-semibold transition-all cursor-pointer">
                             <item.icon className="w-3.5 h-3.5 shrink-0" />
                             {item.label}
                           </div>
@@ -548,22 +592,22 @@ const Home = () => {
                   <>
                     {/* Admissions CLOSED — show portal CTA */}
                     <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="inline-block mb-4">
-                      <Heart className="w-8 h-8 text-[#0F172A]/60 mx-auto" />
+                      <Heart className="w-8 h-8 text-primary/60 mx-auto" />
                     </motion.div>
-                    <div className="inline-flex items-center gap-2 bg-[#0F172A]/5 text-[#111827] border border-[#0F172A]/15 text-sm font-medium px-4 py-2 rounded-full mb-6">
+                    <div className="inline-flex items-center gap-2 bg-primary/5 text-foreground border border-primary/15 text-sm font-medium px-4 py-2 rounded-full mb-6">
                       <Heart className="w-4 h-4" /> Join Our Community
                     </div>
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-[#111827] mb-6 leading-tight">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-foreground mb-6 leading-tight">
                       Ready to Begin Your{" "}
                       <span className="text-[#C96B3B]">Educational Journey?</span>
                     </h2>
-                    <p className="text-[#5B5B5B] text-lg mb-10 max-w-2xl mx-auto">
+                    <p className="text-muted-foreground text-lg mb-10 max-w-2xl mx-auto">
                       Access your student portal to view results, attendance, timetables, and stay connected with your academic progress.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Link to="/auth/signin">
                         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                          className="w-full sm:w-auto px-10 py-5 bg-[#0F172A] text-white rounded-2xl font-bold shadow-md flex items-center justify-center gap-2 text-lg">
+                          className="w-full sm:w-auto px-10 py-5 bg-primary text-white rounded-2xl font-bold shadow-md flex items-center justify-center gap-2 text-lg">
                           Sign In to Portal <ArrowRight className="w-5 h-5" />
                         </motion.button>
                       </Link>
@@ -583,18 +627,18 @@ const Home = () => {
       </motion.section>
 
       {/* ══ 16. ABOUT PREVIEW ══ */}
-      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y cv-auto relative overflow-hidden bg-[#F5F1EB]">
+      <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y cv-auto relative overflow-hidden bg-background">
         <div className="absolute inset-0 opacity-30 pointer-events-none overflow-hidden">
-          <motion.div animate={{ rotate: 360 }}  transition={{ duration: 60, repeat: Infinity, ease: "linear" }} className="absolute -top-20 -right-20 w-80 h-80 rounded-full border-4 border-[#E5E7EB]" />
-          <motion.div animate={{ rotate: -360 }} transition={{ duration: 80, repeat: Infinity, ease: "linear" }} className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full border-4 border-[#E5E7EB]" />
+          <motion.div animate={{ rotate: 360 }}  transition={{ duration: 60, repeat: Infinity, ease: "linear" }} className="absolute -top-20 -right-20 w-80 h-80 rounded-full border-4 border-border" />
+          <motion.div animate={{ rotate: -360 }} transition={{ duration: 80, repeat: Infinity, ease: "linear" }} className="absolute -bottom-20 -left-20 w-96 h-96 rounded-full border-4 border-border" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <ScrollReveal direction="left">
-              <div className="text-[#111827]">
-                <span className="inline-block bg-white text-[#111827] border border-[#E5E7EB] text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full mb-4">About Us</span>
+              <div className="text-foreground">
+                <span className="inline-block bg-white text-foreground border border-border text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full mb-4">About Us</span>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold mb-6 leading-tight">Building Future Leaders Since {settings?.established_year || 2018}</h2>
-                <p className="text-[#5B5B5B] text-lg leading-relaxed mb-8">
+                <p className="text-muted-foreground text-lg leading-relaxed mb-8">
                   {settings?.description || "Government High School Babi Khel has been serving the community of District Mohmand with dedication and excellence. We believe in nurturing every student's potential through quality education and modern teaching methodologies."}
                 </p>
                 <div className="grid sm:grid-cols-2 gap-4 mb-8">
@@ -605,14 +649,14 @@ const Home = () => {
                     { icon: Clock,  text: "Mon-Fri, 8:00 AM - 3:00 PM" },
                   ].map((item, i) => (
                     <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                      className="flex items-center gap-3 bg-white rounded-xl p-3 border border-[#E5E7EB]">
-                      <div className="w-10 h-10 rounded-lg bg-[#0F172A]/5 flex items-center justify-center shrink-0"><item.icon className="w-5 h-5 text-[#0F172A]" /></div>
-                      <span className="text-sm text-[#5B5B5B]">{item.text}</span>
+                      className="flex items-center gap-3 bg-white rounded-xl p-3 border border-border">
+                      <div className="w-10 h-10 rounded-lg bg-primary/5 flex items-center justify-center shrink-0"><item.icon className="w-5 h-5 text-primary" /></div>
+                      <span className="text-sm text-muted-foreground">{item.text}</span>
                     </motion.div>
                   ))}
                 </div>
                 <Link to="/about">
-                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} className="px-8 py-4 bg-[#0F172A] text-white rounded-2xl font-bold shadow-md flex items-center gap-2">
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} className="px-8 py-4 bg-primary text-white rounded-2xl font-bold shadow-md flex items-center gap-2">
                     Learn More About Us <ArrowRight className="w-5 h-5" />
                   </motion.button>
                 </Link>
@@ -620,9 +664,9 @@ const Home = () => {
             </ScrollReveal>
             <ScrollReveal direction="right" delay={0.2}>
               <div className="relative">
-                <div className="aspect-square rounded-3xl bg-white border border-[#E5E7EB] p-2 shadow-xl">
-                  <div className="w-full h-full rounded-2xl bg-[#F9FAFB] flex items-center justify-center overflow-hidden">
-                    <GraduationCap className="w-40 h-40 text-[#0F172A]/20" />
+                <div className="aspect-square rounded-3xl bg-white border border-border p-2 shadow-xl">
+                  <div className="w-full h-full rounded-2xl bg-muted flex items-center justify-center overflow-hidden">
+                    <GraduationCap className="w-40 h-40 text-primary/20" />
                   </div>
                 </div>
                 <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-2xl p-4">

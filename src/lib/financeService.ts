@@ -148,16 +148,30 @@ export async function getMyCharges(student_id: string): Promise<StudentCharge[]>
 
   const charges = (data ?? []) as StudentCharge[];
   if (charges.length === 0) return charges;
-  const ids = charges.map((c) => c.id);
-  const { data: items } = await supabase
-    .from("payment_items")
-    .select("charge_id, amount_paid")
-    .in("charge_id", ids);
+
+  // Only count payment_items from COMPLETED payments
+  const { data: completedPayments } = await supabase
+    .from("payments")
+    .select("id")
+    .eq("student_id", student_id)
+    .eq("status", "completed");
+
+  const completedIds = (completedPayments ?? []).map((p: { id: string }) => p.id);
 
   const paidMap: Record<string, number> = {};
-  (items ?? []).forEach((i: { charge_id: string; amount_paid: number }) => {
-    paidMap[i.charge_id] = (paidMap[i.charge_id] || 0) + i.amount_paid;
-  });
+  if (completedIds.length > 0) {
+    const ids = charges.map((c) => c.id);
+    const { data: items } = await supabase
+      .from("payment_items")
+      .select("charge_id, amount_paid")
+      .in("charge_id", ids)
+      .in("payment_id", completedIds);
+
+    (items ?? []).forEach((i: { charge_id: string; amount_paid: number }) => {
+      paidMap[i.charge_id] = (paidMap[i.charge_id] || 0) + i.amount_paid;
+    });
+  }
+
   return charges.map((c) => ({ ...c, amount_paid: paidMap[c.id] || 0 }));
 }
 
@@ -360,19 +374,32 @@ export async function getMyPayments(student_id: string): Promise<Payment[]> {
 // ─── Ledger ───────────────────────────────────────────────────────────────────
 
 export async function getStudentLedger(student_id: string): Promise<LedgerEntry> {
+  // Step 1: total charged — sum of all charges for this student
   const { data: charges } = await supabase
     .from("student_charges")
     .select("amount")
     .eq("student_id", student_id);
 
-  const { data: items } = await supabase
-    .from("payment_items")
-    .select("amount_paid, payment:payments(student_id, status)")
-    .eq("payment.student_id", student_id)
-    .eq("payment.status", "completed");
+  // Step 2: get all completed payment IDs for this student
+  const { data: completedPayments } = await supabase
+    .from("payments")
+    .select("id")
+    .eq("student_id", student_id)
+    .eq("status", "completed");
+
+  const paymentIds = (completedPayments ?? []).map((p: { id: string }) => p.id);
+
+  // Step 3: sum payment_items only for those payment IDs
+  let total_paid = 0;
+  if (paymentIds.length > 0) {
+    const { data: items } = await supabase
+      .from("payment_items")
+      .select("amount_paid")
+      .in("payment_id", paymentIds);
+    total_paid = (items ?? []).reduce((s: number, i: { amount_paid: number }) => s + i.amount_paid, 0);
+  }
 
   const total_charged = (charges ?? []).reduce((s: number, c: { amount: number }) => s + c.amount, 0);
-  const total_paid = (items ?? []).reduce((s: number, i: { amount_paid: number }) => s + i.amount_paid, 0);
 
   return { student_id, total_charged, total_paid, balance: total_charged - total_paid };
 }

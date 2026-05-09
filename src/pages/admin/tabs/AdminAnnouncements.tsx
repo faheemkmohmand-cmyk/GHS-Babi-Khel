@@ -17,11 +17,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, Loader2, CalendarIcon, Upload, Image as ImageIcon, Trophy, Bell, Newspaper } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, CalendarIcon, Upload, Image as ImageIcon, Trophy, Bell, Newspaper, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { triggerConfetti } from "@/lib/confetti";
 import type { Achievement } from "@/hooks/useAchievements";
+import AdminMeritList from "./AdminMeritList";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Notice {
@@ -476,22 +477,26 @@ const AdminAnnouncements = () => {
     <div className="space-y-4">
       <div>
         <h2 className="text-2xl font-heading font-bold text-foreground">Announcements</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">Notices, News & Achievements — all in one place</p>
+        <p className="text-sm text-muted-foreground mt-0.5">Notices, News, Achievements & Merit List — all in one place</p>
       </div>
 
       <Tabs defaultValue="notices" className="w-full">
-        <TabsList className="w-full sm:w-auto grid grid-cols-3 sm:inline-flex">
-          <TabsTrigger value="notices" className="gap-1.5 text-xs sm:text-sm">
-            <Bell className="w-3.5 h-3.5" />
+        <TabsList className="w-full grid grid-cols-2 sm:grid-cols-4 gap-1 h-auto p-1">
+          <TabsTrigger value="notices" className="gap-1.5 text-xs py-2">
+            <Bell className="w-3.5 h-3.5 shrink-0" />
             <span>Notices</span>
           </TabsTrigger>
-          <TabsTrigger value="news" className="gap-1.5 text-xs sm:text-sm">
-            <Newspaper className="w-3.5 h-3.5" />
+          <TabsTrigger value="news" className="gap-1.5 text-xs py-2">
+            <Newspaper className="w-3.5 h-3.5 shrink-0" />
             <span>News</span>
           </TabsTrigger>
-          <TabsTrigger value="achievements" className="gap-1.5 text-xs sm:text-sm">
-            <Trophy className="w-3.5 h-3.5" />
+          <TabsTrigger value="achievements" className="gap-1.5 text-xs py-2">
+            <Trophy className="w-3.5 h-3.5 shrink-0" />
             <span>Achievements</span>
+          </TabsTrigger>
+          <TabsTrigger value="merit-list" className="gap-1.5 text-xs py-2">
+            <TrendingUp className="w-3.5 h-3.5 shrink-0" />
+            <span>Merit List</span>
           </TabsTrigger>
         </TabsList>
 
@@ -505,6 +510,10 @@ const AdminAnnouncements = () => {
 
         <TabsContent value="achievements" className="mt-4">
           <AchievementsSection />
+        </TabsContent>
+
+        <TabsContent value="merit-list" className="mt-4">
+          <AdminMeritList />
         </TabsContent>
       </Tabs>
     </div>

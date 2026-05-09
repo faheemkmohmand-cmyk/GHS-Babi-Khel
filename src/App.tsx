@@ -8,6 +8,10 @@ import OfflineBanner from "./components/shared/OfflineBanner";
 import { usePageTracker } from "./hooks/usePageTracker";
 import SiteSchema from "./components/seo/SiteSchema";
 import RouteSEOInjector from "./components/seo/RouteSEOInjector";
+// ✅ Route guards MUST be eagerly loaded — no lazy() — so auth check runs before any protected content renders
+import ProtectedRoute        from "./components/layout/ProtectedRoute";
+import AdminProtectedRoute   from "./components/layout/AdminProtectedRoute";
+import TeacherProtectedRoute from "./components/layout/TeacherProtectedRoute";
 
 // Invisible component — just runs the tracker hook inside BrowserRouter
 const PageTracker = () => { usePageTracker(); return null; };
@@ -36,9 +40,6 @@ const Weather          = lazy(() => import("./pages/Weather"));
 const OnlineClasses    = lazy(() => import("./pages/OnlineClasses"));
 const NotFound         = lazy(() => import("./pages/NotFound"));
 const Admission        = lazy(() => import("./pages/Admission"));
-const ProtectedRoute        = lazy(() => import("./components/layout/ProtectedRoute"));
-const AdminProtectedRoute   = lazy(() => import("./components/layout/AdminProtectedRoute"));
-const TeacherProtectedRoute = lazy(() => import("./components/layout/TeacherProtectedRoute"));
 
 const PageSkeleton = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -131,5 +132,3 @@ const App = () => (
 );
 
 export default App;
-
-

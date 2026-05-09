@@ -34,10 +34,10 @@ const NewsTicker = () => {
   const durationSecs = Math.max(8, baseItems.length * 4);
 
   return (
-    <div className="bg-[#0F172A] text-[#F8FAFC] py-2.5 overflow-hidden border-y border-[#1E293B]">
+    <div className="bg-primary text-primary-foreground py-2.5 overflow-hidden border-y border-primary-dark/40">
       <div className="container mx-auto px-4 flex items-center gap-3">
         {/* Label */}
-        <div className="flex items-center gap-1.5 shrink-0 bg-white/10 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border border-white/20">
+        <div className="flex items-center gap-1.5 shrink-0 bg-white/15 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border border-white/25">
           <Megaphone className="w-3 h-3 animate-pulse" />
           Announcements
         </div>
@@ -45,8 +45,8 @@ const NewsTicker = () => {
         {/* Scrolling text */}
         <div className="flex-1 overflow-hidden relative">
           {/* Fade edges */}
-          <div className="absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-[#0F172A] to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-[#0F172A] to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-primary to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-primary to-transparent z-10 pointer-events-none" />
 
           <div
             className="flex gap-12 whitespace-nowrap"

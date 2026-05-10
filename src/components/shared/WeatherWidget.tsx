@@ -13,7 +13,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Wind, Droplets, ArrowRight, MapPin } from "lucide-react";
 
-const API_KEY  = "7b65a0e9302a64320622c0973e306e18";
+const API_KEY  = import.meta.env.VITE_OWM_KEY ?? "";
 const BASE_URL = "https://api.openweathermap.org/data/2.5";
 
 const EMOJI: Record<string,string> = {
@@ -369,3 +369,4 @@ const WeatherWidget = () => {
 };
 
 export default WeatherWidget;
+    

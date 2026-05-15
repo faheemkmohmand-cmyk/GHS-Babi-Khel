@@ -14,19 +14,28 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#1e2a53" />
 
+    <!-- ✅ FIX 1: PWA Web App Manifest — enables Add to Home Screen on Android & iOS -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- ✅ FIX 3: OG image updated from 180x180 icon to proper 1200x630 branded banner  -->
+    <!-- ACTION: Create /public/og-image.jpg (1200x630) with school name + logo + tagline  -->
     <meta property="og:title" content="GHS Babi Khel - Government High School" />
-    <meta property="og:description" content="Government High School Babi Khel, District Mohmand, KPK Pakistan." />
+    <meta property="og:description" content="Government High School Babi Khel, District Mohmand, KPK Pakistan. Excellence in Education since 2018." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://ghsbabikhel.indevs.in" />
-    <meta property="og:image" content="https://ghsbabikhel.indevs.in/apple-touch-icon.png" />
-    <meta property="og:image:width" content="180" />
-    <meta property="og:image:height" content="180" />
+    <meta property="og:image" content="https://ghsbabikhel.indevs.in/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="GHS Babi Khel — Government High School, District Mohmand, KPK Pakistan" />
     <meta property="og:locale" content="en_PK" />
+    <meta property="og:site_name" content="GHS Babi Khel" />
 
+    <!-- ✅ FIX 3: Twitter card — summary_large_image requires 1200x630 to render correctly -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="GHS Babi Khel - Government High School" />
-    <meta name="twitter:description" content="Government High School Babi Khel, District Mohmand, KPK Pakistan." />
-    <meta name="twitter:image" content="https://ghsbabikhel.indevs.in/apple-touch-icon.png" />
+    <meta name="twitter:description" content="Government High School Babi Khel, District Mohmand, KPK Pakistan. Excellence in Education since 2018." />
+    <meta name="twitter:image" content="https://ghsbabikhel.indevs.in/og-image.jpg" />
+    <meta name="twitter:image:alt" content="GHS Babi Khel — Government High School, District Mohmand, KPK Pakistan" />
 
     <!-- ✅ Preconnect to speed up font loading & Supabase -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -35,9 +44,8 @@
     <!-- ✅ DNS-prefetch as fallback for older browsers -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-
-    <!-- ✅ DNS-prefetch for Supabase (actual URL injected at deploy) -->
     <link rel="dns-prefetch" href="https://supabase.co" />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
     <!-- ✅ Non-blocking font load: print trick loads fonts without blocking render -->
     <link
@@ -76,12 +84,11 @@
           } else if (t === 'light') {
             // no class
           } else {
-            // legacy auto dark schedule
             var manual = localStorage.getItem('ghs-dark-mode-manual');
-            var saved = localStorage.getItem('ghs-dark-mode');
+            var saved  = localStorage.getItem('ghs-dark-mode');
             var isDark;
             if (manual !== null) isDark = JSON.parse(manual);
-            else if (saved !== null) isDark = JSON.parse(saved);
+            else if (saved  !== null) isDark = JSON.parse(saved);
             else {
               var h = new Date(Date.now() + 5*3600*1000).getUTCHours();
               isDark = h >= 18 || h < 6;
@@ -101,6 +108,7 @@
       "description": "Government High School Babi Khel, District Mohmand, KPK Pakistan. Excellence in Education since 2018.",
       "url": "https://ghsbabikhel.indevs.in",
       "foundingDate": "2018",
+      "image": "https://ghsbabikhel.indevs.in/og-image.jpg",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Babi Khel",

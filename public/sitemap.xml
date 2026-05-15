@@ -1,16 +1,164 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://ghsbabikhel.indevs.in/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://ghsbabikhel.indevs.in/about</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://ghsbabikhel.indevs.in/teachers</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://ghsbabikhel.indevs.in/notices</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
-  <url><loc>https://ghsbabikhel.indevs.in/news</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
-  <url><loc>https://ghsbabikhel.indevs.in/results</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://ghsbabikhel.indevs.in/result-card</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://ghsbabikhel.indevs.in/gallery</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://ghsbabikhel.indevs.in/library</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://ghsbabikhel.indevs.in/weather</loc><changefreq>daily</changefreq><priority>0.5</priority></url>
-  <url><loc>https://ghsbabikhel.indevs.in/online-classes</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://ghsbabikhel.indevs.in/admission</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://ghsbabikhel.indevs.in/notes</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+
+  <!-- Homepage — changes daily (notices, news) -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/</loc>
+    <lastmod>2025-05-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- About — rarely changes -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/about</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Teachers — changes when staff changes -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/teachers</loc>
+    <lastmod>2025-03-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Notices — changes daily -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/notices</loc>
+    <lastmod>2025-05-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- News — changes daily -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/news</loc>
+    <lastmod>2025-05-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Results — changes on exam result publication -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/results</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Result Card -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/result-card</loc>
+    <lastmod>2025-05-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Gallery -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/gallery</loc>
+    <lastmod>2025-04-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Library -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/library</loc>
+    <lastmod>2025-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Weather -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/weather</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Online Classes -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/online-classes</loc>
+    <lastmod>2025-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Admission -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/admission</loc>
+    <lastmod>2025-03-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Notes root -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/notes</loc>
+    <lastmod>2025-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Notes — subject pages -->
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/notes/math</loc>
+    <lastmod>2025-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/notes/physics</loc>
+    <lastmod>2025-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/notes/chemistry</loc>
+    <lastmod>2025-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/notes/biology</loc>
+    <lastmod>2025-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/notes/english</loc>
+    <lastmod>2025-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/notes/urdu</loc>
+    <lastmod>2025-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/notes/islamiat</loc>
+    <lastmod>2025-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/notes/pakistan-studies</loc>
+    <lastmod>2025-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ghsbabikhel.indevs.in/notes/computer</loc>
+    <lastmod>2025-04-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
 </urlset>

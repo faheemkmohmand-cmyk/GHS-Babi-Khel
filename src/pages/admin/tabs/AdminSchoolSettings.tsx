@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";
-import { supabase } from "@/lib/supabase";
+import { supabasePublic } from "@/lib/supabase";
 import { uploadToCloudinary, compressImage, type UploadProgress } from "@/lib/cloudinary";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +29,6 @@ const ImageUploader = ({
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
   const lastFileRef = useRef<File | null>(null);
 
-  // Keep preview in sync with currentUrl from parent
   useEffect(() => {
     setPreview(currentUrl);
   }, [currentUrl]);
@@ -63,13 +62,11 @@ const ImageUploader = ({
     const file = files[0];
     if (!file) return;
 
-    // File size check — max 10MB (will be compressed before upload)
     if (file.size > 10 * 1024 * 1024) {
       toast.error("File too large. Maximum size is 10MB.");
       return;
     }
 
-    // File type validation
     const validTypes = ["image/png", "image/jpeg", "image/webp", "image/gif"];
     if (!validTypes.includes(file.type)) {
       toast.error("Invalid file type. Use PNG, JPG, WEBP, or GIF.");
@@ -79,14 +76,12 @@ const ImageUploader = ({
     setUploadError(null);
     lastFileRef.current = file;
 
-    // Show local preview immediately
     const localPreview = URL.createObjectURL(file);
     setPreview(localPreview);
 
     await doUpload(file);
   }, [doUpload]);
 
-  // Retry with the same file
   const handleRetry = async () => {
     if (!lastFileRef.current) {
       toast.error("No file to retry. Please select a file again.");
@@ -106,7 +101,6 @@ const ImageUploader = ({
     <div className="space-y-2">
       <Label className="font-semibold">{label}</Label>
 
-      {/* Preview */}
       {preview && (
         <div className="relative">
           <img
@@ -137,7 +131,6 @@ const ImageUploader = ({
         </div>
       )}
 
-      {/* Error display with retry */}
       {uploadError && (
         <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 space-y-2">
           <div className="flex items-start gap-2">
@@ -157,7 +150,6 @@ const ImageUploader = ({
         </div>
       )}
 
-      {/* Drop zone */}
       <div
         {...getRootProps()}
         className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all duration-200 ${
@@ -239,7 +231,7 @@ const AdminSchoolSettings = () => {
     setSaved(false);
 
     try {
-      const savePromise = supabase
+      const savePromise = supabasePublic
         .from("school_settings")
         .upsert({ ...form, id: 1 }, { onConflict: "id" });
 
@@ -255,7 +247,8 @@ const AdminSchoolSettings = () => {
       } else {
         setSaved(true);
         toast.success("Settings saved successfully!");
-        queryClient.invalidateQueries({ queryKey: ["school-settings"] });
+        queryClient.removeQueries({ queryKey: ["school-settings"] });
+        await queryClient.refetchQueries({ queryKey: ["school-settings"] });
         setTimeout(() => setSaved(false), 3000);
       }
     } catch (err: any) {
@@ -345,7 +338,7 @@ const AdminSchoolSettings = () => {
         </CardContent>
       </Card>
 
-      {/* Branding — Logo + Banner upload */}
+      {/* Branding */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Branding</CardTitle>
@@ -366,7 +359,7 @@ const AdminSchoolSettings = () => {
         </CardContent>
       </Card>
 
-      {/* Reminder: Save after upload */}
+      {/* Reminder */}
       <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 flex items-start gap-2">
         <AlertTriangle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
         <p className="text-sm text-muted-foreground">

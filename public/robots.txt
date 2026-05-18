@@ -1,9 +1,14 @@
-# Robots — full crawl access for major search engines
+# ── Robots.txt — GHS Babi Khel ────────────────────────────────────────────
+# Allows all major search engine crawlers full access to public pages.
+# Private dashboards and admin panel are blocked.
+
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 2
 
 User-agent: Twitterbot
 Allow: /
@@ -11,13 +16,25 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
+User-agent: LinkedInBot
 Allow: /
 
-# Disallow private dashboards
-Disallow: /admin
-Disallow: /teacher
-Disallow: /dashboard
-Disallow: /auth/
+User-agent: WhatsApp
+Allow: /
 
+User-agent: *
+Allow: /
+Crawl-delay: 5
+
+# ── Private pages — no indexing ───────────────────────────────────────────
+Disallow: /admin
+Disallow: /admin/
+Disallow: /teacher
+Disallow: /teacher/
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /api/
+
+# ── Sitemap ───────────────────────────────────────────────────────────────
 Sitemap: https://ghsbabikhel.indevs.in/sitemap.xml

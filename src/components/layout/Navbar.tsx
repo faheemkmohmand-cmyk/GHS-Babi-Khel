@@ -5,7 +5,7 @@ import {
   Menu, X, GraduationCap, LogIn, UserPlus,
   LayoutDashboard, LogOut, Shield,
 } from "lucide-react";
-import { useSchoolSettings } from "@/hooks/useSchoolSettings";
+import { useSchoolSettings, safeMediaUrl } from "@/hooks/useSchoolSettings";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/shared/NotificationBell";
 import ThemeSwitcher, { ThemeInlineSelector } from "@/components/shared/ThemeSwitcher";
@@ -59,9 +59,10 @@ const Navbar = () => {
         <Link to="/" className="flex items-center gap-2.5 shrink-0">
           {settings?.logo_url && !logoFailed ? (
             <img
-              src={settings.logo_url}
+              src={safeMediaUrl(settings.logo_url)!}
               alt={`${settings?.school_name || "GHS Babi Khel"} logo`}
               className="w-10 h-10 rounded-xl object-cover"
+              crossOrigin="anonymous"
               onError={() => setLogoFailed(true)}
             />
           ) : (
@@ -314,4 +315,5 @@ const Navbar = () => {
 
 export default Navbar;
 
-      
+
+                           

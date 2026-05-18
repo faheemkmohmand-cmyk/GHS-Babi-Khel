@@ -42,6 +42,15 @@ const fallbackSettings: SchoolSettings = {
   pass_percentage: 98,
 };
 
+// ─── URL safety helper ────────────────────────────────────────────────────
+// Cloudinary occasionally returns http:// URLs. Mobile Chrome blocks
+// mixed-content (http image inside https page) silently — the img fires
+// onError and the logo/banner disappears. Force every media URL to https.
+export function safeMediaUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  return url.replace(/^http:\/\//i, "https://");
+}
+
 export function useSchoolSettings() {
   return useQuery<SchoolSettings>({
     queryKey: ["school-settings"],
@@ -53,33 +62,34 @@ export function useSchoolSettings() {
           .eq("id", 1)
           .single();
         if (error) throw error;
-        return data;
+        // Normalise URLs to https so mobile Chrome never blocks them
+        return {
+          ...data,
+          logo_url: safeMediaUrl(data.logo_url),
+          banner_url: safeMediaUrl(data.banner_url),
+        };
       } catch (err) {
-        // If the query fails (network error, no row, RLS, etc.),
-        // return fallbackSettings instead of throwing — this prevents
-        // the entire page from showing an error state when Supabase
-        // is unreachable or the table is empty.
         console.warn("[useSchoolSettings] Query failed, using fallback:", err);
         return fallbackSettings;
       }
     },
-    // Reduced staleTime so updated logo/banner appear faster after save.
-    // FIX: was 2 minutes — even 2 minutes means homepage shows old null
-    // banner/logo for 2 minutes after saving. Set to 30s as a compromise.
-    staleTime: 30 * 1000,
-    gcTime: 30 * 60 * 1000,
+    // FIX: Increased staleTime from 30s → 5min.
+    // On mobile, a 30s staleTime means every time the user opens a new tab
+    // or the browser wakes the app from background (common on Android), React
+    // Query immediately fires a background refetch. During that refetch window
+    // `settings` becomes `undefined` momentarily → banner/logo disappear.
+    // 5 minutes is still short enough that changes appear quickly after save.
+    staleTime: 5 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     retry: 2,
-    // Refresh data when user switches back to the homepage tab
-    // (e.g., after uploading logo/banner in admin panel)
     refetchOnWindowFocus: true,
-    // FIX: Removed placeholderData: fallbackSettings.
-    // The placeholder has logo_url: null and banner_url: null. When React
-    // Query serves placeholderData, the homepage renders with no banner/logo
-    // even though Supabase has the real URLs. Since the query is fast
-    // (Supabase is nearby), a loading skeleton is better than wrong data.
-    // Components that need fallback text values handle it inline with || "".
+    // FIX: placeholderData keeps the PREVIOUS cached value visible while
+    // a background refetch runs, so the banner/logo never flash away.
+    // Using a function form so it only returns non-null cached data.
+    placeholderData: (previousData) => previousData ?? fallbackSettings,
   });
 }
 
 export { fallbackSettings };
-      
+
+    

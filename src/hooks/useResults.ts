@@ -44,7 +44,9 @@ export function useResults(options: {
 
       if (year) query = query.eq("year", year);
       if (search) {
-        query = query.or(`students.full_name.ilike.%${search}%,students.roll_number.ilike.%${search}%`);
+        // Escape LIKE wildcards to prevent wildcard injection
+        const safe = search.replace(/%/g, "\\%").replace(/_/g, "\\_");
+        query = query.or(`students.full_name.ilike.%${safe}%,students.roll_number.ilike.%${safe}%`);
       }
 
       const { data, error } = await query;
@@ -94,4 +96,4 @@ export function getGradeColor(grade: string): string {
     case "D": return "bg-[hsl(25,95%,53%)] text-white";
     default: return "bg-destructive text-destructive-foreground";
   }
-}
+  }

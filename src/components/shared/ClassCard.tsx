@@ -3,7 +3,7 @@
  * Premium animated class card used across Student, Teacher & Admin dashboards.
  */
 import { useState, useEffect } from "react";
-import {
+import { 
   Video, Clock, Users, BookOpen, ExternalLink, ChevronDown,
   ChevronUp, FileText, BookMarked, CheckCircle, XCircle, Wifi
 } from "lucide-react";

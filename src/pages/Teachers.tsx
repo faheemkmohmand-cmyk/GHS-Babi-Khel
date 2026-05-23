@@ -30,7 +30,10 @@ const Teachers = () => {
     [teachers, debouncedSearch]
   );
 
+  const isTouchDevice = () => window.matchMedia("(hover: none)").matches;
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isTouchDevice()) return; // skip 3D tilt on touch/mobile — causes GPU glitch
     const card = e.currentTarget;
     const rect = card.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width - 0.5) * 16;
@@ -39,6 +42,7 @@ const Teachers = () => {
   };
 
   const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isTouchDevice()) return;
     e.currentTarget.style.transform = "perspective(600px) rotateY(0deg) rotateX(0deg) translateY(0px)";
   };
 
@@ -82,7 +86,7 @@ const Teachers = () => {
                     key={t.id}
                     onMouseMove={handleMouseMove}
                     onMouseLeave={handleMouseLeave}
-                    className="bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-elevated transition-all duration-200 will-change-transform"
+                    className="bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-elevated transition-all duration-200"
                     style={{ transition: "transform 0.15s ease-out, box-shadow 0.3s" }}
                   >
                     <div className="h-28 gradient-hero relative">
@@ -135,3 +139,4 @@ const Teachers = () => {
 };
 
 export default Teachers;
+            

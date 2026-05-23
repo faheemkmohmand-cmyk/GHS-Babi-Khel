@@ -1,9 +1,5 @@
-/* ── Performance: GPU-accelerate common animations ── */
-@layer base {
-  img, video {
-    content-visibility: auto;
-  }
-}
+/* GPU compositing note: content-visibility removed from img/video —
+   causes texture corruption glitch on Android Chrome during scroll/animation */
 
 @tailwind base;
 @tailwind components;
@@ -395,10 +391,11 @@
   }
 }
 
-/* ✅ Content-visibility for off-screen sections — browser skips layout/paint */
+/* content-visibility removed — caused GPU texture corruption (static noise) on
+   Android Chrome when combined with Framer Motion whileInView animations.
+   Sections now rely on Framer Motion viewport detection for lazy rendering. */
 .cv-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 500px;
+  /* intentionally empty — kept as class for backward compat */
 }
 
 /* Print styles */
@@ -407,4 +404,5 @@
   body { background: white !important; color: black !important; }
   .shadow-card, .shadow-elevated { box-shadow: none !important; }
   * { break-inside: avoid; }
-}
+                                }
+  

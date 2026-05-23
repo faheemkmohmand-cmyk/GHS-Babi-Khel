@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import {
   useAdminTests, useTestQuestions, useTestAttempts, useTestMutations,
@@ -46,6 +47,7 @@ function TestList({ onManageQuestions, onViewResults }: { onManageQuestions: (t:
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [form, setForm] = useState<TestFormData>({ title: "", subject: "", type: "weekly", description: "", time_per_question: 15 });
+  const [deleteTarget, setDeleteTarget] = useState<Test | null>(null);
 
   const openCreate = () => { setEditing(null); setForm({ title: "", subject: "", type: "weekly", description: "", time_per_question: 15 }); setModalOpen(true); };
   const openEdit = (t: Test) => { setEditing(t); setForm({ title: t.title, subject: t.subject, type: t.type, description: t.description || "", time_per_question: t.time_per_question }); setModalOpen(true); };
@@ -59,10 +61,11 @@ function TestList({ onManageQuestions, onViewResults }: { onManageQuestions: (t:
     } catch { toast.error("Failed to save test"); }
   };
 
-  const handleDelete = async (t: Test) => {
-    if (!confirm(`Delete "${t.title}"? This will also delete all questions and attempts.`)) return;
-    try { await deleteTest.mutateAsync(t.id); toast.success("Test deleted"); }
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    try { await deleteTest.mutateAsync(deleteTarget.id); toast.success("Test deleted"); }
     catch { toast.error("Failed to delete"); }
+    finally { setDeleteTarget(null); }
   };
 
   const handleToggle = async (t: Test) => {
@@ -136,7 +139,7 @@ function TestList({ onManageQuestions, onViewResults }: { onManageQuestions: (t:
                         <Button size="sm" variant="ghost" onClick={() => handleToggle(t)} title={t.is_published ? "Unpublish" : "Publish"}>
                           {t.is_published ? <ToggleRight className="w-4 h-4 text-primary" /> : <ToggleLeft className="w-4 h-4" />}
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => handleDelete(t)} title="Delete"><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => setDeleteTarget(t)} title="Delete"><Trash2 className="w-4 h-4 text-destructive" /></Button>
                       </div>
                     </td>
                   </tr>
@@ -192,9 +195,12 @@ function QuestionsManager({ test, onBack }: { test: Test; onBack: () => void }) 
     } catch { toast.error("Failed to add question"); }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Delete this question?")) return;
-    try { await deleteQuestion.mutateAsync(id); toast.success("Question deleted"); } catch { toast.error("Failed"); }
+  const [deleteQId, setDeleteQId] = useState<string | null>(null);
+
+  const confirmDeleteQuestion = async () => {
+    if (!deleteQId) return;
+    try { await deleteQuestion.mutateAsync(deleteQId); toast.success("Question deleted"); } catch { toast.error("Failed"); }
+    finally { setDeleteQId(null); }
   };
 
   const handleUpdate = async (id: string) => {
@@ -332,7 +338,7 @@ function QuestionsManager({ test, onBack }: { test: Test; onBack: () => void }) 
                     </div>
                     <div className="flex gap-1 shrink-0">
                       <Button size="sm" variant="ghost" onClick={() => { setEditingId(q.id); setEditForm({ question_text: q.question_text, option_a: q.option_a, option_b: q.option_b, option_c: q.option_c, option_d: q.option_d, correct_option: q.correct_option }); }}><Edit className="w-3.5 h-3.5" /></Button>
-                      <Button size="sm" variant="ghost" onClick={() => handleDelete(q.id)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => setDeleteQId(q.id)}><Trash2 className="w-3.5 h-3.5 text-destructive" /></Button>
                     </div>
                   </div>
                 )}
@@ -341,6 +347,19 @@ function QuestionsManager({ test, onBack }: { test: Test; onBack: () => void }) 
           ))}
         </div>
       )}
+      {/* Delete Question Confirmation */}
+      <AlertDialog open={!!deleteQId} onOpenChange={(o) => !o && setDeleteQId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Question</AlertDialogTitle>
+            <AlertDialogDescription>Are you sure you want to delete this question? This cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteQuestion} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -445,4 +464,4 @@ function ResultsView({ test, onBack }: { test: Test; onBack: () => void }) {
       </Card>
     </div>
   );
-}
+    }

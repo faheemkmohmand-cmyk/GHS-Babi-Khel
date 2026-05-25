@@ -2,8 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-// ✅ FIX 2: vite-plugin-pwa generates a Service Worker + offline cache automatically.
-// Install first:  npm install -D vite-plugin-pwa
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => ({
@@ -16,10 +14,9 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
 
-    // ✅ FIX 2: PWA plugin — auto-generates SW with Workbox precaching
     VitePWA({
-      registerType: "autoUpdate",           // SW updates silently in background
-      injectRegister: "auto",               // Injects registration script automatically
+      registerType: "autoUpdate",
+      injectRegister: "auto",
       includeAssets: [
         "favicon.svg",
         "favicon-16.png",
@@ -27,12 +24,28 @@ export default defineConfig(({ mode }) => ({
         "apple-touch-icon.png",
         "og-image.jpg",
       ],
-      manifest: false,                      // We have our own /public/manifest.json
+      manifest: false,
       workbox: {
-        // Precache all built assets (JS, CSS, HTML)
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-        // Runtime cache strategies for external requests
+        // ✅ FIX: Only precache HTML and critical assets.
+        // JS/CSS chunks are NOT precached — they are fetched fresh on load.
+        // This prevents the "stuck spinner on refresh" bug where the SW
+        // served a stale/mismatched chunk after a new deploy.
+        globPatterns: ["**/*.{html,ico,png,svg,woff2}"],
+
+        // ✅ FIX: JS and CSS chunks must ALWAYS come from network first.
+        // If network fails, fall back to cache. This ensures refreshes
+        // always get the latest code, not a stale SW-cached version.
         runtimeCaching: [
+          {
+            // JS and CSS chunks — NetworkFirst so refresh always works
+            urlPattern: /\/assets\/.*\.(js|css)$/i,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "js-css-chunks",
+              networkTimeoutSeconds: 10,
+              expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 },
+            },
+          },
           {
             // Google Fonts stylesheets
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -52,8 +65,7 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            // Supabase REST API — NetworkFirst so data is always fresh,
-            // but falls back to cache when offline
+            // Supabase REST API — NetworkFirst
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: "NetworkFirst",
             options: {
@@ -63,7 +75,7 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            // Cloudinary images — CacheFirst (images rarely change)
+            // Cloudinary images
             urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
             handler: "CacheFirst",
             options: {
@@ -72,7 +84,7 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            // OpenWeatherMap — StaleWhileRevalidate (weather can be slightly stale)
+            // OpenWeatherMap
             urlPattern: /^https:\/\/api\.openweathermap\.org\/.*/i,
             handler: "StaleWhileRevalidate",
             options: {
@@ -83,7 +95,6 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       devOptions: {
-        // Show SW in dev for testing — set to false to disable in local dev
         enabled: false,
       },
     }),

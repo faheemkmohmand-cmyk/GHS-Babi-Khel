@@ -21,7 +21,8 @@ const AdminSiteAnalytics     = lazy(() => import("./tabs/AdminSiteAnalytics"));
 const AdminAdmissions        = lazy(() => import("./tabs/AdminAdmissions"));
 const AdminFinance           = lazy(() => import("./tabs/AdminFinance"));
 const AdminSchoolAnalytics   = lazy(() => import("../dashboard/tabs/SchoolAnalyticsTab"));
-const AdminStudentIDCards    = lazy(() => import("./tabs/AdminStudentIDCards"));
+// ── Student Credentials (ID Cards + Monitor Pass) ──
+const AdminStudentCredentials = lazy(() => import("./tabs/AdminStudentCredentials"));
 
 const tabMap: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
   overview:           AdminOverview,
@@ -42,7 +43,8 @@ const tabMap: Record<string, React.LazyExoticComponent<React.ComponentType<any>>
   "online-classes":   AdminOnlineClasses,
   admissions:         AdminAdmissions,
   finance:            AdminFinance,
-  "id-cards":         AdminStudentIDCards,
+  // "id-cards" now lives inside credentials
+  "credentials":      AdminStudentCredentials,
 };
 
 const Fallback = () => (
@@ -69,8 +71,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-      
-
-
-
-

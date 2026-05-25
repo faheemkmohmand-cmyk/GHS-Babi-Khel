@@ -62,17 +62,14 @@ export function useSchoolSettings() {
   return useQuery<SchoolSettings>({
     queryKey: ["school-settings"],
     queryFn: async () => {
-      // Attempt 1: public client (works when not signed in)
+      // Attempt 1: public client (no auth)
       try {
         return await fetchSettings(supabasePublic);
       } catch (publicErr) {
         console.warn("[useSchoolSettings] Public client failed:", publicErr);
       }
 
-      // Attempt 2: authenticated client — NO timeout
-      // The old 5-second timeout was the bug: after sign-in the public
-      // client fails, the authenticated client was killed by the timer,
-      // and fallbackSettings (null logo/banner) was returned instead.
+      // Attempt 2: authenticated client — no timeout
       try {
         return await fetchSettings(supabase);
       } catch (authErr) {
@@ -85,9 +82,6 @@ export function useSchoolSettings() {
     gcTime: 60 * 60 * 1000,
     retry: 1,
     refetchOnWindowFocus: false,
-    // KEY FIX: keep showing the previous real data (with logo/banner URLs)
-    // while a refetch is running after sign-in — instead of flashing
-    // fallbackSettings which has null logo/banner
     placeholderData: (previousData) => previousData ?? fallbackSettings,
   });
     }

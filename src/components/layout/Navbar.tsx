@@ -22,7 +22,6 @@ const navLinks = [
   { to: "/weather",        label: "Weather" },
   { to: "/online-classes", label: "Online Classes" },
   { to: "/admission",      label: "Admission" },
-  { to: "/duty",           label: "Duty" },
 ];
 
 const Navbar = () => {
@@ -316,4 +315,5 @@ const Navbar = () => {
 export default Navbar;
 
 
-                           
+
+                      

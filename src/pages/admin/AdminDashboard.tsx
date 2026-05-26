@@ -61,15 +61,14 @@ const Fallback = () => (
 const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Read the tab from the URL query param "?tab=xxx", default to "overview"
+  // Derive activeTab purely from URL — no local useState so back/forward
+  // navigation and refresh always show the correct tab without desync.
   const urlTab = searchParams.get("tab");
-  const [activeTab, setActiveTabState] = useState<string>(
-    urlTab && tabMap[urlTab] ? urlTab : "overview"
-  );
+  const activeTab = urlTab && tabMap[urlTab] ? urlTab : "overview";
 
   const setActiveTab = useCallback((tab: string) => {
-    setActiveTabState(tab);
-    // Persist the tab in the URL so refresh keeps the user on the same tab
+    // replace: true keeps the browser history clean — back button goes to
+    // wherever the user came from before the dashboard, not to a previous tab.
     setSearchParams({ tab }, { replace: true });
   }, [setSearchParams]);
 
@@ -85,3 +84,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+  

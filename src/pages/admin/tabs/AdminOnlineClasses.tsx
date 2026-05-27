@@ -70,7 +70,7 @@ export default function AdminOnlineClasses() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ contain: "layout style" }}>
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -95,7 +95,7 @@ export default function AdminOnlineClasses() {
         {analytics.map((a, i) => (
           <div
             key={a.label}
-            className={`bg-gradient-to-br ${a.bg} rounded-2xl border ${a.border} p-4 relative overflow-hidden`}
+            className={`bg-gradient-to-br ${a.bg} rounded-2xl border ${a.border} p-4 relative`}
           >
             <a.icon className={`w-5 h-5 mb-3 ${a.color}`} />
             <Num n={a.value} />
@@ -232,4 +232,5 @@ export default function AdminOnlineClasses() {
       />
     </div>
   );
-}
+    }
+        

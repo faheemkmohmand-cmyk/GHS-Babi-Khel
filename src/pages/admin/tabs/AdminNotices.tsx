@@ -88,13 +88,13 @@ const AdminNotices = () => {
   if (isLoading) return <div className="space-y-2">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12" />)}</div>;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" style={{ contain: "layout style" }}>
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-heading font-bold text-foreground">Manage Notices</h2>
         <Button onClick={openAdd} className="gap-1.5"><Plus className="w-4 h-4" /> Add Notice</Button>
       </div>
 
-      <Card><CardContent className="p-0">
+      <Card><CardContent className="p-0 overflow-x-auto" style={{ contain: "layout style" }}>
         <Table>
           <TableHeader><TableRow>
             <TableHead>Title</TableHead><TableHead>Category</TableHead><TableHead>Urgent</TableHead><TableHead>Published</TableHead><TableHead>Expires</TableHead><TableHead>Date</TableHead><TableHead className="text-right">Actions</TableHead>
@@ -173,3 +173,4 @@ const AdminNotices = () => {
 };
 
 export default AdminNotices;
+      

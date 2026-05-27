@@ -6,6 +6,16 @@ import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
 import { useSchoolSettings, safeMediaUrl } from "@/hooks/useSchoolSettings";
 
+// Timeout helper: rejects after `ms` milliseconds
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error("Request timed out")), ms)
+    ),
+  ]);
+}
+
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,7 +24,6 @@ const SignIn = () => {
   const [pendingStatus, setPendingStatus] = useState<"pending" | "rejected" | null>(null);
   const navigate = useNavigate();
 
-  // FIX: Load actual school logo so it shows on sign-in page
   const { data: settings } = useSchoolSettings();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,59 +31,89 @@ const SignIn = () => {
     setLoading(true);
     setPendingStatus(null);
 
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      // Step 1: Authenticate — timeout after 10s
+      const authResult = await withTimeout(
+        supabase.auth.signInWithPassword({ email, password }),
+        10000
+      );
 
-    if (authError || !authData.user) {
-      toast.error(authError?.message || "Login failed.");
+      const { data: authData, error: authError } = authResult;
+
+      if (authError || !authData.user) {
+        toast.error(authError?.message || "Login failed.");
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: Fetch profile — timeout after 6s, fall back gracefully
+      let profile: { role?: string; status?: string } | null = null;
+
+      try {
+        const rpcResult = await withTimeout(
+          supabase.rpc("get_my_profile"),
+          6000
+        );
+
+        if (!rpcResult.error && rpcResult.data) {
+          profile = rpcResult.data;
+        } else {
+          // Fallback: direct table query with its own timeout
+          const directResult = await withTimeout(
+            supabase
+              .from("profiles")
+              .select("role, status")
+              .eq("id", authData.user.id)
+              .single(),
+            6000
+          );
+          profile = directResult.data ?? null;
+        }
+      } catch {
+        // Profile fetch timed out — treat as pending to be safe
+        console.warn("Profile fetch timed out, treating as pending.");
+        await supabase.auth.signOut();
+        toast.error("Server is slow. Please try again in a moment.");
+        setLoading(false);
+        return;
+      }
+
+      const status = profile?.status || "pending";
+      const role = profile?.role;
+
+      if (status === "pending") {
+        await supabase.auth.signOut();
+        setPendingStatus("pending");
+        setLoading(false);
+        return;
+      }
+
+      if (status === "rejected") {
+        await supabase.auth.signOut();
+        setPendingStatus("rejected");
+        setLoading(false);
+        return;
+      }
+
+      // Step 3: Navigate FIRST, then clear loading
+      toast.success("Signed in successfully!");
+
+      if (role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+
       setLoading(false);
-      return;
-    }
-
-    // Check profile status
-    const { data: profileJson, error: rpcError } = await supabase.rpc("get_my_profile");
-
-    let profile: { role?: string; status?: string } | null = null;
-
-    if (!rpcError && profileJson) {
-      profile = profileJson;
-    } else {
-      const { data: directProfile } = await supabase
-        .from("profiles")
-        .select("role, status")
-        .eq("id", authData.user.id)
-        .single();
-      profile = directProfile;
-    }
-
-    const status = profile?.status || "pending";
-    const role = profile?.role;
-
-    if (status === "pending") {
-      await supabase.auth.signOut();
-      setPendingStatus("pending");
+    } catch (err) {
+      // Catches the top-level auth timeout or any unexpected error
+      const message =
+        err instanceof Error && err.message === "Request timed out"
+          ? "Sign in is taking too long. Check your connection and try again."
+          : "An unexpected error occurred. Please try again.";
+      toast.error(message);
       setLoading(false);
-      return;
     }
-
-    if (status === "rejected") {
-      await supabase.auth.signOut();
-      setPendingStatus("rejected");
-      setLoading(false);
-      return;
-    }
-
-    toast.success("Signed in successfully!");
-
-    if (role === "admin") {
-      navigate("/admin", { replace: true });
-    } else {
-      navigate("/dashboard", { replace: true });
-    }
-
-    setLoading(false);
   };
 
   return (
@@ -92,7 +131,6 @@ const SignIn = () => {
       >
         <div className="bg-card rounded-2xl shadow-elevated p-8">
           <div className="text-center mb-8">
-            {/* FIX: Show real school logo if available, fallback to icon */}
             <div className="w-14 h-14 rounded-2xl gradient-hero mx-auto mb-4 flex items-center justify-center overflow-hidden">
               {settings?.logo_url && !logoFailed ? (
                 <img
@@ -191,3 +229,4 @@ const SignIn = () => {
 };
 
 export default SignIn;
+            

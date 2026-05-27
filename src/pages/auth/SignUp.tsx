@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, Lock, User, GraduationCap, ArrowRight, Loader2, Phone, Hash, Clock } from "lucide-react";
+import { Mail, Lock, User, GraduationCap, ArrowRight, Loader2, Phone, Clock } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
 
 const roles = ["student", "teacher"] as const;
-const classOptions = ["6", "7", "8", "9", "10"];
 
 const SignUp = () => {
   const [fullName, setFullName] = useState("");
@@ -14,8 +13,6 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState<string>("student");
-  const [studentClass, setStudentClass] = useState("");
-  const [rollNumber, setRollNumber] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -46,8 +43,6 @@ const SignUp = () => {
         data: {
           full_name: fullName,
           role,
-          class: role === "student" ? studentClass : null,
-          roll_number: role === "student" ? rollNumber : null,
           phone: phone || null,
           status: "pending",
         },
@@ -60,8 +55,6 @@ const SignUp = () => {
         id: authData.user.id,
         full_name: fullName,
         role,
-        class: role === "student" ? studentClass : null,
-        roll_number: role === "student" ? rollNumber : null,
         phone: phone || null,
         status: "pending",
       }, { onConflict: "id" });
@@ -221,40 +214,6 @@ const SignUp = () => {
               </div>
             </div>
 
-            {/* Student fields */}
-            {role === "student" && (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-1 block">Class</label>
-                  <select
-                    value={studentClass}
-                    onChange={(e) => setStudentClass(e.target.value)}
-                    className="w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm focus:ring-2 focus:ring-ring outline-none"
-                    required
-                  >
-                    <option value="">Select</option>
-                    {classOptions.map((c) => (
-                      <option key={c} value={c}>Class {c}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-1 block">Roll Number</label>
-                  <div className="relative">
-                    <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input
-                      type="text"
-                      value={rollNumber}
-                      onChange={(e) => setRollNumber(e.target.value)}
-                      placeholder="e.g. 601"
-                      className="w-full rounded-xl border border-input bg-background pl-9 pr-3 py-2.5 text-sm focus:ring-2 focus:ring-ring outline-none"
-                      maxLength={20}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Phone */}
             <div>
               <label className="text-sm font-medium text-foreground mb-1 block">Phone (optional)</label>
@@ -293,4 +252,4 @@ const SignUp = () => {
 };
 
 export default SignUp;
-              
+

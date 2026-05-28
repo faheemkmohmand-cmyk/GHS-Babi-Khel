@@ -63,10 +63,10 @@ export default function AdminOnlineClasses() {
   };
 
   const analytics = [
-    { icon: BarChart3,   label: "Total Classes",     value: classes.length,         color: "text-primary",     bg: "from-primary/10 to-primary/5",             border: "border-primary/20"           },
-    { icon: Wifi,        label: "Live Right Now",     value: liveClasses.length,     color: "text-red-500",     bg: "from-red-500/10 to-red-500/5",             border: "border-red-400/20"           },
-    { icon: TrendingUp,  label: "Completed Today",    value: completedToday.length,  color: "text-emerald-500", bg: "from-emerald-500/10 to-emerald-500/5",     border: "border-emerald-400/20"       },
-    { icon: Clock,       label: "Upcoming",           value: upcomingClasses.length, color: "text-blue-500",   bg: "from-blue-500/10 to-blue-500/5",         border: "border-blue-400/20"         },
+    { icon: BarChart3,   label: "Total Classes",     value: classes.length,         color: "text-primary",     bg: "bg-primary/10",      border: "border-primary/20"      },
+    { icon: Wifi,        label: "Live Right Now",     value: liveClasses.length,     color: "text-red-500",     bg: "bg-red-500/10",      border: "border-red-400/20"      },
+    { icon: TrendingUp,  label: "Completed Today",    value: completedToday.length,  color: "text-emerald-500", bg: "bg-emerald-500/10",  border: "border-emerald-400/20"  },
+    { icon: Clock,       label: "Upcoming",           value: upcomingClasses.length, color: "text-blue-500",    bg: "bg-blue-500/10",     border: "border-blue-400/20"     },
   ];
 
   return (
@@ -95,7 +95,7 @@ export default function AdminOnlineClasses() {
         {analytics.map((a, i) => (
           <div
             key={a.label}
-            className={`bg-gradient-to-br ${a.bg} rounded-2xl border ${a.border} p-4 relative`}
+            className={`${a.bg} rounded-2xl border ${a.border} p-4 relative`}
           >
             <a.icon className={`w-5 h-5 mb-3 ${a.color}`} />
             <Num n={a.value} />

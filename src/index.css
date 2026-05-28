@@ -19,15 +19,15 @@
 [class*="hover:scale-"] {
   transform: none !important;
 }
-
-/* ✅ ANDROID CHROME GRADIENT FIX: diagonal gradients (bg-gradient-to-br/tr/tl/bl)
-   inside scrollable containers cause texture corruption on Android Chrome.
-   Force them to render as their start-color only. */
-[class*="bg-gradient-to-br"],
-[class*="bg-gradient-to-tr"],
-[class*="bg-gradient-to-tl"],
-[class*="bg-gradient-to-bl"] {
-  background-image: none !important;
+/* Prevent backdrop-blur from creating stacking context GPU layers on Android */
+[class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+/* Prevent overflow-hidden + transform combos from causing texture glitches */
+.overflow-hidden [class*="translate-"],
+.overflow-hidden [class*="-translate-"] {
+  transform: none !important;
 }
 
 @tailwind base;
@@ -436,4 +436,4 @@
   * { break-inside: avoid; }
                                 }
 
-     
+                                                                    

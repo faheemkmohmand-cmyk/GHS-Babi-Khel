@@ -4,16 +4,13 @@ import {
   BarChart3, Settings, Users, GraduationCap, ClipboardList, CheckSquare,
   Calendar, Bell, BookOpen, LogOut,
   Menu, X, ExternalLink, Shield, Moon, Sun, Video, Hash,
-  BookMarked, TrendingUp, Star, Globe, DollarSign, Search, KeyRound,
-  UserCheck, Clock
+  BookMarked, TrendingUp, Star, Globe, DollarSign, Search, KeyRound
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useDarkMode } from "@/hooks/useDarkMode";
 
 const navItems = [
   { id: "overview",          label: "Overview",              icon: BarChart3      },
-  { id: "pending-requests",  label: "Pending Requests",      icon: Clock          },
-  { id: "users",             label: "Manage Users",          icon: UserCheck      },
   { id: "settings",          label: "School Settings",       icon: Settings       },
   { id: "credentials",       label: "Student Credentials",   icon: KeyRound       },
   { id: "teachers",          label: "Manage Teachers",       icon: Users          },
@@ -52,14 +49,6 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
   const searchIndex: { label: string; sublabel?: string; tabId: string }[] = [
     // Direct nav items
     ...navItems.map((item) => ({ label: item.label, tabId: item.id })),
-    // pending-requests sub-features
-    { label: "Approve Users",     sublabel: "Pending Requests", tabId: "pending-requests" },
-    { label: "Reject Users",      sublabel: "Pending Requests", tabId: "pending-requests" },
-    { label: "Sign Up Approvals", sublabel: "Pending Requests", tabId: "pending-requests" },
-    // users sub-features
-    { label: "Add User",          sublabel: "Manage Users", tabId: "users" },
-    { label: "Delete User",       sublabel: "Manage Users", tabId: "users" },
-    { label: "Change Role",       sublabel: "Manage Users", tabId: "users" },
     // announcements sub-tabs
     { label: "Notices",        sublabel: "Announcements", tabId: "announcements" },
     { label: "News",           sublabel: "Announcements", tabId: "announcements" },
@@ -408,4 +397,4 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
 };
 
 export default AdminLayout;
-     
+    

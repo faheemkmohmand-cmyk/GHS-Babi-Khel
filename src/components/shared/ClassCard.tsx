@@ -78,14 +78,14 @@ export default function ClassCard({ cls, role = "student", onEdit, onDelete, ind
         ${status === "live" ? "ring-2 ring-red-400/40 border-red-500/30" : `border-border ${statusConfig.border}`}
       `}
     >
-      {/* Subject colour strip — inline block, not absolute, avoids GPU layer creation */}
-      <div className={`rounded-t-2xl h-1 bg-gradient-to-r ${gradient} opacity-80`} />
+      {/* Subject colour strip — solid color, no gradient to avoid Android GPU glitch */}
+      <div className="rounded-t-2xl h-1 bg-primary opacity-60" />
 
       <div className="p-4 pt-5">
         {/* ── Header row ── */}
         <div className="flex items-start gap-3">
           {/* Subject icon */}
-          <div className={`shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-xl shadow-lg`}>
+          <div className="shrink-0 w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center text-xl">
             {icon}
           </div>
 
@@ -138,7 +138,7 @@ export default function ClassCard({ cls, role = "student", onEdit, onDelete, ind
         {status === "upcoming" && countdown && (
           <div className="mt-2.5 flex items-center gap-1.5">
             <div className="flex-1 h-1 rounded-full bg-secondary overflow-hidden">
-              <div className="h-full w-1/3 bg-gradient-to-r from-primary to-primary/60 rounded-full opacity-70" />
+              <div className="h-full w-1/3 bg-primary rounded-full opacity-70" />
             </div>
             <span className="text-[11px] font-mono font-bold text-primary whitespace-nowrap">
               ⏱ {countdown}
@@ -256,4 +256,4 @@ export default function ClassCard({ cls, role = "student", onEdit, onDelete, ind
     </div>
   );
         }
-            
+                

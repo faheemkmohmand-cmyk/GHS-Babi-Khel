@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   BarChart3, Settings, Users, GraduationCap, ClipboardList, CheckSquare,
@@ -40,6 +40,21 @@ interface AdminLayoutProps {
 const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => {
   const { profile, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const mobileNavRef = useRef<HTMLElement>(null);
+
+  // When sidebar opens, scroll the active nav item into the center of the list
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    requestAnimationFrame(() => {
+      const nav = mobileNavRef.current;
+      if (!nav) return;
+      const active = nav.querySelector('[data-active="true"]') as HTMLElement | null;
+      if (active) {
+        const top = active.offsetTop - nav.clientHeight / 2 + active.clientHeight / 2;
+        nav.scrollTop = Math.max(0, top);
+      }
+    });
+  }, [sidebarOpen]);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const navigate = useNavigate();
@@ -158,6 +173,7 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
         {items.map((item) => (
           <button
             key={item.id}
+            data-active={activeTab === item.id ? "true" : "false"}
             onClick={() => { onTabChange(item.id); onItemClick?.(); }}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
               activeTab === item.id
@@ -369,7 +385,7 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
                 />
               </div>
             </div>
-            <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+            <nav ref={mobileNavRef} className="flex-1 p-3 space-y-0.5 overflow-y-auto">
               <NavList onItemClick={() => setSidebarOpen(false)} />
             </nav>
             <div className="p-3 border-t border-border space-y-1">
@@ -397,4 +413,4 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
 };
 
 export default AdminLayout;
-    
+                                                

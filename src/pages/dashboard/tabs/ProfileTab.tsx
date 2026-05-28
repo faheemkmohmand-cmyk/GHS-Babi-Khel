@@ -5,14 +5,10 @@ import { supabase } from "@/lib/supabase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import toast from "react-hot-toast";
 
-const classOptions = ["", "6", "7", "8", "9", "10"];
-
 const ProfileTab = () => {
   const { user, profile, refreshProfile } = useAuth();
   const [fullName, setFullName] = useState(profile?.full_name || "");
   const [phone, setPhone] = useState(profile?.phone || "");
-  const [studentClass, setStudentClass] = useState(profile?.class || "");
-  const [rollNumber, setRollNumber] = useState(profile?.roll_number || "");
   const [saving, setSaving] = useState(false);
 
   const [newPassword, setNewPassword] = useState("");
@@ -28,8 +24,6 @@ const ProfileTab = () => {
       .update({
         full_name: fullName,
         phone: phone || null,
-        class: studentClass || null,
-        roll_number: rollNumber || null,
       })
       .eq("id", user.id);
     setSaving(false);
@@ -110,19 +104,6 @@ const ProfileTab = () => {
           <label className="text-sm font-medium text-foreground mb-1 block">Email</label>
           <input value={user?.email || ""} disabled className="w-full rounded-lg border border-input bg-muted px-3 py-2.5 text-sm text-muted-foreground" />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">Class</label>
-            <select value={studentClass} onChange={(e) => setStudentClass(e.target.value)} className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm">
-              <option value="">N/A</option>
-              {classOptions.filter(Boolean).map((c) => <option key={c} value={c}>Class {c}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground mb-1 block">Roll Number</label>
-            <input value={rollNumber} onChange={(e) => setRollNumber(e.target.value)} className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:ring-2 focus:ring-ring outline-none" />
-          </div>
-        </div>
         <div>
           <label className="text-sm font-medium text-foreground mb-1 block">Phone</label>
           <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+92 3XX XXXXXXX" className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:ring-2 focus:ring-ring outline-none" />
@@ -149,3 +130,4 @@ const ProfileTab = () => {
 
 export default ProfileTab;
 
+                                                                                     

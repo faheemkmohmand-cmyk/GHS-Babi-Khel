@@ -83,21 +83,6 @@ const AdminUsers = () => {
     onError: () => toast.error("Update failed"),
   });
 
-  // ── Update class ─────────────────────────────────────────────────────────
-  const updateClass = useMutation({
-    mutationFn: async ({ id, cls }: { id: string; cls: string }) => {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ class: cls || null })
-        .eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Class updated");
-      qc.invalidateQueries({ queryKey: ["admin-users"] });
-    },
-  });
-
   // ── Delete user ──────────────────────────────────────────────────────────
   const deleteUser = useMutation({
     mutationFn: async (id: string) => {
@@ -284,8 +269,6 @@ const AdminUsers = () => {
                 <TableRow>
                   <TableHead>User</TableHead>
                   <TableHead>Role</TableHead>
-                  <TableHead>Class</TableHead>
-                  <TableHead>Roll No</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Joined</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -340,29 +323,6 @@ const AdminUsers = () => {
                         )}
                       </TableCell>
 
-                      {/* Class selector */}
-                      <TableCell>
-                        {isSelf ? (
-                          <span className="text-sm text-muted-foreground">{u.class ? `Class ${u.class}` : "—"}</span>
-                        ) : (
-                          <Select
-                            value={u.class || "none"}
-                            onValueChange={v => updateClass.mutate({ id: u.id, cls: v === "none" ? "" : v })}
-                          >
-                            <SelectTrigger className="h-8 w-24 text-xs">
-                              <SelectValue placeholder="—" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">—</SelectItem>
-                              {classes.map(c => (
-                                <SelectItem key={c} value={c}>Class {c}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      </TableCell>
-
-                      <TableCell className="text-sm text-muted-foreground">{u.roll_number || "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{u.phone || "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                         {format(new Date(u.created_at), "dd MMM yyyy")}

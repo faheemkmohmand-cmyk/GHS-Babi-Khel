@@ -70,7 +70,7 @@ export default function AdminOnlineClasses() {
   ];
 
   return (
-    <div className="space-y-6" style={{ contain: "layout style" }}>
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -191,7 +191,7 @@ export default function AdminOnlineClasses() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ contain: "layout style" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filtered.map((cls, i) => (
               <ClassCard key={cls.id} cls={cls} role="admin" index={i} onEdit={handleEdit}
                 onDelete={(id) => setConfirmId(id)} />
@@ -233,4 +233,5 @@ export default function AdminOnlineClasses() {
     </div>
   );
     }
+
         

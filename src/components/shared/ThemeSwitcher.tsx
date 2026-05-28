@@ -10,9 +10,9 @@ const OPTIONS: { id: ThemeMode; label: string; Icon: typeof Sun }[] = [
 // Segmented pill toggle (Light / System / Dark) — used everywhere.
 const ThemeSegmented = ({ size = "md" }: { size?: "sm" | "md" }) => {
   const { theme, setTheme } = useTheme();
-  const padY = size === "sm" ? 4 : 6;
-  const padX = size === "sm" ? 8 : 10;
-  const iconSize = size === "sm" ? 13 : 15;
+  const padY = size === "sm" ? 2 : 4;
+  const padX = size === "sm" ? 5 : 7;
+  const iconSize = size === "sm" ? 11 : 13;
 
   return (
     <div
@@ -22,7 +22,7 @@ const ThemeSegmented = ({ size = "md" }: { size?: "sm" | "md" }) => {
         display: "inline-flex",
         alignItems: "center",
         gap: 2,
-        padding: 4,
+        padding: 3,
         borderRadius: 9999,
         backgroundColor: "hsl(var(--secondary))",
         border: "1px solid hsl(var(--border))",
@@ -63,7 +63,7 @@ const ThemeSegmented = ({ size = "md" }: { size?: "sm" | "md" }) => {
 
 // Backwards-compatible exports — both desktop and mobile now render the same control.
 export const ThemeInlineSelector = () => (
-  <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "8px 0" }}>
+  <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "4px 0" }}>
     <ThemeSegmented size="md" />
   </div>
 );
@@ -71,3 +71,4 @@ export const ThemeInlineSelector = () => (
 const ThemeSwitcher = (_props: { compact?: boolean } = {}) => <ThemeSegmented size="sm" />;
 
 export default ThemeSwitcher;
+               

@@ -369,8 +369,7 @@ const AdminExamAttendance = () => {
                       );
                     })}
                   </div>
-
-                  {/* Desktop table */}
+{/* Desktop table */}
                   <div className="hidden sm:block">
                     <Card><CardContent className="p-0 overflow-x-auto">
                       <table className="w-full text-sm">
@@ -457,49 +456,93 @@ const AdminExamAttendance = () => {
               <p className="text-xs text-muted-foreground mt-1">Initialize attendance sheets for papers to see the overview</p>
             </CardContent></Card>
           ) : (
-            <Card><CardContent className="p-0 overflow-x-auto">
-              <table className="w-full text-sm min-w-[600px]">
-                <thead><tr className="border-b border-border bg-secondary/30">
-                  <th className="text-left p-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-secondary/30 z-10">Student</th>
-                  <th className="text-left p-2 text-xs font-semibold text-muted-foreground">Exam Roll</th>
-                  {overviewPivot.subjects.map(sub => (
-                    <th key={sub} className="text-center p-2 text-xs font-semibold text-muted-foreground whitespace-nowrap">{sub}</th>
-                  ))}
-                  <th className="text-center p-2 text-xs font-semibold text-muted-foreground">Present</th>
-                  <th className="text-center p-2 text-xs font-semibold text-muted-foreground">Absent</th>
-                </tr></thead>
-                <tbody>
-                  {overviewPivot.students.map(s => {
-                    const statuses = overviewPivot.grid[s.id] || {};
-                    const presentCount = overviewPivot.subjects.filter(sub => statuses[sub] === "present").length;
-                    const absentCount = overviewPivot.subjects.filter(sub => statuses[sub] === "absent").length;
-                    return (
-                      <tr key={s.id} className="border-b border-border/50 hover:bg-secondary/20">
-                        <td className="p-2 font-medium sticky left-0 bg-card z-10">{s.name}</td>
-                        <td className="p-2 font-mono text-primary font-bold">{s.examRoll}</td>
-                        {overviewPivot.subjects.map(sub => {
-                          const st = statuses[sub] || "—";
-                          const cfg = st !== "—" ? statusConfig[st as Status] : null;
-                          return (
-                            <td key={sub} className="p-2 text-center">
-                              {cfg ? (
-                                <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md text-[10px] font-bold ${cfg.bg} ${cfg.color}`}>
-                                  {st === "present" ? "P" : st === "absent" ? "A" : "L"}
-                                </span>
-                              ) : (
-                                <span className="text-muted-foreground">—</span>
-                              )}
-                            </td>
-                          );
-                        })}
-                        <td className="p-2 text-center font-bold text-emerald-600">{presentCount}</td>
-                        <td className="p-2 text-center font-bold text-red-600">{absentCount}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </CardContent></Card>
+            <>
+              {/* ── Mobile: one card per student ── */}
+              <div className="sm:hidden space-y-3">
+                {overviewPivot.students.map(s => {
+                  const statuses = overviewPivot.grid[s.id] || {};
+                  const presentCount = overviewPivot.subjects.filter(sub => statuses[sub] === "present").length;
+                  const absentCount  = overviewPivot.subjects.filter(sub => statuses[sub] === "absent").length;
+                  return (
+                    <Card key={s.id}>
+                      <CardContent className="p-3 space-y-2">
+                        {/* Student header */}
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold text-sm text-foreground">{s.name}</p>
+                            <p className="text-xs text-muted-foreground">Exam Roll: <span className="font-mono font-bold text-primary">{s.examRoll}</span></p>
+                          </div>
+                          <div className="flex gap-2 text-xs font-semibold">
+                            <span className="text-emerald-600">P: {presentCount}</span>
+                            <span className="text-red-600">A: {absentCount}</span>
+                          </div>
+                        </div>
+                        {/* Subject pills */}
+                        <div className="flex flex-wrap gap-1.5">
+                          {overviewPivot.subjects.map(sub => {
+                            const st = statuses[sub];
+                            const cfg = st ? statusConfig[st as Status] : null;
+                            return (
+                              <div key={sub} className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold border ${cfg ? `${cfg.bg} ${cfg.color}` : "bg-secondary text-muted-foreground border-border"}`}>
+                                <span className="max-w-[70px] truncate">{sub.length > 8 ? sub.slice(0, 8) + "…" : sub}</span>
+                                <span>{st === "present" ? "P" : st === "absent" ? "A" : st === "leave" ? "L" : "—"}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* ── Desktop: scrollable table ── */}
+              <div className="hidden sm:block">
+                <Card><CardContent className="p-0 overflow-x-auto">
+                  <table className="w-full text-sm min-w-[600px]">
+                    <thead><tr className="border-b border-border bg-secondary/30">
+                      <th className="text-left p-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-secondary/30 z-10">Student</th>
+                      <th className="text-left p-2 text-xs font-semibold text-muted-foreground">Exam Roll</th>
+                      {overviewPivot.subjects.map(sub => (
+                        <th key={sub} className="text-center p-2 text-xs font-semibold text-muted-foreground whitespace-nowrap">{sub}</th>
+                      ))}
+                      <th className="text-center p-2 text-xs font-semibold text-muted-foreground">Present</th>
+                      <th className="text-center p-2 text-xs font-semibold text-muted-foreground">Absent</th>
+                    </tr></thead>
+                    <tbody>
+                      {overviewPivot.students.map(s => {
+                        const statuses = overviewPivot.grid[s.id] || {};
+                        const presentCount = overviewPivot.subjects.filter(sub => statuses[sub] === "present").length;
+                        const absentCount  = overviewPivot.subjects.filter(sub => statuses[sub] === "absent").length;
+                        return (
+                          <tr key={s.id} className="border-b border-border/50 hover:bg-secondary/20">
+                            <td className="p-2 font-medium sticky left-0 bg-card z-10">{s.name}</td>
+                            <td className="p-2 font-mono text-primary font-bold">{s.examRoll}</td>
+                            {overviewPivot.subjects.map(sub => {
+                              const st = statuses[sub] || "—";
+                              const cfg = st !== "—" ? statusConfig[st as Status] : null;
+                              return (
+                                <td key={sub} className="p-2 text-center">
+                                  {cfg ? (
+                                    <span className={`inline-flex items-center justify-center w-7 h-7 rounded-md text-[10px] font-bold ${cfg.bg} ${cfg.color}`}>
+                                      {st === "present" ? "P" : st === "absent" ? "A" : "L"}
+                                    </span>
+                                  ) : (
+                                    <span className="text-muted-foreground">—</span>
+                                  )}
+                                </td>
+                              );
+                            })}
+                            <td className="p-2 text-center font-bold text-emerald-600">{presentCount}</td>
+                            <td className="p-2 text-center font-bold text-red-600">{absentCount}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </CardContent></Card>
+              </div>
+            </>
           )}
         </>
       )}

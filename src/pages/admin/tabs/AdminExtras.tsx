@@ -2,8 +2,9 @@
 // Manages: Daily Quotes (Feature 3), Honor Roll (Feature 8), Exam Schedule (Feature 6), Users
 
 import { useState, lazy, Suspense } from "react";
-import { UserCog } from "lucide-react";
+import { UserCog, Clock } from "lucide-react";
 const AdminUsers = lazy(() => import("./AdminUsers"));
+const AdminPendingRequests = lazy(() => import("./AdminPendingRequests"));
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -278,7 +279,7 @@ function ExamScheduleManager() {
           <span>Subject *</span><span className="col-span-2">Paper Name</span><span>Paper Code</span><span>Date *</span><span>Start</span><span>End</span><span>Hall / Notes</span>
         </div>
 
-          {/* Rows */}
+        {/* Rows */}
         <div className="space-y-2">
           {rows.map((row, i) => (
             <div key={i} className="grid grid-cols-2 sm:grid-cols-8 gap-1.5 items-center bg-secondary/30 rounded-xl p-2">
@@ -354,11 +355,17 @@ const AdminExtras = () => (
         <TabsTrigger value="quotes" className="text-xs sm:text-sm shrink-0 px-3 py-2">🌙 <span className="ml-1">Quotes</span></TabsTrigger>
         <TabsTrigger value="honor" className="text-xs sm:text-sm shrink-0 px-3 py-2">🏅 <span className="ml-1">Honor Roll</span></TabsTrigger>
         <TabsTrigger value="schedule" className="text-xs sm:text-sm shrink-0 px-3 py-2">📅 <span className="ml-1">Schedule</span></TabsTrigger>
+        <TabsTrigger value="pending" className="gap-1.5 text-xs sm:text-sm shrink-0 px-3 py-2"><Clock className="w-3.5 h-3.5" /><span>Pending</span></TabsTrigger>
         <TabsTrigger value="users" className="gap-1.5 text-xs sm:text-sm shrink-0 px-3 py-2"><UserCog className="w-3.5 h-3.5" /><span>Users</span></TabsTrigger>
       </TabsList>
       <TabsContent value="quotes" className="mt-4"><QuotesManager /></TabsContent>
       <TabsContent value="honor" className="mt-4"><HonorRollManager /></TabsContent>
       <TabsContent value="schedule" className="mt-4"><ExamScheduleManager /></TabsContent>
+      <TabsContent value="pending" className="mt-4">
+        <Suspense fallback={<div className="space-y-2">{[...Array(4)].map((_,i)=><div key={i} className="h-12 rounded-lg bg-muted animate-pulse"/>)}</div>}>
+          <AdminPendingRequests />
+        </Suspense>
+      </TabsContent>
       <TabsContent value="users" className="mt-4">
         <Suspense fallback={<div className="space-y-2">{[...Array(4)].map((_,i)=><div key={i} className="h-12 rounded-lg bg-muted animate-pulse"/>)}</div>}>
           <AdminUsers />

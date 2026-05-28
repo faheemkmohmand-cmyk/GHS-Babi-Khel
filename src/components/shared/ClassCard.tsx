@@ -77,7 +77,6 @@ export default function ClassCard({ cls, role = "student", onEdit, onDelete, ind
         transition-shadow duration-300 group
         ${status === "live" ? "ring-2 ring-red-400/40 border-red-500/30" : `border-border ${statusConfig.border}`}
       `}
-      style={{ contain: "layout style" }}
     >
       {/* Subject colour strip — inline block, not absolute, avoids GPU layer creation */}
       <div className={`rounded-t-2xl h-1 bg-gradient-to-r ${gradient} opacity-80`} />
@@ -256,4 +255,5 @@ export default function ClassCard({ cls, role = "student", onEdit, onDelete, ind
       </div>
     </div>
   );
-          }
+        }
+            

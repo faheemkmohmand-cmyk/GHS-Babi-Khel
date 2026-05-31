@@ -47,7 +47,7 @@ const About = () => {
                     {settings?.school_name || "GHS Babi Khel"}
                   </h2>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    {settings?.description ||
+                    {settings?.about_text || settings?.description ||
                       "Established in 2018, GHS Babi Khel is a government high school located in Babi Khel, District Mohmand, Khyber Pakhtunkhwa, Pakistan. The school serves as a beacon of education in the region, providing quality education from Class 6 to Class 10."}
                   </p>
                   <p className="text-muted-foreground leading-relaxed mb-4">
@@ -128,11 +128,12 @@ const About = () => {
 
       {/* Location */}
       <section className="py-16">
-        <div className="container mx-auto px-4 text-center">
+        <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            className="text-center mb-8"
           >
             <MapPin className="w-8 h-8 text-primary mx-auto mb-3" />
             <h2 className="text-2xl font-heading font-bold text-foreground mb-2">Our Location</h2>
@@ -146,6 +147,40 @@ const About = () => {
               Email: {settings?.email || "ghsbabkhel@edu.pk"}
             </p>
           </motion.div>
+
+          {settings?.location_lat && settings?.location_lng ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="rounded-2xl overflow-hidden shadow-card border border-border"
+            >
+              <iframe
+                src={`https://maps.google.com/maps?q=${settings.location_lat},${settings.location_lng}&z=15&output=embed`}
+                width="100%"
+                height="400"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="School Location"
+              />
+              <div className="bg-card px-5 py-3 flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="w-4 h-4 text-primary shrink-0" />
+                  <span>{settings.address || "Babi Khel, District Mohmand, KPK"}</span>
+                </div>
+                <a
+                  href={`https://www.google.com/maps?q=${settings.location_lat},${settings.location_lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                >
+                  Open in Google Maps ↗
+                </a>
+              </div>
+            </motion.div>
+          ) : null}
         </div>
       </section>
     </PageLayout>
@@ -153,3 +188,4 @@ const About = () => {
 };
 
 export default About;
+                  

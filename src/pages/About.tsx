@@ -156,13 +156,11 @@ const About = () => {
               className="rounded-2xl overflow-hidden shadow-card border border-border"
             >
               <iframe
-                src={`https://maps.google.com/maps?q=${settings.location_lat},${settings.location_lng}&z=15&output=embed`}
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${settings.location_lng! - 0.01},${settings.location_lat! - 0.01},${settings.location_lng! + 0.01},${settings.location_lat! + 0.01}&layer=mapnik&marker=${settings.location_lat},${settings.location_lng}`}
                 width="100%"
                 height="400"
                 style={{ border: 0 }}
-                allowFullScreen
                 loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
                 title="School Location"
               />
               <div className="bg-card px-5 py-3 flex items-center justify-between gap-3 flex-wrap">
@@ -188,4 +186,4 @@ const About = () => {
 };
 
 export default About;
-                  
+        

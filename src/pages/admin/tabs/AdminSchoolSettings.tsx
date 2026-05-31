@@ -162,7 +162,7 @@ const MapPicker = ({ lat, lng, onChange }: MapPickerProps) => {
 
   const detectLocation = () => {
     if (!navigator.geolocation) {
-      toast.error("Geolocation not supported by your browser.");
+      toast.error("Geolocation is not supported by this browser.");
       return;
     }
     setDetecting(true);
@@ -173,45 +173,66 @@ const MapPicker = ({ lat, lng, onChange }: MapPickerProps) => {
         setInputLng(longitude.toFixed(6));
         onChange(latitude, longitude);
         setDetecting(false);
-        toast.success("Location detected!");
+        toast.success("Location detected! Click Save to keep it.");
       },
-      () => {
-        toast.error("Could not detect location. Enter coordinates manually.");
+      (err) => {
         setDetecting(false);
+        if (err.code === 1) {
+          // PERMISSION_DENIED
+          toast.error(
+            "Location permission denied. Go to your browser Settings → Site Permissions → Location and allow this site.",
+            { duration: 7000 }
+          );
+        } else if (err.code === 2) {
+          // POSITION_UNAVAILABLE
+          toast.error("Could not get your position. Check GPS/network and try again.", { duration: 5000 });
+        } else {
+          // TIMEOUT or unknown
+          toast.error("Location request timed out. Try again or enter coordinates manually.", { duration: 5000 });
+        }
       },
-      { timeout: 10000 }
+      { timeout: 12000, enableHighAccuracy: true }
     );
   };
 
   const hasLocation = lat !== null && lng !== null;
-  const mapsUrl = hasLocation
+  // OpenStreetMap embed — free, no API key, never blocked
+  const osmEmbedUrl = hasLocation
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${lng! - 0.01},${lat! - 0.01},${lng! + 0.01},${lat! + 0.01}&layer=mapnik&marker=${lat},${lng}`
+    : null;
+  const googleMapsUrl = hasLocation
     ? `https://www.google.com/maps?q=${lat},${lng}`
     : null;
-  const embedUrl = hasLocation
-    ? `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`
+  const osmUrl = hasLocation
+    ? `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}`
     : null;
 
   return (
     <div className="space-y-4">
-      {/* Map preview */}
-      {embedUrl ? (
+      {/* Map preview — OpenStreetMap, no API key needed */}
+      {osmEmbedUrl ? (
         <div className="rounded-xl overflow-hidden border border-border shadow-sm">
           <iframe
-            src={embedUrl}
+            src={osmEmbedUrl}
             width="100%"
             height="300"
             style={{ border: 0 }}
-            allowFullScreen
             loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
             title="School Location Preview"
           />
+          <div className="bg-secondary/40 px-3 py-2 flex items-center justify-between gap-2 flex-wrap text-xs text-muted-foreground">
+            <span className="font-mono">{lat?.toFixed(6)}, {lng?.toFixed(6)}</span>
+            <div className="flex gap-3">
+              <a href={osmUrl!} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">OpenStreetMap ↗</a>
+              <a href={googleMapsUrl!} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Maps ↗</a>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="rounded-xl border-2 border-dashed border-border bg-secondary/30 h-48 flex flex-col items-center justify-center gap-2 text-muted-foreground">
           <MapPin className="w-8 h-8 opacity-40" />
           <p className="text-sm font-medium">No location set yet</p>
-          <p className="text-xs opacity-60">Use the options below to set your school location</p>
+          <p className="text-xs opacity-60">Use the options below to pin your school</p>
         </div>
       )}
 
@@ -220,7 +241,7 @@ const MapPicker = ({ lat, lng, onChange }: MapPickerProps) => {
         <div>
           <Label className="text-xs">Latitude</Label>
           <Input
-            placeholder="e.g. 34.408400"
+            placeholder="e.g. 34.325461"
             value={inputLat}
             onChange={e => setInputLat(e.target.value)}
             className="font-mono text-sm"
@@ -229,7 +250,7 @@ const MapPicker = ({ lat, lng, onChange }: MapPickerProps) => {
         <div>
           <Label className="text-xs">Longitude</Label>
           <Input
-            placeholder="e.g. 71.370700"
+            placeholder="e.g. 71.379518"
             value={inputLng}
             onChange={e => setInputLng(e.target.value)}
             className="font-mono text-sm"
@@ -245,21 +266,19 @@ const MapPicker = ({ lat, lng, onChange }: MapPickerProps) => {
           {detecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Navigation className="w-3.5 h-3.5" />}
           {detecting ? "Detecting..." : "Use My Device Location"}
         </Button>
-        {mapsUrl && (
-          <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
+        {googleMapsUrl && (
+          <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
             <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-primary">
-              <ExternalLink className="w-3.5 h-3.5" /> View on Google Maps
+              <ExternalLink className="w-3.5 h-3.5" /> Verify on Google Maps
             </Button>
           </a>
         )}
       </div>
 
-      <p className="text-xs text-muted-foreground bg-secondary/40 rounded-lg px-3 py-2">
-        💡 <strong>Tip:</strong> Open{" "}
-        <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-          Google Maps
-        </a>
-        , right-click your school, and copy the coordinates shown at the top of the popup.
+      <p className="text-xs text-muted-foreground bg-secondary/40 rounded-lg px-3 py-2 leading-relaxed">
+        💡 <strong>To get coordinates:</strong> Open{" "}
+        <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Google Maps</a>
+        {" "}→ find your school → long-press or right-click → the coordinates appear at the top. Paste them above and click Apply.
       </p>
     </div>
   );
@@ -439,8 +458,7 @@ const AdminSchoolSettings = () => {
           />
         </CardContent>
       </Card>
-
-      <Card>
+<Card>
         <CardHeader><CardTitle className="text-base">Branding</CardTitle></CardHeader>
         <CardContent className="grid sm:grid-cols-2 gap-6">
           <ImageUploader label="School Logo" currentUrl={form.logo_url} folder="branding"
@@ -467,5 +485,4 @@ const AdminSchoolSettings = () => {
 };
 
 export default AdminSchoolSettings;
-
-          
+            

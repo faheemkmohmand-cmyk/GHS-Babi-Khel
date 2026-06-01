@@ -141,7 +141,7 @@ const ROUTES: RouteSEO[] = [
   },
   {
     pattern: "/about",
-    title: "About Our School — History, Mission & Vision",
+    title: "About GHS Babi Khel — History, Mission & Vision | District Mohmand KPK",
     description:
       "Learn about Government High School Babi Khel — our history since 2018, mission, vision, faculty and commitment to quality education in District Mohmand.",
     keywords: "about GHS Babi Khel, school history, school mission, school vision, Mohmand education",
@@ -156,7 +156,7 @@ const ROUTES: RouteSEO[] = [
   },
   {
     pattern: "/teachers",
-    title: "Our Teachers & Faculty — Qualified Educators",
+    title: "Teachers & Faculty — GHS Babi Khel | District Mohmand KPK",
     description:
       "Meet the qualified teachers and faculty of GHS Babi Khel — dedicated educators shaping the future of students in District Mohmand, KPK.",
     keywords: "GHS Babi Khel teachers, faculty, qualified educators, school staff KPK",
@@ -164,7 +164,7 @@ const ROUTES: RouteSEO[] = [
   },
   {
     pattern: "/notices",
-    title: "School Notices & Announcements — Latest Updates",
+    title: "School Notices & Announcements — GHS Babi Khel",
     description:
       "Browse the latest school notices, urgent announcements, academic updates and event information from Government High School Babi Khel.",
     keywords: "school notices, announcements, urgent notices, academic updates, GHS Babi Khel notices",
@@ -172,7 +172,7 @@ const ROUTES: RouteSEO[] = [
   },
   {
     pattern: "/news",
-    title: "School News & Stories — Updates from GHS Babi Khel",
+    title: "News & Updates — GHS Babi Khel | District Mohmand",
     description:
       "Read the latest news, stories and achievements from Government High School Babi Khel — events, sports, academics and student success.",
     keywords: "school news, GHS Babi Khel news, school events, school stories, student achievements",
@@ -180,7 +180,7 @@ const ROUTES: RouteSEO[] = [
   },
   {
     pattern: "/results",
-    title: "Exam Results — Annual & Term Results",
+    title: "Exam Results — GHS Babi Khel | Annual & Term Results",
     description:
       "View annual and term examination results for all classes at GHS Babi Khel. Check student performance, position and grade reports.",
     keywords: "school results, exam results, annual results, term results, GHS Babi Khel results",
@@ -196,7 +196,7 @@ const ROUTES: RouteSEO[] = [
   },
   {
     pattern: "/result-card",
-    title: "Result Card — Student Performance Report",
+    title: "Result Card — GHS Babi Khel Student Performance Report",
     description:
       "Download or view your detailed student result card from GHS Babi Khel with subject-wise marks, grade and overall performance.",
     keywords: "result card, student report, marks sheet, GHS Babi Khel result",
@@ -204,7 +204,7 @@ const ROUTES: RouteSEO[] = [
   },
   {
     pattern: "/gallery",
-    title: "Photo Gallery — School Events & Activities",
+    title: "Photo Gallery — GHS Babi Khel School Events & Activities",
     description:
       "Explore the photo and video gallery of Government High School Babi Khel — events, sports, academic activities and celebrations.",
     keywords: "school gallery, photos, videos, school events, GHS Babi Khel gallery",
@@ -219,7 +219,7 @@ const ROUTES: RouteSEO[] = [
   },
   {
     pattern: "/library",
-    title: "Digital Library — Books, Notes & Resources",
+    title: "Digital Library — GHS Babi Khel | Books, Notes & Past Papers",
     description:
       "Access the digital library of GHS Babi Khel — books, study notes, past papers and educational resources for all classes.",
     keywords: "school library, digital library, study notes, past papers, books, GHS Babi Khel library",
@@ -228,7 +228,7 @@ const ROUTES: RouteSEO[] = [
   },
   {
     pattern: "/weather",
-    title: "Local Weather — District Mohmand Forecast",
+    title: "Weather — District Mohmand KPK | GHS Babi Khel",
     description:
       "Live weather forecast for Babi Khel and District Mohmand, KPK — temperature, conditions and outlook for the school community.",
     keywords: "Mohmand weather, Babi Khel weather, KPK weather forecast",
@@ -236,7 +236,7 @@ const ROUTES: RouteSEO[] = [
   },
   {
     pattern: "/online-classes",
-    title: "Online Classes — Live Lectures & Recorded Sessions",
+    title: "Online Classes — GHS Babi Khel | Live & Recorded Lectures",
     description:
       "Join live online classes and access recorded lectures from GHS Babi Khel — flexible learning anytime, anywhere.",
     keywords: "online classes, live lectures, e-learning, online school Pakistan, GHS Babi Khel online",
@@ -246,7 +246,7 @@ const ROUTES: RouteSEO[] = [
   },
   {
     pattern: "/admission",
-    title: "Admissions Open — Apply to GHS Babi Khel",
+    title: "Admissions Open — GHS Babi Khel | Apply Online District Mohmand",
     description:
       "Apply for admission at Government High School Babi Khel — eligibility, fee structure, required documents and online application form.",
     keywords: "school admission, admissions open, apply online, GHS Babi Khel admission, school enrollment",
@@ -256,7 +256,7 @@ const ROUTES: RouteSEO[] = [
   },
   {
     pattern: "/notes",
-    title: "Study Notes — Subject-wise Notes & Resources",
+    title: "Study Notes — GHS Babi Khel | Subject-wise Notes & Resources",
     description:
       "Access subject-wise study notes, summaries and chapter resources for all classes at GHS Babi Khel — interactive learning made easy.",
     keywords: "study notes, subject notes, chapter notes, school notes Pakistan, GHS Babi Khel notes",
@@ -266,7 +266,7 @@ const ROUTES: RouteSEO[] = [
   },
   {
     pattern: "/notes/:subject",
-    title: "Subject Notes — Chapters & Lessons",
+    title: "Subject Notes — GHS Babi Khel | Chapter-wise Study Material",
     description:
       "Browse chapter-wise notes and lessons for the selected subject. Comprehensive study material curated for GHS Babi Khel students.",
     keywords: "subject notes, chapters, lessons, study material",

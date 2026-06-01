@@ -573,10 +573,12 @@ const Admission = () => {
 
       if (docsPayload.length > 0) {
         await withTimeout(
-          supabasePublic.rpc("save_admission_docs", {
-            p_b_form_no: form.b_form_no.trim(),
-            p_docs:      JSON.stringify(docsPayload),
-          }),
+          Promise.resolve(
+            supabasePublic.rpc("save_admission_docs", {
+              p_b_form_no: form.b_form_no.trim(),
+              p_docs:      JSON.stringify(docsPayload),
+            })
+          ) as Promise<any>,
           15000,
           "Document save"
         ).catch(() => {

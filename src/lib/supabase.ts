@@ -19,7 +19,7 @@ export const supabasePublic = supabaseUrl
       auth: {
         persistSession:       false,
         autoRefreshToken:     false,
-        detectSessionFromUrl: false,
+        detectSessionInUrl: false,
         storageKey:           "ghs-public-auth",
       },
     })
@@ -27,7 +27,7 @@ export const supabasePublic = supabaseUrl
       auth: {
         persistSession:       false,
         autoRefreshToken:     false,
-        detectSessionFromUrl: false,
+        detectSessionInUrl: false,
         storageKey:           "ghs-public-auth",
       },
     });

@@ -94,9 +94,9 @@ const SEO = ({
           en-PK = English for Pakistan audience.
           ur    = Urdu (same URL for now; update when Urdu pages exist).
           x-default = fallback for unknown locales. */}
-      {!noIndex && <link rel="alternate" hreflang="en-PK"    href={url} />}
-      {!noIndex && <link rel="alternate" hreflang="ur"        href={url} />}
-      {!noIndex && <link rel="alternate" hreflang="x-default" href={url} />}
+      {!noIndex && <link rel="alternate" hrefLang="en-PK"    href={url} />}
+      {!noIndex && <link rel="alternate" hrefLang="ur"        href={url} />}
+      {!noIndex && <link rel="alternate" hrefLang="x-default" href={url} />}
 
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />

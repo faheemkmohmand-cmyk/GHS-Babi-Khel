@@ -28,9 +28,9 @@ const PROFILE_FETCH_TIMEOUT_MS = 6000;
 const AUTH_INIT_TIMEOUT_MS = 8000;
 
 // Wraps a promise with a hard timeout — rejects if the promise doesn't settle in time
-function withTimeout<T>(promise: Promise<T>, ms: number, label = "timeout"): Promise<T> {
+function withTimeout<T>(promise: PromiseLike<T>, ms: number, label = "timeout"): Promise<T> {
   return Promise.race([
-    promise,
+    Promise.resolve(promise),
     new Promise<T>((_, reject) =>
       setTimeout(() => reject(new Error(`${label} after ${ms}ms`)), ms)
     ),

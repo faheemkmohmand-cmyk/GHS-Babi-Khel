@@ -23,7 +23,7 @@ const ResultsHubTab = ({ onNavigate }: { onNavigate?: (tab: string) => void }) =
           <FileText className="w-3.5 h-3.5" /><span>Result Card</span>
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="results" className="mt-4"><ResultsTab onNavigate={onNavigate} /></TabsContent>
+      <TabsContent value="results" className="mt-4"><ResultsTab /></TabsContent>
       <TabsContent value="rolls" className="mt-4"><RollNumbersTab /></TabsContent>
       <TabsContent value="card" className="mt-4"><ResultCardTab /></TabsContent>
     </Tabs>

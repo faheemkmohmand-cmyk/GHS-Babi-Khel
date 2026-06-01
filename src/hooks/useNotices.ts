@@ -31,3 +31,21 @@ export function useNotices(limit?: number) {
     placeholderData: [],
   });
 }
+
+export function useNoticeItem(id: string | undefined) {
+  return useQuery<Notice | null>({
+    queryKey: ["notice-item", id],
+    queryFn: async () => {
+      if (!id) return null;
+      const { data, error } = await supabase
+        .from("notices")
+        .select("id, title, content, category, is_urgent, is_published, created_at, expires_at")
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as Notice | null) ?? null;
+    },
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  });
+}

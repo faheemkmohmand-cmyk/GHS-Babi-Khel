@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, ChevronDown, ChevronUp, Bell } from "lucide-react";
+import { Calendar, ChevronDown, ChevronUp, Bell, ArrowRight } from "lucide-react";
 import PageLayout from "@/components/layout/PageLayout";
 import PageBanner from "@/components/shared/PageBanner";
 import { useNotices } from "@/hooks/useNotices";
@@ -108,8 +109,15 @@ const Notices = () => {
                         >
                         <div className="px-5 pb-5 pt-0 text-sm text-muted-foreground leading-relaxed border-t border-border mt-0 pt-4">
                             {n.content}
-                            <div className="mt-3">
+                            <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
                               <ListenButton onClick={() => setTtsNotice({ title: n.title, content: n.content! })} />
+                              <Link
+                                to={`/notices/${n.id}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                              >
+                                View Full Notice <ArrowRight className="w-3.5 h-3.5" />
+                              </Link>
                             </div>
                           </div>
                         </motion.div>

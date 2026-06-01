@@ -29,3 +29,21 @@ export function useNews(limit?: number) {
     placeholderData: [],
   });
 }
+
+export function useNewsItem(id: string | undefined) {
+  return useQuery<NewsItem | null>({
+    queryKey: ["news-item", id],
+    queryFn: async () => {
+      if (!id) return null;
+      const { data, error } = await supabase
+        .from("news")
+        .select("id, title, content, image_url, is_published, created_at")
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as NewsItem | null) ?? null;
+    },
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  });
+}

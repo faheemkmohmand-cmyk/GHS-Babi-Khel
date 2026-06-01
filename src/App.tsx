@@ -79,6 +79,9 @@ const OnlineClasses    = lazyWithRetry(() => import("./pages/OnlineClasses"));
 const NotFound         = lazyWithRetry(() => import("./pages/NotFound"));
 const Admission        = lazyWithRetry(() => import("./pages/Admission"));
 const DutyPage         = lazyWithRetry(() => import("./pages/Duty"));
+const Search           = lazyWithRetry(() => import("./pages/Search"));
+const NewsDetail       = lazyWithRetry(() => import("./pages/NewsDetail"));
+const NoticeDetail     = lazyWithRetry(() => import("./pages/NoticeDetail"));
 
 const PageSkeleton = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">

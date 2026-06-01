@@ -3,16 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Primary title — React Helmet overrides this per-route after JS loads -->
     <title>GHS Babi Khel - Government High School</title>
-    <meta name="description" content="Government High School Babi Khel, District Mohmand, KPK Pakistan. Excellence in Education since 2018." />
-    <meta name="keywords" content="GHS Babi Khel, Government High School Babi Khel, school Mohmand, KPK school, education Pakistan, admission, online classes, results" />
-    <meta name="author" content="GHS Babi Khel" />
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
 
     <!-- Google Search Console ownership verification -->
     <meta name="google-site-verification" content="oxtaDh5_WKTGGtiPsV1j8KLLqg8b64a8r2F825a7JPQ" />
 
-    <!-- Favicons — PNG first so Google Search picks up the real logo (no favicon.svg which was missing) -->
+    <!-- Favicons -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="shortcut icon" href="/favicon.ico" />
@@ -22,34 +19,12 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- Canonical for root URL -->
-    <link rel="canonical" href="https://ghsbabikhel.indevs.in/" />
-
-    <!-- hreflang — English (Pakistan) primary + Urdu alternate + x-default -->
-    <link rel="alternate" hreflang="en-PK"    href="https://ghsbabikhel.indevs.in/" />
-    <link rel="alternate" hreflang="ur"        href="https://ghsbabikhel.indevs.in/" />
-    <link rel="alternate" hreflang="x-default" href="https://ghsbabikhel.indevs.in/" />
-
-    <!-- OG — actual og-image.jpg is 1730x909 -->
-    <meta property="og:title" content="GHS Babi Khel - Government High School" />
-    <meta property="og:description" content="Government High School Babi Khel, District Mohmand, KPK Pakistan. Excellence in Education since 2018." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://ghsbabikhel.indevs.in/" />
-    <meta property="og:image" content="https://ghsbabikhel.indevs.in/og-image.jpg" />
-    <meta property="og:image:width" content="1730" />
-    <meta property="og:image:height" content="909" />
-    <meta property="og:image:alt" content="GHS Babi Khel — Government High School, District Mohmand, KPK Pakistan" />
-    <meta property="og:locale" content="en_PK" />
-    <meta property="og:locale:alternate" content="ur_PK" />
-    <meta property="og:site_name" content="GHS Babi Khel" />
-
-    <!-- Twitter card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@GHSBabiKhel" />
-    <meta name="twitter:title" content="GHS Babi Khel - Government High School" />
-    <meta name="twitter:description" content="Government High School Babi Khel, District Mohmand, KPK Pakistan. Excellence in Education since 2018." />
-    <meta name="twitter:image" content="https://ghsbabikhel.indevs.in/og-image.jpg" />
-    <meta name="twitter:image:alt" content="GHS Babi Khel — Government High School, District Mohmand, KPK Pakistan" />
+    <!--
+      NOTE: description, keywords, robots, canonical, hreflang, OG, Twitter card,
+      and JSON-LD are ALL injected by React Helmet (SEO.tsx + SiteSchema.tsx).
+      Keeping them here too causes duplicate tags that confuse Google and hurt rankings.
+      React Helmet is the single source of truth for all meta tags.
+    -->
 
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -108,43 +83,6 @@
           }
         } catch (e) {}
       })();
-    </script>
-
-    <!-- JSON-LD — HighSchool schema for homepage -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "HighSchool",
-      "@id": "https://ghsbabikhel.indevs.in#organization",
-      "name": "Government High School Babi Khel",
-      "alternateName": "GHS Babi Khel",
-      "description": "Government High School Babi Khel, District Mohmand, KPK Pakistan. Excellence in Education since 2018.",
-      "url": "https://ghsbabikhel.indevs.in",
-      "foundingDate": "2018",
-      "image": "https://ghsbabikhel.indevs.in/og-image.jpg",
-      "logo": "https://ghsbabikhel.indevs.in/apple-touch-icon.png",
-      "email": "ghsbabikhel@edu.pk",
-      "telephone": "+923469898295",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Babi Khel",
-        "addressLocality": "Babi Khel",
-        "addressRegion": "Khyber Pakhtunkhwa",
-        "postalCode": "24220",
-        "addressCountry": "PK"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": "34.3167",
-        "longitude": "71.5167"
-      },
-      "hasMap": "https://maps.google.com/?q=34.3167,71.5167",
-      "areaServed": {
-        "@type": "AdministrativeArea",
-        "name": "District Mohmand, Khyber Pakhtunkhwa, Pakistan"
-      },
-      "sameAs": ["https://ghsbabikhel.indevs.in"]
-    }
     </script>
 
     <!-- SW KILLER: Unregisters any old Service Worker immediately -->

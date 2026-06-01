@@ -370,6 +370,13 @@ const RouteSEOInjector = () => {
   }
   if (!matched) matched = NOT_FOUND;
 
+  // Dynamic title for /notes/:subject — capitalize subject param
+  let titleOut = matched.title;
+  if (matched.pattern === "/notes/:subject" && matchedParams.subject) {
+    const subj = matchedParams.subject.charAt(0).toUpperCase() + matchedParams.subject.slice(1);
+    titleOut = `${subj} Notes — GHS Babi Khel | Chapter-wise Study Material`;
+  }
+
   const breadcrumbs = matched.breadcrumbs ? matched.breadcrumbs(matchedParams) : undefined;
   const extraJsonLd = matched.jsonLd ? matched.jsonLd(matchedParams, path) : undefined;
 

@@ -538,22 +538,24 @@ const Admission = () => {
     try {
       // ── 1. INSERT admission + read back id and reference_no in one call ──
       const { data: inserted, error: insErr } = await withTimeout(
-        supabasePublic.from("admissions").insert({
-          full_name:       form.full_name.trim(),
-          father_name:     form.father_name.trim(),
-          date_of_birth:   form.date_of_birth || null,
-          b_form_no:       form.b_form_no.trim(),
-          contact_number:  form.contact_number.trim(),
-          whatsapp_number: form.whatsapp_number.trim() || null,
-          home_address:    form.home_address.trim() || null,
-          gender:          form.gender || null,
-          applying_class:  form.applying_class,
-          admission_type:  form.admission_type,
-          previous_school: form.previous_school.trim() || null,
-          previous_class:  form.previous_class.trim() || null,
-          previous_marks:  form.previous_marks.trim() || null,
-          year_of_passing: form.year_of_passing.trim() || null,
-        }).select("id, reference_no").single(),
+        Promise.resolve(
+          supabasePublic.from("admissions").insert({
+            full_name:       form.full_name.trim(),
+            father_name:     form.father_name.trim(),
+            date_of_birth:   form.date_of_birth || null,
+            b_form_no:       form.b_form_no.trim(),
+            contact_number:  form.contact_number.trim(),
+            whatsapp_number: form.whatsapp_number.trim() || null,
+            home_address:    form.home_address.trim() || null,
+            gender:          form.gender || null,
+            applying_class:  form.applying_class,
+            admission_type:  form.admission_type,
+            previous_school: form.previous_school.trim() || null,
+            previous_class:  form.previous_class.trim() || null,
+            previous_marks:  form.previous_marks.trim() || null,
+            year_of_passing: form.year_of_passing.trim() || null,
+          }).select("id, reference_no").single()
+        ) as Promise<{ data: { id: string; reference_no: string } | null; error: any }>,
         15000,
         "Admission insert"
       );

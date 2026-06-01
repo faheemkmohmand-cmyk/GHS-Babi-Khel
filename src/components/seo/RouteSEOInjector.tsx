@@ -383,13 +383,13 @@ const RouteSEOInjector = () => {
   const webPage = {
     "@context": "https://schema.org",
     "@type": matched.type === "article" ? "Article" : "WebPage",
-    name: matched.title,
+    name: titleOut,
     description: matched.description,
     url: `${SITE_URL}${path === "/" ? "" : path}`,
     isPartOf: { "@id": `${SITE_URL}#website` },
     ...(matched.type === "article"
       ? {
-          headline: matched.title,
+          headline: titleOut,
           publisher: { "@id": `${SITE_URL}#organization` },
         }
       : {}),
@@ -403,7 +403,7 @@ const RouteSEOInjector = () => {
 
   return (
     <SEO
-      title={matched.title}
+      title={titleOut}
       description={matched.description}
       keywords={matched.keywords}
       path={path}

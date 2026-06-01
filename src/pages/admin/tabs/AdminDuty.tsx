@@ -5,11 +5,12 @@
  * Roles per class: Monitor · Proctor · Social Worker · Head Boy · Nazira
  * School-wide role: Chief Proctor (one student for whole school)
  *
- * Data saved to localStorage (ghs.duty.v1) — displayed on public /duty page
+ * Data saved to Supabase `duty_board` table — visible on ALL devices instantly.
  * Copilot blue-light palette throughout.
  */
 
 import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Shield, ShieldCheck, Users, Star, BookOpen,
   Crown, Award, Save, Trash2, Pencil, X, Check,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import { supabase } from "@/lib/supabase";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 export type DutyRole = "monitor" | "proctor" | "social_worker" | "head_boy" | "nazira";
@@ -33,11 +35,9 @@ export interface ClassDuty {
 export interface DutyData {
   classes: Record<ClassId, ClassDuty>;
   chief_proctor: string;
-  updatedAt: number;
 }
 
 const CLASSES: ClassId[] = ["6", "7", "8", "9", "10"];
-const STORAGE_KEY = "ghs.duty.v1";
 
 const emptyClass = (): ClassDuty => ({
   monitor: "",
@@ -56,31 +56,40 @@ const defaultData = (): DutyData => ({
     "10": emptyClass(),
   },
   chief_proctor: "",
-  updatedAt: 0,
 });
 
-export function loadDutyData(): DutyData {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultData();
-    const parsed = JSON.parse(raw);
-    // Ensure all classes exist
-    const data = defaultData();
-    data.chief_proctor = parsed.chief_proctor || "";
-    data.updatedAt = parsed.updatedAt || 0;
-    for (const cls of CLASSES) {
-      if (parsed.classes?.[cls]) {
-        data.classes[cls] = { ...emptyClass(), ...parsed.classes[cls] };
-      }
-    }
-    return data;
-  } catch { return defaultData(); }
+// ── Supabase helpers ───────────────────────────────────────────────────────────
+async function fetchDutyData(): Promise<DutyData> {
+  const { data, error } = await supabase
+    .from("duty_board")
+    .select("classes, chief_proctor")
+    .eq("id", 1)
+    .single();
+
+  if (error) throw error;
+
+  const classes = {} as Record<ClassId, ClassDuty>;
+  for (const cls of CLASSES) {
+    classes[cls] = { ...emptyClass(), ...(data.classes?.[cls] ?? {}) };
+  }
+  return { classes, chief_proctor: data.chief_proctor ?? "" };
 }
 
-function saveDutyData(data: DutyData) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, updatedAt: Date.now() }));
-  } catch { /* ignore */ }
+async function saveDutyToSupabase(duty: DutyData): Promise<void> {
+  const { error } = await supabase
+    .from("duty_board")
+    .update({ classes: duty.classes, chief_proctor: duty.chief_proctor })
+    .eq("id", 1);
+  if (error) throw error;
+}
+
+async function clearDutyInSupabase(): Promise<void> {
+  const empty = defaultData();
+  const { error } = await supabase
+    .from("duty_board")
+    .update({ classes: empty.classes, chief_proctor: "" })
+    .eq("id", 1);
+  if (error) throw error;
 }
 
 // ── Role config ────────────────────────────────────────────────────────────────
@@ -291,33 +300,61 @@ function ClassCard({
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 const AdminDuty = () => {
-  const [data, setData] = useState<DutyData>(loadDutyData);
+  const qc = useQueryClient();
+
+  // Load from Supabase
+  const { data: remoteData, isLoading, isError } = useQuery({
+    queryKey: ["duty-board-admin"],
+    queryFn: fetchDutyData,
+    staleTime: 60 * 1000,
+  });
+
+  const [localData, setLocalData] = useState<DutyData>(defaultData);
   const [chiefEditing, setChiefEditing] = useState(false);
   const [chiefDraft, setChiefDraft] = useState("");
-  const [saved, setSaved] = useState(false);
+
+  // Sync remote → local when loaded
+  useEffect(() => {
+    if (remoteData) setLocalData(remoteData);
+  }, [remoteData]);
+
+  const saveMutation = useMutation({
+    mutationFn: saveDutyToSupabase,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["duty-board"] });
+      qc.invalidateQueries({ queryKey: ["duty-board-admin"] });
+      toast.success("Duty assignments saved! Students can now view them on the Duty page.");
+    },
+    onError: () => toast.error("Failed to save. Please try again."),
+  });
+
+  const clearMutation = useMutation({
+    mutationFn: clearDutyInSupabase,
+    onSuccess: () => {
+      setLocalData(defaultData());
+      qc.invalidateQueries({ queryKey: ["duty-board"] });
+      qc.invalidateQueries({ queryKey: ["duty-board-admin"] });
+      toast.success("All duty assignments cleared.");
+    },
+    onError: () => toast.error("Failed to clear. Please try again."),
+  });
 
   const updateClass = (cls: ClassId, updated: ClassDuty) => {
-    setData((prev) => ({
+    setLocalData((prev) => ({
       ...prev,
       classes: { ...prev.classes, [cls]: updated },
     }));
-    setSaved(false);
   };
 
-  const handleSave = () => {
-    saveDutyData(data);
-    setSaved(true);
-    toast.success("Duty assignments saved! Students can now view them on the Duty page.");
-    setTimeout(() => setSaved(false), 3000);
-  };
+  const handleSave = () => saveMutation.mutate(localData);
 
   const handleClearAll = () => {
     if (!confirm("Clear ALL duty assignments? This cannot be undone.")) return;
-    const fresh = defaultData();
-    setData(fresh);
-    saveDutyData(fresh);
-    toast.success("All duty assignments cleared.");
+    clearMutation.mutate();
   };
+
+  const isSaving = saveMutation.isPending;
+  const justSaved = saveMutation.isSuccess;
 
   const chiefRole: RoleConfig = {
     key: "monitor" as DutyRole,
@@ -330,6 +367,26 @@ const AdminDuty = () => {
     desc: "Whole school supervisor",
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="flex flex-col items-center gap-3 text-muted-foreground">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-medium">Loading duty assignments…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center py-24 space-y-3">
+        <p className="text-lg font-bold text-destructive">Failed to load duty board</p>
+        <p className="text-muted-foreground text-sm">Please refresh the page.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Page header */}
@@ -341,7 +398,7 @@ const AdminDuty = () => {
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">
             Assign duty roles for Classes 6–10 and the school-wide Chief Proctor.
-            Changes are visible to all students on the Duty board.
+            Changes are visible to all students on the Duty board instantly.
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -349,6 +406,7 @@ const AdminDuty = () => {
             variant="outline"
             size="sm"
             onClick={handleClearAll}
+            disabled={clearMutation.isPending}
             className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400"
           >
             <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Clear All
@@ -356,10 +414,17 @@ const AdminDuty = () => {
           <Button
             size="sm"
             onClick={handleSave}
-            className={`gap-1.5 ${saved ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"}`}
+            disabled={isSaving}
+            className={`gap-1.5 ${justSaved ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"}`}
           >
-            {saved ? <Check className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
-            {saved ? "Saved!" : "Save Changes"}
+            {isSaving ? (
+              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : justSaved ? (
+              <Check className="w-3.5 h-3.5" />
+            ) : (
+              <Save className="w-3.5 h-3.5" />
+            )}
+            {isSaving ? "Saving…" : justSaved ? "Saved!" : "Save Changes"}
           </Button>
         </div>
       </div>
@@ -383,9 +448,8 @@ const AdminDuty = () => {
                 onChange={(e) => setChiefDraft(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    setData((p) => ({ ...p, chief_proctor: chiefDraft.trim() }));
+                    setLocalData((p) => ({ ...p, chief_proctor: chiefDraft.trim() }));
                     setChiefEditing(false);
-                    setSaved(false);
                   }
                   if (e.key === "Escape") setChiefEditing(false);
                 }}
@@ -394,9 +458,8 @@ const AdminDuty = () => {
               />
               <button
                 onClick={() => {
-                  setData((p) => ({ ...p, chief_proctor: chiefDraft.trim() }));
+                  setLocalData((p) => ({ ...p, chief_proctor: chiefDraft.trim() }));
                   setChiefEditing(false);
-                  setSaved(false);
                 }}
                 className="p-2 rounded-xl bg-yellow-500 text-white hover:bg-yellow-600"
               >
@@ -412,9 +475,9 @@ const AdminDuty = () => {
                 <Crown className="w-6 h-6" />
               </div>
               <div className="flex-1 min-w-0">
-                {data.chief_proctor ? (
+                {localData.chief_proctor ? (
                   <>
-                    <p className="font-bold text-foreground text-base truncate">{data.chief_proctor}</p>
+                    <p className="font-bold text-foreground text-base truncate">{localData.chief_proctor}</p>
                     <p className="text-xs text-yellow-700 dark:text-yellow-400 font-semibold">Chief Proctor · GHS Babi Khel</p>
                   </>
                 ) : (
@@ -422,10 +485,10 @@ const AdminDuty = () => {
                 )}
               </div>
               <button
-                onClick={() => { setChiefDraft(data.chief_proctor); setChiefEditing(true); }}
+                onClick={() => { setChiefDraft(localData.chief_proctor); setChiefEditing(true); }}
                 className="text-xs font-semibold text-yellow-700 dark:text-yellow-400 hover:underline flex items-center gap-1 shrink-0"
               >
-                <Pencil className="w-3.5 h-3.5" /> {data.chief_proctor ? "Change" : "Assign"}
+                <Pencil className="w-3.5 h-3.5" /> {localData.chief_proctor ? "Change" : "Assign"}
               </button>
             </div>
           )}
@@ -459,7 +522,7 @@ const AdminDuty = () => {
           <ClassCard
             key={cls}
             cls={cls}
-            duty={data.classes[cls]}
+            duty={localData.classes[cls]}
             onUpdate={(updated) => updateClass(cls, updated)}
           />
         ))}
@@ -470,9 +533,20 @@ const AdminDuty = () => {
         <p className="text-sm text-blue-700 dark:text-blue-300 font-medium">
           💡 Click <strong>Save Changes</strong> to publish duty assignments to the student-facing Duty board.
         </p>
-        <Button onClick={handleSave} size="sm" className={`shrink-0 ml-4 gap-1.5 ${saved ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"}`}>
-          {saved ? <Check className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
-          {saved ? "Saved!" : "Save Changes"}
+        <Button
+          onClick={handleSave}
+          disabled={isSaving}
+          size="sm"
+          className={`shrink-0 ml-4 gap-1.5 ${justSaved ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700"}`}
+        >
+          {isSaving ? (
+            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : justSaved ? (
+            <Check className="w-3.5 h-3.5" />
+          ) : (
+            <Save className="w-3.5 h-3.5" />
+          )}
+          {isSaving ? "Saving…" : justSaved ? "Saved!" : "Save Changes"}
         </Button>
       </div>
     </div>

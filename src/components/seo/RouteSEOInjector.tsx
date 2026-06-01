@@ -325,6 +325,26 @@ const ROUTES: RouteSEO[] = [
   { pattern: "/dashboard",           title: "Student Dashboard — Your Personal Hub",       description: "Your personalised student dashboard at GHS Babi Khel.", noIndex: true },
   { pattern: "/teacher",             title: "Teacher Dashboard — Manage Classes",          description: "Teacher dashboard at GHS Babi Khel.",               noIndex: true },
   { pattern: "/admin",               title: "Admin Dashboard — School Management",         description: "Administrative console for GHS Babi Khel.",          noIndex: true },
+  {
+    pattern: "/search",
+    title: "Search — GHS Babi Khel",
+    description: "Search across notices, news, teachers and notes at Government High School Babi Khel.",
+    breadcrumbs: () => [baseBreadcrumb, { name: "Search", path: "/search" }],
+  },
+  {
+    pattern: "/news/:id",
+    title: "News Article — GHS Babi Khel",
+    description: "Read the latest news from Government High School Babi Khel.",
+    type: "article",
+    breadcrumbs: () => [baseBreadcrumb, { name: "News", path: "/news" }],
+  },
+  {
+    pattern: "/notices/:id",
+    title: "School Notice — GHS Babi Khel",
+    description: "Read the full school notice from Government High School Babi Khel.",
+    type: "article",
+    breadcrumbs: () => [baseBreadcrumb, { name: "Notices", path: "/notices" }],
+  },
 ];
 
 const NOT_FOUND: RouteSEO = {

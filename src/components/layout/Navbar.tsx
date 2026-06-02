@@ -13,19 +13,16 @@ import ThemeSwitcher, { ThemeInlineSelector } from "@/components/shared/ThemeSwi
 const primaryLinks = [
   { to: "/",          label: "Home" },
   { to: "/about",     label: "About" },
+  { to: "/news",      label: "News" },
+  { to: "/notices",   label: "Notices" },
   { to: "/results",   label: "Results" },
   { to: "/notes",     label: "Notes" },
-  { to: "/notices",   label: "Notices" },
-  { to: "/admission", label: "Admission" },
 ];
 
 const moreLinks = [
-  { to: "/teachers",       label: "Teachers" },
-  { to: "/library",        label: "Library" },
-  { to: "/gallery",        label: "Gallery" },
-  { to: "/online-classes", label: "Online Classes" },
-  { to: "/weather",        label: "Weather" },
-  { to: "/news",           label: "News" },
+  { to: "/gallery",    label: "Gallery" },
+  { to: "/library",    label: "Library" },
+  { to: "/admission",  label: "Admission" },
 ];
 
 const navLinks = [...primaryLinks, ...moreLinks];

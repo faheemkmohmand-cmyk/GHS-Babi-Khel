@@ -90,17 +90,18 @@
       })();
     </script>
 
-    <!-- SW KILLER: Unregisters any old Service Worker immediately -->
+    <!-- Smart SW cleanup: only unregister broken/outdated service workers -->
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          for (var r of registrations) { r.unregister(); }
+          registrations.forEach(function(r) { r.unregister(); });
         });
-        if (window.caches) {
-          caches.keys().then(function(names) {
-            for (var name of names) { caches.delete(name); }
-          });
-        }
+      }
+      if (window.caches && !sessionStorage.getItem('cache-cleared-v2')) {
+        caches.keys().then(function(names) {
+          names.forEach(function(name) { caches.delete(name); });
+        });
+        sessionStorage.setItem('cache-cleared-v2', '1');
       }
     </script>
   </head>

@@ -1,28 +1,34 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, GraduationCap, LogIn, UserPlus,
-  LayoutDashboard, LogOut, Shield,
+  LayoutDashboard, LogOut, Shield, ChevronDown, Search,
 } from "lucide-react";
 import { useSchoolSettings, safeMediaUrl } from "@/hooks/useSchoolSettings";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/shared/NotificationBell";
 import ThemeSwitcher, { ThemeInlineSelector } from "@/components/shared/ThemeSwitcher";
 
-const navLinks = [
-  { to: "/",               label: "Home" },
-  { to: "/about",          label: "About" },
-  { to: "/teachers",       label: "Teachers" },
-  { to: "/results",        label: "Results" },
-  { to: "/notes",          label: "Notes" },
-  { to: "/library",        label: "Library" },
-  { to: "/notices",        label: "Notices" },
-  { to: "/gallery",        label: "Gallery" },
-  { to: "/weather",        label: "Weather" },
-  { to: "/online-classes", label: "Online Classes" },
-  { to: "/admission",      label: "Admission" },
+const primaryLinks = [
+  { to: "/",          label: "Home" },
+  { to: "/about",     label: "About" },
+  { to: "/results",   label: "Results" },
+  { to: "/notes",     label: "Notes" },
+  { to: "/notices",   label: "Notices" },
+  { to: "/admission", label: "Admission" },
 ];
+
+const moreLinks = [
+  { to: "/teachers",       label: "Teachers" },
+  { to: "/library",        label: "Library" },
+  { to: "/gallery",        label: "Gallery" },
+  { to: "/online-classes", label: "Online Classes" },
+  { to: "/weather",        label: "Weather" },
+  { to: "/news",           label: "News" },
+];
+
+const navLinks = [...primaryLinks, ...moreLinks];
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);

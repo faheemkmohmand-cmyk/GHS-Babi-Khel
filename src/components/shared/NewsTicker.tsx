@@ -1,4 +1,5 @@
 import { Megaphone } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useNotices } from "@/hooks/useNotices";
 import { useAdmissionSettings } from "@/hooks/useAdmission";
 

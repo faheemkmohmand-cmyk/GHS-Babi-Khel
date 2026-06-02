@@ -163,8 +163,14 @@ const Footer = () => {
             </h4>
             <ul className="space-y-2.5">
               {footerLinks.classes.map((c) => (
-                <li key={c.label}>
-                  <span className="text-sm text-white/70">{c.label}</span>
+                <li key={c.to}>
+                  <Link
+                    to={c.to}
+                    className="text-sm text-white/70 hover:text-white transition-colors flex items-center gap-1 group"
+                  >
+                    <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {c.label}
+                  </Link>
                 </li>
               ))}
             </ul>

@@ -286,6 +286,29 @@ const Navbar = () => {
                 );
               })}
 
+              {/* Search link in mobile menu */}
+              <Link
+                to="/search"
+                onClick={() => setOpen(false)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "11px 16px",
+                  borderRadius: "12px",
+                  marginBottom: "2px",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  backgroundColor: location.pathname === "/search" ? "hsl(var(--primary))" : "transparent",
+                  color: location.pathname === "/search"
+                    ? "hsl(var(--primary-foreground))"
+                    : "hsl(var(--muted-foreground))",
+                }}
+              >
+                <Search style={{ width: "18px", height: "18px" }} />
+                Search
+
               {/* ── Divider ── */}
               <div style={{ height: "1px", backgroundColor: "hsl(var(--border))", margin: "12px 0" }} />
 

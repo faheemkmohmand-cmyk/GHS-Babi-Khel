@@ -53,12 +53,24 @@ const NewsTicker = () => {
             className="flex gap-12 whitespace-nowrap"
             style={{ animation: `ticker-scroll ${durationSecs}s linear infinite` }}
           >
-            {items.map((item, idx) => (
-              <span key={`${item.id}-${idx}`} className="text-sm font-medium inline-flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-white/60 inline-block shrink-0" />
-                {item.title}
-              </span>
-            ))}
+            {items.map((item, idx) => {
+              const to =
+                item.id === "admission-open"
+                  ? "/admission"
+                  : /^[0-9a-fA-F-]{6,}$/.test(String(item.id))
+                  ? `/notices/${item.id}`
+                  : "/notices";
+              return (
+                <Link
+                  key={`${item.id}-${idx}`}
+                  to={to}
+                  className="text-sm font-medium inline-flex items-center gap-2 hover:text-white/90 underline-offset-2 hover:underline cursor-pointer transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/60 inline-block shrink-0" />
+                  {item.title}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, GraduationCap, LogIn, UserPlus,
@@ -13,35 +13,46 @@ import ThemeSwitcher, { ThemeInlineSelector } from "@/components/shared/ThemeSwi
 const primaryLinks = [
   { to: "/",          label: "Home" },
   { to: "/about",     label: "About" },
-  { to: "/news",      label: "News" },
-  { to: "/notices",   label: "Notices" },
   { to: "/results",   label: "Results" },
   { to: "/notes",     label: "Notes" },
+  { to: "/notices",   label: "Notices" },
+  { to: "/admission", label: "Admission" },
 ];
 
 const moreLinks = [
-  { to: "/gallery",    label: "Gallery" },
-  { to: "/library",    label: "Library" },
-  { to: "/admission",  label: "Admission" },
+  { to: "/teachers",       label: "Teachers" },
+  { to: "/library",        label: "Library" },
+  { to: "/gallery",        label: "Gallery" },
+  { to: "/online-classes", label: "Online Classes" },
+  { to: "/weather",        label: "Weather" },
+  { to: "/news",           label: "News" },
 ];
 
 const navLinks = [...primaryLinks, ...moreLinks];
 
 const Navbar = () => {
-  const [open, setOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
-  const moreRef = useRef<HTMLDivElement>(null);
-  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen]           = useState(false);
+  const [moreOpen, setMoreOpen]   = useState(false);
+  // Desktop inline search state
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchVal, setSearchVal]   = useState("");
+  // Mobile search state
+  const [mobileSearch, setMobileSearch] = useState("");
+
+  const moreRef        = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const mobileSearchRef = useRef<HTMLInputElement>(null);
+
+  const [scrolled, setScrolled]   = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
-  const location = useLocation();
+  const location  = useLocation();
+  const navigate  = useNavigate();
   const { data: settings } = useSchoolSettings();
   const { user, profile, loading: authLoading, signOut } = useAuth();
   const isAdmin = profile?.role === "admin";
 
-  // Reset logo failed state when URL changes
   useEffect(() => { setLogoFailed(false); }, [settings?.logo_url]);
-
-  useEffect(() => { setOpen(false); setMoreOpen(false); }, [location.pathname]);
+  useEffect(() => { setOpen(false); setMoreOpen(false); setSearchOpen(false); setSearchVal(""); }, [location.pathname]);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 10);
@@ -49,6 +60,7 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
+  // Close "More" dropdown on outside click
   useEffect(() => {
     if (!moreOpen) return;
     const handler = (e: MouseEvent) => {
@@ -59,6 +71,50 @@ const Navbar = () => {
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
   }, [moreOpen]);
+
+  // Focus search input when it opens
+  useEffect(() => {
+    if (searchOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 80);
+    }
+  }, [searchOpen]);
+
+  // Focus mobile search when mobile menu opens
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => mobileSearchRef.current?.focus(), 150);
+    } else {
+      setMobileSearch("");
+    }
+  }, [open]);
+
+  // Desktop: submit search → navigate to /search?q=...
+  const handleDesktopSearch = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchVal.trim();
+    if (!q) return;
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+    setSearchOpen(false);
+    setSearchVal("");
+  }, [searchVal, navigate]);
+
+  // Desktop: close search on Escape
+  const handleDesktopKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      setSearchOpen(false);
+      setSearchVal("");
+    }
+  }, []);
+
+  // Mobile: submit search → navigate to /search?q=...
+  const handleMobileSearch = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    const q = mobileSearch.trim();
+    if (!q) return;
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+    setOpen(false);
+    setMobileSearch("");
+  }, [mobileSearch, navigate]);
 
   return (
     <nav
@@ -95,7 +151,7 @@ const Navbar = () => {
           </div>
         </Link>
 
-        {/* Desktop nav links — hidden below lg breakpoint */}
+        {/* ── Desktop nav links ── */}
         <div className="hidden lg:flex items-center gap-0.5">
           {primaryLinks.map((link) => {
             const active = location.pathname === link.to;
@@ -162,14 +218,70 @@ const Navbar = () => {
             </AnimatePresence>
           </div>
 
-          {/* Search icon */}
-          <Link
-            to="/search"
-            aria-label="Search"
-            className="ml-1 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-          >
-            <Search className="w-4 h-4" />
-          </Link>
+          {/* ── Inline Search (replaces bare icon link) ── */}
+          <div className="relative ml-1 flex items-center">
+            <AnimatePresence mode="wait">
+              {searchOpen ? (
+                /* Expanded search bar */
+                <motion.form
+                  key="search-form"
+                  onSubmit={handleDesktopSearch}
+                  initial={{ width: 32, opacity: 0 }}
+                  animate={{ width: 220, opacity: 1 }}
+                  exit={{ width: 32, opacity: 0 }}
+                  transition={{ duration: 0.22, ease: "easeOut" }}
+                  className="flex items-center overflow-hidden rounded-lg border border-primary/50 bg-background shadow-sm"
+                  style={{ height: 34 }}
+                >
+                  <Search className="w-3.5 h-3.5 text-primary shrink-0 ml-2.5" />
+                  <input
+                    ref={searchInputRef}
+                    value={searchVal}
+                    onChange={(e) => setSearchVal(e.target.value)}
+                    onKeyDown={handleDesktopKeyDown}
+                    placeholder="Search…"
+                    aria-label="Search site"
+                    className="flex-1 min-w-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none px-2 py-0"
+                    style={{ lineHeight: "34px" }}
+                  />
+                  {/* Submit / clear */}
+                  {searchVal ? (
+                    <button
+                      type="submit"
+                      aria-label="Go"
+                      className="shrink-0 px-2.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+                    >
+                      Go
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      aria-label="Close search"
+                      onClick={() => { setSearchOpen(false); setSearchVal(""); }}
+                      className="shrink-0 px-2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </motion.form>
+              ) : (
+                /* Collapsed — just the icon button */
+                <motion.button
+                  key="search-icon"
+                  type="button"
+                  aria-label="Open search"
+                  onClick={() => setSearchOpen(true)}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                >
+                  <Search className="w-4 h-4" />
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Desktop right-side controls */}
@@ -254,7 +366,59 @@ const Navbar = () => {
           >
             <div style={{ padding: "12px 12px 24px" }}>
 
-              {/* ── Nav links (same array as desktop — always in sync) ── */}
+              {/* ── Mobile inline search bar — top of menu ── */}
+              <form
+                onSubmit={handleMobileSearch}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 12px",
+                  borderRadius: "12px",
+                  border: "1.5px solid hsl(var(--border))",
+                  backgroundColor: "hsl(var(--background))",
+                  marginBottom: "10px",
+                }}
+              >
+                <Search style={{ width: 16, height: 16, color: "hsl(var(--muted-foreground))", flexShrink: 0 }} />
+                <input
+                  ref={mobileSearchRef}
+                  value={mobileSearch}
+                  onChange={(e) => setMobileSearch(e.target.value)}
+                  placeholder="Search notices, news, teachers…"
+                  aria-label="Search site"
+                  style={{
+                    flex: 1,
+                    background: "transparent",
+                    border: "none",
+                    outline: "none",
+                    fontSize: "14px",
+                    color: "hsl(var(--foreground))",
+                    minWidth: 0,
+                  }}
+                />
+                {mobileSearch.trim() && (
+                  <button
+                    type="submit"
+                    aria-label="Search"
+                    style={{
+                      flexShrink: 0,
+                      padding: "4px 10px",
+                      borderRadius: "8px",
+                      border: "none",
+                      backgroundColor: "hsl(var(--primary))",
+                      color: "hsl(var(--primary-foreground))",
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Go
+                  </button>
+                )}
+              </form>
+
+              {/* ── Nav links ── */}
               {navLinks.map((link) => {
                 const active = location.pathname === link.to;
                 return (
@@ -282,31 +446,6 @@ const Navbar = () => {
                   </Link>
                 );
               })}
-
-              {/* Search link in mobile menu */}
-              <Link
-                to="/search"
-                onClick={() => setOpen(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "11px 16px",
-                  borderRadius: "12px",
-                  marginBottom: "2px",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  textDecoration: "none",
-                  backgroundColor: location.pathname === "/search" ? "hsl(var(--primary))" : "transparent",
-                  color: location.pathname === "/search"
-                    ? "hsl(var(--primary-foreground))"
-                    : "hsl(var(--muted-foreground))",
-                }}
-              >
-                <Search style={{ width: "18px", height: "18px" }} />
-                Search
-              </Link>
-
 
               {/* ── Divider ── */}
               <div style={{ height: "1px", backgroundColor: "hsl(var(--border))", margin: "12px 0" }} />
@@ -347,7 +486,7 @@ const Navbar = () => {
                         fontWeight: 600, fontSize: "14px", textDecoration: "none",
                       }}
                     >
-                      <LayoutDashboard style={{ width: "18px", height: "18px" }} />
+                    <LayoutDashboard style={{ width: "18px", height: "18px" }} />
                       Dashboard
                     </Link>
                     <button
@@ -408,7 +547,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-
-
-

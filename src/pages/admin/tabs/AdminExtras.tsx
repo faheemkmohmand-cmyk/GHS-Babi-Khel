@@ -239,7 +239,7 @@ function ExamScheduleManager() {
         hall: r.hall || null,
         notes: r.notes || null,
         is_published: true,
-      } as any)));
+      })));
       toast.success(`${valid.length} exam entries added`);
       setRows([{ ...EMPTY_ROW }]);
     } catch { toast.error("Failed to save"); }

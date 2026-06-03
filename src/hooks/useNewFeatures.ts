@@ -23,6 +23,8 @@ export interface ExamScheduleEntry {
   exam_type: string;
   year: number;
   subject: string;
+  paper_name: string | null;
+  paper_code: string | null;
   exam_date: string;
   start_time: string | null;
   end_time: string | null;

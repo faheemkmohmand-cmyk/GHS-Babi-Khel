@@ -90,8 +90,8 @@ export function generateExamICS(
         ? toICalDate(entry.exam_date, (() => {
             // Default duration: 3 hours if only start time given
             const [hh, mm] = entry.start_time!.split(":").map(Number);
-            const endH = hh + 3;
-            return `${String(endH).padStart(2,"0")}:${String(mm).padStart(2,"0")}`;
+            const endH = (hh + 3) % 24;
+            return `${String(endH).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
           })())
         : null;
 
@@ -107,9 +107,9 @@ export function generateExamICS(
       entry.notes       ? `Notes: ${entry.notes}`           : "",
       "",
       `GHS Babi Khel — ghsbabikhel.indevs.in`,
-    ].filter((l) => l !== undefined);
+    ];
 
-    const description = esc(descParts.filter(Boolean).join("\\n"));
+    const description = esc(descParts.filter(Boolean).join("\n"));
     const location    = entry.hall ? esc(`${entry.hall}, ${schoolName}`) : esc(schoolName);
     const uid         = makeUID(entry, slug);
 
@@ -186,4 +186,4 @@ export function generateExamICS(
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-                     }
+}

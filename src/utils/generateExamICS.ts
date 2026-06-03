@@ -186,4 +186,4 @@ export function generateExamICS(
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-                     }
+}

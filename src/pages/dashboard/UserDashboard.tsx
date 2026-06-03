@@ -43,7 +43,7 @@ import { useResults, useResultYears } from "@/hooks/useResults";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface DailyQuote { id: string; text: string; author: string | null; category: string; fixed_date: string | null; }
-interface ExamEntry { id: string; class: string; exam_type: string; year: number; subject: string; exam_date: string; start_time: string | null; end_time: string | null; hall: string | null; paper_code: string | null; notes: string | null; }
+interface ExamEntry { id: string; class: string; exam_type: string; year: number; subject: string; paper_name: string | null; paper_code: string | null; exam_date: string; start_time: string | null; end_time: string | null; hall: string | null; notes: string | null; }
 interface HonorEntry { id: string; student_name: string; class: string; month: number; year: number; reason: string | null; photo_url: string | null; }
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];

@@ -5,8 +5,9 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useExamSchedule } from "@/hooks/useNewFeatures";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Printer, ChevronRight } from "lucide-react";
+import { Calendar, Printer, ChevronRight, CalendarPlus } from "lucide-react";
 import { format, isPast, isToday, differenceInDays } from "date-fns";
+import { generateExamICS } from "@/utils/generateExamICS";
 
 const classes = ["6", "7", "8", "9", "10"];
 const getExamTypes = (cls: string) => ["9", "10"].includes(cls) ? ["Annual-I", "Annual-II"] : ["1st Semester", "2nd Semester"];
@@ -45,9 +46,22 @@ const ExamScheduleTab = () => {
           <p className="text-xs text-muted-foreground">{year} examination schedule</p>
         </div>
         {schedule.length > 0 && (
-          <button onClick={handlePrint} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground bg-secondary px-3 py-1.5 rounded-lg transition-colors">
-            <Printer className="w-3.5 h-3.5" /> Print
-          </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => generateExamICS(schedule, cls, examType, year)}
+              className="flex items-center gap-1.5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 px-3 py-1.5 rounded-lg transition-colors"
+              title="Download .ics — import into Google Calendar, iPhone Calendar, Outlook"
+            >
+              <CalendarPlus className="w-3.5 h-3.5" />
+              Add to Calendar
+            </button>
+            <button
+              onClick={handlePrint}
+              className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground bg-secondary px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <Printer className="w-3.5 h-3.5" /> Print
+            </button>
+          </div>
         )}
       </div>
 

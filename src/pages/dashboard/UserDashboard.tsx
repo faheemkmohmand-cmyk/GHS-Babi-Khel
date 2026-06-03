@@ -89,7 +89,7 @@ function generateDateSheetPDF(schedule: ExamEntry[], cls: string, examType: stri
   autoTable(doc,{
     startY:76,
     head:[["Day","Date","Subject","Paper Name","Code","Time","Hall"]],
-    body:schedule.map(e=>{ const d=new Date(e.exam_date); return [format(d,"EEEE"),format(d,"dd MMM yyyy"),e.subject,(e as any).paper_name||e.subject,(e as any).paper_code||"—",e.start_time&&e.end_time?`${e.start_time}–${e.end_time}`:e.start_time||"—",e.hall||"—"]; }),
+    body:schedule.map(e=>{ const d=new Date(e.exam_date); return [format(d,"EEEE"),format(d,"dd MMM yyyy"),e.subject,e.paper_name||e.subject,e.paper_code||"—",e.start_time&&e.end_time?`${e.start_time}–${e.end_time}`:e.start_time||"—",e.hall||"—"]; }),
     headStyles:{fillColor:[4,44,83],textColor:[255,255,255],fontStyle:"bold",fontSize:8,halign:"center",cellPadding:4},
     bodyStyles:{fontSize:8,cellPadding:3.5,valign:"middle"},
     columnStyles:{0:{cellWidth:22,halign:"center"},1:{cellWidth:28,halign:"center",fontStyle:"bold"},2:{cellWidth:24},3:{cellWidth:42},4:{cellWidth:18,halign:"center",fontStyle:"bold"},5:{cellWidth:28,halign:"center"},6:{cellWidth:18,halign:"center"}},

@@ -11,9 +11,9 @@ interface Fact {
 }
 
 // Fetch order:
-// 1. Direct numbersapi.com call (supports CORS + HTTPS, fastest)
-// 2. /api/numbers Vercel proxy (production fallback)
-// 3. allorigins CORS proxy (last-resort fallback for dev preview)
+// 1. /api/numbers Vercel proxy (PRIMARY — works even when numbersapi.com is down)
+// 2. Direct numbersapi.com call (currently down — domain expired)
+// 3. allorigins CORS proxy (last-resort fallback)
 async function tryFetch(url: string, timeoutMs = 8000): Promise<Fact | null> {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
@@ -28,15 +28,17 @@ async function tryFetch(url: string, timeoutMs = 8000): Promise<Fact | null> {
 }
 
 async function fetchFact(path: string): Promise<Fact | null> {
-  // Strategy 1: direct
-  const direct = await tryFetch(`https://numbersapi.com/${path}?json`);
-  if (direct?.text) return direct;
-
-  // Strategy 2: same-origin Vercel proxy (only exists in production)
+  // Strategy 1: same-origin Vercel proxy (PRIMARY — works even when numbersapi.com is down)
+  // The /api/numbers serverless function tries numbersapi.com first, then falls back
+  // to a comprehensive local fact database. This is the most reliable strategy.
   const proxy = await tryFetch(`/api/numbers?path=${encodeURIComponent(path)}`, 15000);
   if (proxy?.text) return proxy;
 
-  // Strategy 3: allorigins fallback
+  // Strategy 2: direct numbersapi.com (currently down — domain expired, but try anyway)
+  const direct = await tryFetch(`https://numbersapi.com/${path}?json`);
+  if (direct?.text) return direct;
+
+  // Strategy 3: allorigins fallback (wraps numbersapi.com, also down)
   const allorigins = await tryFetch(
     `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://numbersapi.com/${path}?json`)}`,
     10000,
@@ -257,5 +259,4 @@ export default function NumberFacts() {
       )}
     </div>
   );
-                }
-          
+              }

@@ -1,9 +1,7 @@
 // src/pages/dashboard/tabs/NASASpacePic.tsx
 import { useState, useEffect } from "react";
 
-// Using DEMO_KEY which allows 30 requests/hour — enough for students
-// For production, replace with a real key from https://api.nasa.gov
-const NASA_API_KEY = "DEMO_KEY";
+const NASA_API_KEY = "I7E0FR0gL0Lvt9cnxh5jsRSvAzWlJVzeYFZRQTKy";
 
 interface APODData {
   title: string;
@@ -30,12 +28,13 @@ export default function NASASpacePic() {
     setError(null);
     setImgLoaded(false);
     try {
-      const res = await fetch(
-        `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}&date=${date}&thumbs=true`
-      );
+      const url = `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}&date=${date}&thumbs=true`;
+      const res = await fetch(url);
       if (!res.ok) {
-        if (res.status === 429) throw new Error("Rate limit reached. Try again in an hour.");
-        throw new Error("NASA API error");
+        const body = await res.text().catch(() => "");
+        if (res.status === 429) throw new Error("NASA rate limit reached. Try again later.");
+        if (res.status === 400) throw new Error("No NASA image available for this date.");
+        throw new Error(`NASA API error (${res.status}): ${body.slice(0, 120)}`);
       }
       const data: APODData = await res.json();
       setApod(data);
@@ -105,7 +104,7 @@ export default function NASASpacePic() {
       <div className="flex items-center gap-2 bg-secondary rounded-xl p-2">
         <button
           onClick={goToPrevDay}
-          className="p-2 rounded-lg hover:bg-card text-muted-foreground hover:text-foreground transition-colors"
+          className="p-2 rounded-lg hover:bg-card text-muted-foreground hover:text-foreground transition-colors text-lg font-bold"
           title="Previous day"
         >
           ‹
@@ -121,7 +120,7 @@ export default function NASASpacePic() {
         <button
           onClick={goToNextDay}
           disabled={isToday}
-          className="p-2 rounded-lg hover:bg-card text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30"
+          className="p-2 rounded-lg hover:bg-card text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30 text-lg font-bold"
           title="Next day"
         >
           ›
@@ -130,9 +129,9 @@ export default function NASASpacePic() {
 
       {loading && (
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
-          <div className="h-64 sm:h-80 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center animate-pulse">
+          <div className="h-64 sm:h-80 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center">
             <div className="text-center">
-              <div className="text-5xl mb-3">🔭</div>
+              <div className="text-5xl mb-3 animate-pulse">🔭</div>
               <p className="text-white/60 text-sm">Fetching from NASA…</p>
             </div>
           </div>
@@ -144,7 +143,7 @@ export default function NASASpacePic() {
         </div>
       )}
 
-      {error && (
+      {error && !loading && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-6 text-center">
           <p className="text-3xl mb-2">🛑</p>
           <p className="text-sm font-semibold text-red-600 dark:text-red-400">{error}</p>
@@ -157,7 +156,7 @@ export default function NASASpacePic() {
         </div>
       )}
 
-      {apod && !loading && (
+      {apod && !loading && !error && (
         <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
           {/* Image / Video */}
           {apod.media_type === "image" ? (
@@ -168,15 +167,16 @@ export default function NASASpacePic() {
                 </div>
               )}
               <img
-                src={apod.hdurl || apod.url}
+                src={apod.url}
                 alt={apod.title}
                 onLoad={() => setImgLoaded(true)}
+                onError={() => setImgLoaded(true)}
                 className={`w-full object-cover transition-opacity duration-700 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
                 style={{ maxHeight: 420 }}
               />
-              {imgLoaded && (
+              {imgLoaded && apod.hdurl && (
                 <a
-                  href={apod.hdurl || apod.url}
+                  href={apod.hdurl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="absolute bottom-3 right-3 text-[10px] bg-black/60 text-white px-2.5 py-1 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors"
@@ -199,7 +199,6 @@ export default function NASASpacePic() {
 
           {/* Content */}
           <div className="p-4 space-y-3">
-            {/* Title + Date */}
             <div>
               <div className="flex items-start justify-between gap-2 flex-wrap">
                 <h4 className="font-bold text-base text-foreground leading-snug flex-1">{apod.title}</h4>
@@ -215,7 +214,6 @@ export default function NASASpacePic() {
               )}
             </div>
 
-            {/* Explanation */}
             <div className="text-xs text-muted-foreground leading-relaxed">
               <p>{expanded ? apod.explanation : shortExplanation}</p>
               {apod.explanation.length > 280 && (
@@ -228,14 +226,12 @@ export default function NASASpacePic() {
               )}
             </div>
 
-            {/* Fun fact badge */}
             <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-xl p-3">
               <p className="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold">
-                🚀 This photo was taken from {apod.media_type === "video" ? "space" : "another corner of the universe"}. Science class just got real! 🌟
+                🚀 This image comes from {apod.media_type === "video" ? "space" : "another corner of the universe"}. Science class just got real! 🌟
               </p>
             </div>
 
-            {/* NASA credit */}
             <p className="text-[10px] text-muted-foreground/50 text-center">
               Powered by NASA Astronomy Picture of the Day API · nasa.gov
             </p>
@@ -244,4 +240,5 @@ export default function NASASpacePic() {
       )}
     </div>
   );
-}
+      }
+                  

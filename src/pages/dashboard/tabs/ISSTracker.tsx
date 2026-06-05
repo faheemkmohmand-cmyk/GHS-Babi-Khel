@@ -81,13 +81,29 @@ async function tryJson(url: string, timeoutMs = 6000): Promise<any | null> {
 }
 
 async function fetchISSPosition(): Promise<ISSPosition> {
-  // Strategy 1: wheretheiss.at direct (CORS-enabled)
+  // Strategy 1: Our own Vercel serverless proxy (bypasses CORS + mixed-content issues)
+  // api.open-notify.org only works on HTTP, which browsers block on HTTPS sites.
+  // The /api/iss proxy fetches server-side via HTTP and returns clean JSON.
+  const proxyPos = await tryJson("/api/iss?type=position", 8000);
+  if (proxyPos?.iss_position) {
+    return {
+      latitude: parseFloat(proxyPos.iss_position.latitude),
+      longitude: parseFloat(proxyPos.iss_position.longitude),
+      timestamp: proxyPos.timestamp,
+    };
+  }
+  // Also handle wheretheiss.at format from proxy (in case proxy is extended)
+  if (proxyPos && typeof proxyPos.latitude === "number") {
+    return { latitude: proxyPos.latitude, longitude: proxyPos.longitude, timestamp: proxyPos.timestamp };
+  }
+
+  // Strategy 2: wheretheiss.at direct (often down, but try anyway)
   const direct = await tryJson("https://api.wheretheiss.at/v1/satellites/25544", 5000);
   if (direct && typeof direct.latitude === "number") {
     return { latitude: direct.latitude, longitude: direct.longitude, timestamp: direct.timestamp };
   }
 
-  // Strategy 2: via CORS proxies (corsproxy.io, then allorigins)
+  // Strategy 3: via CORS proxies (corsproxy.io may require paid plan, allorigins is flaky)
   for (const proxy of PROXIES) {
     const data = await tryJson(proxy("https://api.wheretheiss.at/v1/satellites/25544"), 7000);
     if (data && typeof data.latitude === "number") {
@@ -95,7 +111,7 @@ async function fetchISSPosition(): Promise<ISSPosition> {
     }
   }
 
-  // Strategy 3: open-notify via proxy as last resort
+  // Strategy 4: open-notify via CORS proxy as last resort
   for (const proxy of PROXIES) {
     const data = await tryJson(proxy("https://api.open-notify.org/iss-now.json"), 7000);
     if (data?.iss_position) {
@@ -111,17 +127,19 @@ async function fetchISSPosition(): Promise<ISSPosition> {
 }
 
 async function fetchAstronauts(): Promise<AstronautData> {
-  // Try direct first
+  // Strategy 1: Our own Vercel serverless proxy (bypasses CORS + mixed-content)
+  const proxyAstros = await tryJson("/api/iss?type=astros", 8000);
+  if (proxyAstros?.people) return proxyAstros;
+
+  // Strategy 2: Try direct (likely fails due to HTTPS/mixed-content)
   const direct = await tryJson("https://api.open-notify.org/astros.json", 5000);
   if (direct?.people) return direct;
 
-  // Via proxies
+  // Strategy 3: Via CORS proxies
   for (const proxy of PROXIES) {
     const data = await tryJson(proxy("https://api.open-notify.org/astros.json"), 7000);
     if (data?.people) return data;
   }
-
-
 
   // Hardcoded fallback so the UI still shows something useful
   return {
@@ -129,7 +147,7 @@ async function fetchAstronauts(): Promise<AstronautData> {
     people: [
       { name: "Oleg Kononenko", craft: "ISS" },
       { name: "Nikolai Chub", craft: "ISS" },
-      { name: "Tracy Dyson", craft: "ISS" },
+      { name: "Tracy Caldwell Dyson", craft: "ISS" },
       { name: "Matthew Dominick", craft: "ISS" },
       { name: "Michael Barratt", craft: "ISS" },
       { name: "Jeanette Epps", craft: "ISS" },
@@ -295,5 +313,4 @@ export default function ISSTracker() {
       </p>
     </div>
   );
-      }
-              
+    }

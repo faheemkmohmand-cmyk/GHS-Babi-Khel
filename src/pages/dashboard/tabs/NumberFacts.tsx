@@ -10,15 +10,45 @@ interface Fact {
   found: boolean;
 }
 
-// All requests go through our own Vercel serverless proxy at /api/numbers
-// This avoids CORS entirely — the proxy fetches numbersapi.com server-side
+// 1️⃣ Try our own Vercel serverless proxy at /api/numbers (no CORS issue).
+// 2️⃣ If the proxy returns 404/500 (e.g. local dev), fall back to hitting
+//    numbersapi.com directly — it supports CORS so browsers can fetch it.
 async function fetchFact(path: string): Promise<Fact | null> {
+  // --- Attempt 1: proxy ---
   try {
     const res = await fetch(`/api/numbers?path=${encodeURIComponent(path)}`, {
       signal: AbortSignal.timeout(10000),
     });
-    if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
-    return await res.json();
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.text) return data as Fact;
+    }
+    // 404 means the serverless function isn't deployed here — fall through
+    if (res.status !== 404 && res.status !== 500) {
+      // Any other non-ok status (e.g. 429) → surface the error, don't retry
+      throw new Error(`Proxy returned ${res.status}`);
+    }
+  } catch (e: unknown) {
+    // Only swallow 404/timeout so we can try the fallback
+    const msg = e instanceof Error ? e.message : String(e);
+    if (!msg.includes("404") && !msg.includes("Failed to fetch") && !msg.includes("AbortError")) {
+      console.error("NumberFacts fetch error:", e);
+      return null;
+    }
+  }
+
+  // --- Attempt 2: direct (CORS-enabled) ---
+  try {
+    const res = await fetch(`https://numbersapi.com/${path}?json`, {
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) throw new Error(`numbersapi.com returned ${res.status}`);
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("json")) {
+      return (await res.json()) as Fact;
+    }
+    const text = await res.text();
+    return { text, found: true, type: "trivia", number: 0 };
   } catch (e) {
     console.error("NumberFacts fetch error:", e);
     return null;
@@ -26,10 +56,10 @@ async function fetchFact(path: string): Promise<Fact | null> {
 }
 
 const TYPE_META: Record<FactType, { label: string; emoji: string; color: string; desc: string; placeholder: string }> = {
-  trivia: { label: "Trivia",  emoji: "🎯", color: "from-violet-500 to-purple-600", desc: "Interesting fact",       placeholder: "e.g. 42, 7, 100" },
-  math:   { label: "Math",    emoji: "📐", color: "from-blue-500 to-indigo-600",   desc: "Mathematical property", placeholder: "e.g. 42, 12, 256" },
-  year:   { label: "Year",    emoji: "📅", color: "from-amber-500 to-orange-600",  desc: "Historical year fact",  placeholder: "e.g. 1947, 1969"  },
-  date:   { label: "Birthday",emoji: "🎂", color: "from-pink-500 to-rose-600",     desc: "Date in history",       placeholder: ""                  },
+  trivia: { label: "Trivia",   emoji: "🎯", color: "from-violet-500 to-purple-600", desc: "Interesting fact",       placeholder: "e.g. 42, 7, 100" },
+  math:   { label: "Math",     emoji: "📐", color: "from-blue-500 to-indigo-600",   desc: "Mathematical property", placeholder: "e.g. 42, 12, 256" },
+  year:   { label: "Year",     emoji: "📅", color: "from-amber-500 to-orange-600",  desc: "Historical year fact",  placeholder: "e.g. 1947, 1969"  },
+  date:   { label: "Birthday", emoji: "🎂", color: "from-pink-500 to-rose-600",     desc: "Date in history",       placeholder: ""                  },
 };
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -238,5 +268,5 @@ export default function NumberFacts() {
       )}
     </div>
   );
-            }
-              
+           }
+        

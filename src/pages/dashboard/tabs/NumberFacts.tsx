@@ -10,30 +10,22 @@ interface Fact {
   found: boolean;
 }
 
-// Fetches via our Vercel serverless proxy at /api/numbers.
-// The proxy hits numbersapi.com server-side (no CORS issue).
-// ROOT CAUSES FIXED in this file:
-//   1. Timeout raised 10 s → 15 s — Vercel functions have cold-start latency.
-//   2. Error message is now specific (shows HTTP status) so you can debug faster.
-//   3. AbortError / TimeoutError are caught separately and surface a clear message.
+// Calls our Vercel serverless proxy at /api/numbers
+// (Vercel auto-routes api/numbers.js → /api/numbers — no rewrite needed)
 async function fetchFact(path: string): Promise<Fact | null> {
   try {
     const res = await fetch(`/api/numbers?path=${encodeURIComponent(path)}`, {
-      // FIX: 15 s — matches the raised timeout inside api/numbers.js
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(15000), // matches proxy timeout
     });
-
     if (!res.ok) {
-      // Log the actual status so it's visible in the console
       console.error(`NumberFacts proxy error: HTTP ${res.status} for path "${path}"`);
       return null;
     }
-
-    const data = await res.json();
-    return data as Fact;
+    return await res.json() as Fact;
   } catch (e: unknown) {
-    if (e instanceof Error && (e.name === "AbortError" || e.name === "TimeoutError")) {
-      console.error("NumberFacts fetch error: request timed out after 15 s");
+    const name = e instanceof Error ? e.name : "";
+    if (name === "AbortError" || name === "TimeoutError") {
+      console.error("NumberFacts fetch error: timed out after 15s");
     } else {
       console.error("NumberFacts fetch error:", e);
     }
@@ -41,10 +33,7 @@ async function fetchFact(path: string): Promise<Fact | null> {
   }
 }
 
-const TYPE_META: Record<
-  FactType,
-  { label: string; emoji: string; color: string; desc: string; placeholder: string }
-> = {
+const TYPE_META: Record<FactType, { label: string; emoji: string; color: string; desc: string; placeholder: string }> = {
   trivia: { label: "Trivia",   emoji: "🎯", color: "from-violet-500 to-purple-600", desc: "Interesting fact",       placeholder: "e.g. 42, 7, 100" },
   math:   { label: "Math",     emoji: "📐", color: "from-blue-500 to-indigo-600",   desc: "Mathematical property", placeholder: "e.g. 42, 12, 256" },
   year:   { label: "Year",     emoji: "📅", color: "from-amber-500 to-orange-600",  desc: "Historical year fact",  placeholder: "e.g. 1947, 1969"  },
@@ -52,10 +41,7 @@ const TYPE_META: Record<
 };
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const DAYS_IN: Record<number, number> = {
-  1:31, 2:29, 3:31, 4:30, 5:31, 6:30,
-  7:31, 8:31, 9:30, 10:31, 11:30, 12:31,
-};
+const DAYS_IN: Record<number, number> = {1:31,2:29,3:31,4:30,5:31,6:30,7:31,8:31,9:30,10:31,11:30,12:31};
 
 export default function NumberFacts() {
   const [activeMode, setActiveMode] = useState<FactType>("trivia");
@@ -70,9 +56,7 @@ export default function NumberFacts() {
   const maxDay = DAYS_IN[bdMonth] ?? 31;
 
   const go = async (pathOverride?: string, labelOverride?: string) => {
-    setLoading(true);
-    setError(null);
-    setFact(null);
+    setLoading(true); setError(null); setFact(null);
 
     let path  = pathOverride ?? "";
     let label = labelOverride ?? "";
@@ -115,7 +99,6 @@ export default function NumberFacts() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div>
         <h3 className="text-lg font-heading font-bold text-foreground flex items-center gap-2">
           🔢 Number Facts &amp; Birthday History
@@ -125,7 +108,6 @@ export default function NumberFacts() {
         </p>
       </div>
 
-      {/* Mode cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {(Object.keys(TYPE_META) as FactType[]).map((mode) => {
           const m      = TYPE_META[mode];
@@ -134,11 +116,11 @@ export default function NumberFacts() {
             <button
               key={mode}
               onClick={() => { setActiveMode(mode); setFact(null); setError(null); }}
-              className={`rounded-xl p-3 text-left transition-all duration-200 border
-                ${active
+              className={`rounded-xl p-3 text-left transition-all duration-200 border ${
+                active
                   ? "bg-primary text-white border-primary shadow-md scale-[1.02]"
                   : "bg-card text-foreground border-border hover:border-primary/40 hover:bg-secondary"
-                }`}
+              }`}
             >
               <div className="text-xl mb-1">{m.emoji}</div>
               <div className={`text-xs font-bold ${active ? "text-white" : "text-foreground"}`}>{m.label}</div>
@@ -148,7 +130,6 @@ export default function NumberFacts() {
         })}
       </div>
 
-      {/* Input card */}
       <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
         {activeMode === "date" ? (
           <div>
@@ -156,11 +137,7 @@ export default function NumberFacts() {
             <div className="flex gap-2">
               <select
                 value={bdMonth}
-                onChange={(e) => {
-                  const m = Number(e.target.value);
-                  setBdMonth(m);
-                  if (bdDay > (DAYS_IN[m] ?? 31)) setBdDay(1);
-                }}
+                onChange={(e) => { const m = Number(e.target.value); setBdMonth(m); if (bdDay > (DAYS_IN[m] ?? 31)) setBdDay(1); }}
                 className="flex-1 bg-secondary border border-border rounded-xl px-3 py-2.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/40"
               >
                 {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
@@ -203,10 +180,7 @@ export default function NumberFacts() {
             className="flex-1 bg-primary text-white rounded-xl py-2.5 text-sm font-bold hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {loading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Looking up…
-              </>
+              <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Looking up…</>
             ) : (
               <>{meta.emoji} Get {meta.label} Fact</>
             )}
@@ -222,23 +196,19 @@ export default function NumberFacts() {
         </div>
       </div>
 
-      {/* Error */}
       {error && !loading && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 text-center">
           <p className="text-sm font-semibold text-red-600 dark:text-red-400">{error}</p>
         </div>
       )}
 
-      {/* Fact result */}
       {fact && !loading && (
         <div className="rounded-2xl overflow-hidden shadow-sm">
           <div className={`bg-gradient-to-r ${meta.color} px-5 py-4`}>
             <div className="flex items-center gap-3">
               <span className="text-3xl">{meta.emoji}</span>
               <div>
-                <p className="text-white/70 text-[11px] font-semibold uppercase tracking-wider">
-                  {meta.label} fact
-                </p>
+                <p className="text-white/70 text-[11px] font-semibold uppercase tracking-wider">{meta.label} fact</p>
                 <p className="text-white font-black text-lg leading-tight">{queryLabel}</p>
               </div>
             </div>
@@ -261,7 +231,6 @@ export default function NumberFacts() {
         </div>
       )}
 
-      {/* Empty state */}
       {!fact && !loading && !error && (
         <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-2">
           <p className="text-3xl">🔢</p>
@@ -274,5 +243,5 @@ export default function NumberFacts() {
       )}
     </div>
   );
-    }
+                }
           

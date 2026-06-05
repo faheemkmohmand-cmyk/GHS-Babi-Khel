@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Home, Calendar, BarChart3, Bell, BookOpen, Image, Trophy,
   Users, User, LogOut, GraduationCap, Menu, X, Shield, ExternalLink, Moon, Sun,
-  Video, BookMarked, TrendingUp, Search, CreditCard
+  Video, BookMarked, TrendingUp, Search, CreditCard, Sparkles
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/shared/NotificationBell";
@@ -28,6 +28,7 @@ const navItems: NavItem[] = [
   { id: "analytics",      label: "Analytics",        icon: TrendingUp     },
   { id: "credentials",    label: "Credentials",      icon: CreditCard     },
   { id: "teachers",       label: "Teachers",         icon: Users          },
+  { id: "extra",          label: "Extra",            icon: Sparkles       },
   { id: "profile",        label: "My Profile",       icon: User           },
 ];
 
@@ -75,6 +76,12 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
     // notes hub
     { label: "Notes",          sublabel: "Notes Manager",  tabId: "notes" },
     { label: "MCQ Tests",      sublabel: "Notes Manager",  tabId: "notes" },
+    // extra hub
+    { label: "ISS Tracker",    sublabel: "Extra",          tabId: "extra" },
+    { label: "ISS Live",       sublabel: "Extra",          tabId: "extra" },
+    { label: "NASA",           sublabel: "Extra",          tabId: "extra" },
+    { label: "Space Picture",  sublabel: "Extra",          tabId: "extra" },
+    { label: "Astronomy",      sublabel: "Extra",          tabId: "extra" },
   ];
 
   const searchResults = searchQuery.trim()
@@ -414,4 +421,5 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
 export default DashboardLayout;
 
 
-      
+
+          

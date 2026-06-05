@@ -16,7 +16,11 @@ interface AstronautData {
 }
 
 // CORS proxy helper
-const PROXY = "https://api.allorigins.win/raw?url=";
+// CORS proxy helpers (allorigins is flaky / 400s under load — corsproxy.io is the primary fallback)
+const PROXIES = [
+  (u: string) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+  (u: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+];
 
 // Pulsing ISS icon
 const issIcon = L.divIcon({
@@ -66,64 +70,58 @@ function ISSMapController({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
+async function tryJson(url: string, timeoutMs = 6000): Promise<any | null> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
 async function fetchISSPosition(): Promise<ISSPosition> {
-  // Strategy 1: wheretheiss.at via CORS proxy
-  try {
-    const url = encodeURIComponent("https://api.wheretheiss.at/v1/satellites/25544");
-    const res = await fetch(`${PROXY}${url}`, { signal: AbortSignal.timeout(6000) });
-    if (res.ok) {
-      const data = await res.json();
-      if (typeof data.latitude === "number") {
-        return { latitude: data.latitude, longitude: data.longitude, timestamp: data.timestamp };
-      }
-    }
-  } catch { /* fall through */ }
+  // Strategy 1: wheretheiss.at direct (CORS-enabled)
+  const direct = await tryJson("https://api.wheretheiss.at/v1/satellites/25544", 5000);
+  if (direct && typeof direct.latitude === "number") {
+    return { latitude: direct.latitude, longitude: direct.longitude, timestamp: direct.timestamp };
+  }
 
-  // Strategy 2: open-notify via CORS proxy
-  try {
-    const url = encodeURIComponent("https://api.open-notify.org/iss-now.json");
-    const res = await fetch(`${PROXY}${url}`, { signal: AbortSignal.timeout(6000) });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.iss_position) {
-        return {
-          latitude: parseFloat(data.iss_position.latitude),
-          longitude: parseFloat(data.iss_position.longitude),
-          timestamp: data.timestamp,
-        };
-      }
-    }
-  } catch { /* fall through */ }
-
-  // Strategy 3: wheretheiss.at directly (works if server has permissive CORS headers)
-  try {
-    const res = await fetch("https://api.wheretheiss.at/v1/satellites/25544", {
-      signal: AbortSignal.timeout(5000),
-    });
-    if (res.ok) {
-      const data = await res.json();
+  // Strategy 2: via CORS proxies (corsproxy.io, then allorigins)
+  for (const proxy of PROXIES) {
+    const data = await tryJson(proxy("https://api.wheretheiss.at/v1/satellites/25544"), 7000);
+    if (data && typeof data.latitude === "number") {
       return { latitude: data.latitude, longitude: data.longitude, timestamp: data.timestamp };
     }
-  } catch { /* fall through */ }
+  }
+
+  // Strategy 3: open-notify via proxy as last resort
+  for (const proxy of PROXIES) {
+    const data = await tryJson(proxy("https://api.open-notify.org/iss-now.json"), 7000);
+    if (data?.iss_position) {
+      return {
+        latitude: parseFloat(data.iss_position.latitude),
+        longitude: parseFloat(data.iss_position.longitude),
+        timestamp: data.timestamp,
+      };
+    }
+  }
 
   throw new Error("All ISS APIs unreachable. Check your internet connection.");
 }
 
 async function fetchAstronauts(): Promise<AstronautData> {
-  // Try direct first (open-notify has CORS headers sometimes)
-  try {
-    const res = await fetch("https://api.open-notify.org/astros.json", {
-      signal: AbortSignal.timeout(5000),
-    });
-    if (res.ok) return await res.json();
-  } catch { /* fall through */ }
+  // Try direct first
+  const direct = await tryJson("https://api.open-notify.org/astros.json", 5000);
+  if (direct?.people) return direct;
 
-  // Via proxy
-  try {
-    const url = encodeURIComponent("https://api.open-notify.org/astros.json");
-    const res = await fetch(`${PROXY}${url}`, { signal: AbortSignal.timeout(6000) });
-    if (res.ok) return await res.json();
-  } catch { /* fall through */ }
+  // Via proxies
+  for (const proxy of PROXIES) {
+    const data = await tryJson(proxy("https://api.open-notify.org/astros.json"), 7000);
+    if (data?.people) return data;
+  }
+
+
 
   // Hardcoded fallback so the UI still shows something useful
   return {

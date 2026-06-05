@@ -10,27 +10,41 @@ interface Fact {
   found: boolean;
 }
 
-// Calls our Vercel serverless proxy at /api/numbers
-// (Vercel auto-routes api/numbers.js → /api/numbers — no rewrite needed)
-async function fetchFact(path: string): Promise<Fact | null> {
+// Fetch order:
+// 1. Direct numbersapi.com call (supports CORS + HTTPS, fastest)
+// 2. /api/numbers Vercel proxy (production fallback)
+// 3. allorigins CORS proxy (last-resort fallback for dev preview)
+async function tryFetch(url: string, timeoutMs = 8000): Promise<Fact | null> {
   try {
-    const res = await fetch(`/api/numbers?path=${encodeURIComponent(path)}`, {
-      signal: AbortSignal.timeout(15000), // matches proxy timeout
-    });
-    if (!res.ok) {
-      console.error(`NumberFacts proxy error: HTTP ${res.status} for path "${path}"`);
-      return null;
-    }
-    return await res.json() as Fact;
-  } catch (e: unknown) {
-    const name = e instanceof Error ? e.name : "";
-    if (name === "AbortError" || name === "TimeoutError") {
-      console.error("NumberFacts fetch error: timed out after 15s");
-    } else {
-      console.error("NumberFacts fetch error:", e);
-    }
+    const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
+    if (!res.ok) return null;
+    const ct = res.headers.get("content-type") || "";
+    if (ct.includes("json")) return await res.json() as Fact;
+    const text = await res.text();
+    return { text: text.trim(), found: true, type: "trivia", number: 0 };
+  } catch {
     return null;
   }
+}
+
+async function fetchFact(path: string): Promise<Fact | null> {
+  // Strategy 1: direct
+  const direct = await tryFetch(`https://numbersapi.com/${path}?json`);
+  if (direct?.text) return direct;
+
+  // Strategy 2: same-origin Vercel proxy (only exists in production)
+  const proxy = await tryFetch(`/api/numbers?path=${encodeURIComponent(path)}`, 15000);
+  if (proxy?.text) return proxy;
+
+  // Strategy 3: allorigins fallback
+  const allorigins = await tryFetch(
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://numbersapi.com/${path}?json`)}`,
+    10000,
+  );
+  if (allorigins?.text) return allorigins;
+
+  console.error(`NumberFacts: all strategies failed for path "${path}"`);
+  return null;
 }
 
 const TYPE_META: Record<FactType, { label: string; emoji: string; color: string; desc: string; placeholder: string }> = {

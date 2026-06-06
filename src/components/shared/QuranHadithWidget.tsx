@@ -157,7 +157,7 @@ const HADITHS: HadithData[] = [
   { text: "Take benefit of five before five: your youth before your old age, your health before your sickness, your wealth before your poverty, your free time before your preoccupation, and your life before your death.", narrator: "Ibn Abbas (RA)", source: "Shu'ab al-Iman", grade: "Sahih" },
   { text: "Feed the hungry, visit the sick, and free the captive.", narrator: "Abu Musa al-Ash'ari (RA)", source: "Sahih al-Bukhari", grade: "Sahih" },
   { text: "Verily, actions are by intentions, and every person will have only what they intended.", narrator: "Umar ibn al-Khattab (RA)", source: "Sahih al-Bukhari", grade: "Sahih" },
-  { text: "The religion is sincerity." The companions asked: "To whom?" He replied: "To Allah, His Book, His Messenger, the leaders of the Muslims and their common folk.", narrator: "Tamim al-Dari (RA)", source: "Sahih Muslim", grade: "Sahih" },
+  { text: "The religion is sincerity. The companions asked: To whom? He replied: To Allah, His Book, His Messenger, the leaders of the Muslims and their common folk.", narrator: "Tamim al-Dari (RA)", source: "Sahih Muslim", grade: "Sahih" },
   { text: "Part of the perfection of someone's Islam is his leaving alone what does not concern him.", narrator: "Abu Hurayrah (RA)", source: "Jami' at-Tirmidhi", grade: "Hasan" },
   { text: "Smile at your brother, for it is charity.", narrator: "Abu Dharr (RA)", source: "Jami' at-Tirmidhi", grade: "Sahih" },
   { text: "Allah does not look at your appearance or your wealth, but He looks at your hearts and your deeds.", narrator: "Abu Hurayrah (RA)", source: "Sahih Muslim", grade: "Sahih" },

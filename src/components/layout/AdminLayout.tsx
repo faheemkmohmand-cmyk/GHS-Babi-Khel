@@ -101,6 +101,13 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
     { label: "Chief Proctor",     sublabel: "Student Credentials", tabId: "credentials" },
     { label: "Nazira",            sublabel: "Student Credentials", tabId: "credentials" },
     { label: "Social Worker",     sublabel: "Student Credentials", tabId: "credentials" },
+    // library hub
+    { label: "School Files",      sublabel: "Library", tabId: "library" },
+    { label: "Virtual Library",   sublabel: "Library", tabId: "library" },
+    { label: "Free Books",        sublabel: "Library", tabId: "library" },
+    { label: "Ebooks",            sublabel: "Library", tabId: "library" },
+    { label: "Gutenberg",         sublabel: "Library", tabId: "library" },
+    { label: "Open Library",      sublabel: "Library", tabId: "library" },
   ];
 
   const searchResults = searchQuery.trim()

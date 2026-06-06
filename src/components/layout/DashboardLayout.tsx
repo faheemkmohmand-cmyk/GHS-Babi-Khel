@@ -13,23 +13,24 @@ interface NavItem {
   id: string;
   label: string;
   icon: React.ElementType;
+  color: string;
 }
 
 const navItems: NavItem[] = [
-  { id: "overview",       label: "Overview",         icon: Home           },
-  { id: "timetable",      label: "Schedule",         icon: Calendar       },
-  { id: "results",        label: "Results",          icon: BarChart3      },
-  { id: "merit-list",     label: "Merit List",       icon: Trophy         },
-  { id: "notices",        label: "Notices & News",   icon: Bell           },
-  { id: "notes",          label: "Notes Manager",    icon: BookMarked     },
-  { id: "library",        label: "Library",          icon: BookOpen       },
-  { id: "gallery",        label: "Media",            icon: Image          },
-  { id: "online-classes", label: "Online Classes",   icon: Video          },
-  { id: "analytics",      label: "Analytics",        icon: TrendingUp     },
-  { id: "credentials",    label: "Credentials",      icon: CreditCard     },
-  { id: "teachers",       label: "Teachers",         icon: Users          },
-  { id: "extra",          label: "Extra",            icon: Sparkles       },
-  { id: "profile",        label: "My Profile",       icon: User           },
+  { id: "overview",       label: "Overview",         icon: Home,        color: "#3b82f6" }, // blue
+  { id: "timetable",      label: "Schedule",         icon: Calendar,    color: "#8b5cf6" }, // violet
+  { id: "results",        label: "Results",          icon: BarChart3,   color: "#f59e0b" }, // amber
+  { id: "merit-list",     label: "Merit List",       icon: Trophy,      color: "#eab308" }, // yellow
+  { id: "notices",        label: "Notices & News",   icon: Bell,        color: "#f97316" }, // orange
+  { id: "notes",          label: "Notes Manager",    icon: BookMarked,  color: "#06b6d4" }, // cyan
+  { id: "library",        label: "Library",          icon: BookOpen,    color: "#10b981" }, // emerald
+  { id: "gallery",        label: "Media",            icon: Image,       color: "#ec4899" }, // pink
+  { id: "online-classes", label: "Online Classes",   icon: Video,       color: "#ef4444" }, // red
+  { id: "analytics",      label: "Analytics",        icon: TrendingUp,  color: "#14b8a6" }, // teal
+  { id: "credentials",    label: "Credentials",      icon: CreditCard,  color: "#6366f1" }, // indigo
+  { id: "teachers",       label: "Teachers",         icon: Users,       color: "#0ea5e9" }, // sky
+  { id: "extra",          label: "Extra",            icon: Sparkles,    color: "#a855f7" }, // purple
+  { id: "profile",        label: "My Profile",       icon: User,        color: "#84cc16" }, // lime
 ];
 
 /** Flatten navItems for finding label by activeTab id */
@@ -130,11 +131,16 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
       className={`w-full flex items-center gap-3 px-3 ${isMobile ? 'py-2.5' : 'py-2'} rounded-lg text-sm font-medium transition-colors ${
         activeTab === item.id
           ? "bg-primary text-primary-foreground"
-          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+          : "hover:bg-secondary"
       }`}
     >
-      <item.icon className="w-4 h-4 shrink-0" />
-      {item.label}
+      <item.icon
+        className="w-4 h-4 shrink-0"
+        style={{ color: activeTab === item.id ? 'currentColor' : item.color }}
+      />
+      <span className={activeTab === item.id ? "" : "text-muted-foreground"}>
+        {item.label}
+      </span>
     </button>
   );
 
@@ -197,10 +203,10 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     activeTab === result.tabId
                       ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                      : "text-muted-foreground hover:bg-secondary"
                   }`}
                 >
-                  <navItem.icon className="w-4 h-4 shrink-0" />
+                  <navItem.icon className="w-4 h-4 shrink-0" style={activeTab !== result.tabId ? { color: navItem.color } : undefined} />
                   <span className="flex-1 text-left">
                     {result.label}
                     {result.sublabel && (
@@ -327,10 +333,13 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
               key={item.id}
               onClick={() => handleTabChange(item.id)}
               className={`flex flex-col items-center gap-0.5 p-2 min-w-[3rem] ${
-                activeTab === item.id ? "text-primary" : "text-muted-foreground"
+                activeTab === item.id ? "text-primary" : ""
               }`}
             >
-              <item.icon className="w-5 h-5" />
+              <item.icon
+                className="w-5 h-5"
+                style={{ color: activeTab === item.id ? undefined : item.color }}
+              />
               <span className="text-[10px] font-medium">{item.label}</span>
             </button>
           ))}
@@ -387,10 +396,10 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                         activeTab === result.tabId
                           ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                          : "text-muted-foreground hover:bg-secondary"
                       }`}
                     >
-                      <navItem.icon className="w-4 h-4 shrink-0" />
+                      <navItem.icon className="w-4 h-4 shrink-0" style={activeTab !== result.tabId ? { color: navItem.color } : undefined} />
                       <span className="flex-1 text-left">
                         {result.label}
                         {result.sublabel && (
@@ -408,7 +417,7 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
                 onClick={() => setSidebarOpen(false)}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary"
               >
-                <ExternalLink className="w-4 h-4" />
+        <ExternalLink className="w-4 h-4" />
                 Main Website
               </Link>
               <button

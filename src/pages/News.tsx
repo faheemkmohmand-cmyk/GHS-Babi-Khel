@@ -7,6 +7,7 @@ import PageBanner from "@/components/shared/PageBanner";
 import { useNews } from "@/hooks/useNews";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import LiveNewsSection from "@/components/shared/LiveNewsSection";
 
 const PER_PAGE = 9;
 
@@ -24,8 +25,27 @@ const News = () => {
     <PageLayout>
       <PageBanner title="News & Updates" subtitle="Latest happenings at GHS Babi Khel" />
 
+      {/* ══════════════════════════════════════════
+          SECTION 1 — School News (manual, Supabase)
+          Kept exactly as before — do not modify
+         ══════════════════════════════════════════ */}
       <section className="py-16">
         <div className="container mx-auto px-4">
+
+          {/* section heading */}
+          <div className="mb-8">
+            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full mb-3">
+              <Bell className="w-3 h-3" />
+              School Updates
+            </span>
+            <h2 className="text-3xl font-heading font-bold text-foreground">
+              📢 From GHS Babi Khel
+            </h2>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Official news and announcements from our school administration.
+            </p>
+          </div>
+
           {isLoading ? (
             <div className="space-y-8">
               <Skeleton className="h-64 rounded-2xl" />
@@ -139,6 +159,24 @@ const News = () => {
           )}
         </div>
       </section>
+
+      {/* ══════════════════════════════════════════
+          DIVIDER
+         ══════════════════════════════════════════ */}
+      <div className="container mx-auto px-4">
+        <div className="relative flex items-center gap-4 py-2">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground bg-background px-3 shrink-0">
+            World News
+          </span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════
+          SECTION 2 — Live News via NewsData.io
+         ══════════════════════════════════════════ */}
+      <LiveNewsSection />
     </PageLayout>
   );
 };

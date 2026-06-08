@@ -1,42 +1,93 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Home, Calendar, BarChart3, Bell, BookOpen, Image, Trophy,
-  Users, User, LogOut, GraduationCap, Menu, X, Shield, ExternalLink, Moon, Sun,
-  Video, BookMarked, TrendingUp, Search, CreditCard, Sparkles
-} from "lucide-react";
+import { LogOut, Menu, X, ExternalLink, Moon, Sun, Search, Shield, GraduationCap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/shared/NotificationBell";
 import { useDarkMode } from "@/hooks/useDarkMode";
 
+// ── Emoji icon component ──────────────────────────────────────────────────────
+const EmojiIcon = ({ emoji, size = "w-5 h-5" }: { emoji: string; size?: string }) => (
+  <span className={`${size} flex items-center justify-center text-base leading-none select-none`} aria-hidden>
+    {emoji}
+  </span>
+);
+
+// ── Nav structure with sections ───────────────────────────────────────────────
 interface NavItem {
   id: string;
   label: string;
-  icon: React.ElementType;
-  color: string;
+  emoji: string;
+}
+interface NavSection {
+  heading: string;
+  items: NavItem[];
 }
 
-const navItems: NavItem[] = [
-  { id: "overview",       label: "Overview",         icon: Home,        color: "#3b82f6" }, // blue
-  { id: "timetable",      label: "Schedule",         icon: Calendar,    color: "#8b5cf6" }, // violet
-  { id: "results",        label: "Results",          icon: BarChart3,   color: "#f59e0b" }, // amber
-  { id: "merit-list",     label: "Merit List",       icon: Trophy,      color: "#eab308" }, // yellow
-  { id: "notices",        label: "Notices & News",   icon: Bell,        color: "#f97316" }, // orange
-  { id: "notes",          label: "Notes Manager",    icon: BookMarked,  color: "#06b6d4" }, // cyan
-  { id: "library",        label: "Library",          icon: BookOpen,    color: "#10b981" }, // emerald
-  { id: "gallery",        label: "Media",            icon: Image,       color: "#ec4899" }, // pink
-  { id: "online-classes", label: "Online Classes",   icon: Video,       color: "#ef4444" }, // red
-  { id: "analytics",      label: "Analytics",        icon: TrendingUp,  color: "#14b8a6" }, // teal
-  { id: "credentials",    label: "Credentials",      icon: CreditCard,  color: "#6366f1" }, // indigo
-  { id: "teachers",       label: "Teachers",         icon: Users,       color: "#0ea5e9" }, // sky
-  { id: "extra",          label: "Extra",            icon: Sparkles,    color: "#a855f7" }, // purple
-  { id: "profile",        label: "My Profile",       icon: User,        color: "#84cc16" }, // lime
+const navSections: NavSection[] = [
+  {
+    heading: "OVERVIEW",
+    items: [
+      { id: "overview",   label: "Overview",      emoji: "🏠" },
+      { id: "profile",    label: "My Profile",    emoji: "👤" },
+      { id: "analytics",  label: "Analytics",     emoji: "📈" },
+    ],
+  },
+  {
+    heading: "STUDENTS",
+    items: [
+      { id: "results",     label: "Results",          emoji: "📝" },
+      { id: "merit-list",  label: "Merit List",       emoji: "🏆" },
+      { id: "credentials", label: "Credentials",      emoji: "🪪" },
+    ],
+  },
+  {
+    heading: "SCHOOL",
+    items: [
+      { id: "timetable",      label: "Schedule",        emoji: "📅" },
+      { id: "notices",        label: "Notices & News",  emoji: "📢" },
+      { id: "teachers",       label: "Teachers",        emoji: "👨‍🏫" },
+      { id: "online-classes", label: "Online Classes",  emoji: "💻" },
+    ],
+  },
+  {
+    heading: "LEARNING",
+    items: [
+      { id: "notes",   label: "Notes Manager", emoji: "📓" },
+      { id: "library", label: "Library",       emoji: "📚" },
+      { id: "gallery", label: "Media",         emoji: "🎬" },
+      { id: "extra",   label: "Extra",         emoji: "⭐" },
+    ],
+  },
 ];
 
-/** Flatten navItems for finding label by activeTab id */
-function findLabel(items: NavItem[], tabId: string): string | undefined {
-  return items.find(item => item.id === tabId)?.label;
-}
+// Flat list for bottom bar / searching
+const allNavItems: NavItem[] = navSections.flatMap(s => s.items);
+
+// Deep search index
+const searchIndex: { label: string; sublabel?: string; tabId: string }[] = [
+  ...allNavItems.map(item => ({ label: item.label, tabId: item.id })),
+  { label: "ID Cards",          sublabel: "Credentials",      tabId: "credentials" },
+  { label: "Monitor Pass",      sublabel: "Credentials",      tabId: "credentials" },
+  { label: "Student ID",        sublabel: "Credentials",      tabId: "credentials" },
+  { label: "Notices",           sublabel: "Notices & News",   tabId: "notices" },
+  { label: "News",              sublabel: "Notices & News",   tabId: "notices" },
+  { label: "Result Card",       sublabel: "Results",          tabId: "results" },
+  { label: "Exam Roll Numbers", sublabel: "Results",          tabId: "results" },
+  { label: "Timetable",         sublabel: "Schedule",         tabId: "timetable" },
+  { label: "Exam Schedule",     sublabel: "Schedule",         tabId: "timetable" },
+  { label: "Gallery",           sublabel: "Media",            tabId: "gallery" },
+  { label: "Videos",            sublabel: "Media",            tabId: "gallery" },
+  { label: "Achievements",      sublabel: "Media",            tabId: "gallery" },
+  { label: "Notes",             sublabel: "Notes Manager",    tabId: "notes" },
+  { label: "MCQ Tests",         sublabel: "Notes Manager",    tabId: "notes" },
+  { label: "Daily Quiz",        sublabel: "Notes Manager",    tabId: "notes" },
+  { label: "ISS Tracker",       sublabel: "Extra",            tabId: "extra" },
+  { label: "NASA",              sublabel: "Extra",            tabId: "extra" },
+  { label: "World Explorer",    sublabel: "Extra",            tabId: "extra" },
+  { label: "School Files",      sublabel: "Library",          tabId: "library" },
+  { label: "Virtual Library",   sublabel: "Library",          tabId: "library" },
+  { label: "Free Books",        sublabel: "Library",          tabId: "library" },
+];
 
 interface DashboardLayoutProps {
   activeTab: string;
@@ -52,108 +103,91 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
   const navigate = useNavigate();
   const { isDark, toggle } = useDarkMode();
 
-  // Deep search index: sub-features inside merged hub tabs
-  const searchIndex: { label: string; sublabel?: string; tabId: string }[] = [
-    ...navItems.map((item) => ({ label: item.label, tabId: item.id })),
-    // credentials hub
-    { label: "ID Cards",       sublabel: "Credentials",  tabId: "credentials" },
-    { label: "Monitor Pass",   sublabel: "Credentials",  tabId: "credentials" },
-    { label: "Duty",           sublabel: "Credentials",  tabId: "credentials" },
-    { label: "Student ID",     sublabel: "Credentials",  tabId: "credentials" },
-    { label: "Notices",        sublabel: "Notices & News", tabId: "notices" },
-    { label: "News",           sublabel: "Notices & News", tabId: "notices" },
-    // results hub
-    { label: "Results",        sublabel: "Results Hub",    tabId: "results" },
-    { label: "Exam Roll Numbers", sublabel: "Results Hub", tabId: "results" },
-    { label: "Result Card",    sublabel: "Results Hub",    tabId: "results" },
-    // schedule hub
-    { label: "Timetable",      sublabel: "Schedule Hub",   tabId: "timetable" },
-    { label: "Exam Schedule",  sublabel: "Schedule Hub",   tabId: "timetable" },
-    // media hub
-    { label: "Gallery",        sublabel: "Media",          tabId: "gallery" },
-    { label: "Videos",         sublabel: "Media",          tabId: "gallery" },
-    { label: "Achievements",   sublabel: "Media",          tabId: "gallery" },
-    { label: "Honor Roll",     sublabel: "Media",          tabId: "gallery" },
-    // notes hub
-    { label: "Notes",          sublabel: "Notes Manager",  tabId: "notes" },
-    { label: "MCQ Tests",      sublabel: "Notes Manager",  tabId: "notes" },
-    { label: "Daily Quiz",     sublabel: "Notes Manager",  tabId: "notes" },
-    // extra hub
-    { label: "ISS Tracker",    sublabel: "Extra",          tabId: "extra" },
-    { label: "ISS Live",       sublabel: "Extra",          tabId: "extra" },
-    { label: "NASA",           sublabel: "Extra",          tabId: "extra" },
-    { label: "Space Picture",  sublabel: "Extra",          tabId: "extra" },
-    { label: "Astronomy",      sublabel: "Extra",          tabId: "extra" },
-    { label: "World Explorer",    sublabel: "Extra",          tabId: "extra" },
-    { label: "Country Profiles",  sublabel: "Extra",          tabId: "extra" },
-    { label: "Flag Quiz",         sublabel: "Extra",          tabId: "extra" },
-    { label: "Country Compare",   sublabel: "Extra",          tabId: "extra" },
-    { label: "Country of Week",   sublabel: "Extra",          tabId: "extra" },
-    // library hub
-    { label: "School Files",   sublabel: "Library",        tabId: "library" },
-    { label: "Virtual Library", sublabel: "Library",       tabId: "library" },
-    { label: "Free Books",     sublabel: "Library",        tabId: "library" },
-    { label: "Ebooks",         sublabel: "Library",        tabId: "library" },
-    { label: "Gutenberg",      sublabel: "Library",        tabId: "library" },
-    { label: "Open Library",   sublabel: "Library",        tabId: "library" },
-  ];
-
   const searchResults = searchQuery.trim()
-    ? searchIndex.filter((entry) =>
-        entry.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        entry.sublabel?.toLowerCase().includes(searchQuery.toLowerCase())
+    ? searchIndex.filter(e =>
+        e.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        e.sublabel?.toLowerCase().includes(searchQuery.toLowerCase())
       ).reduce<typeof searchIndex>((acc, entry) => {
-        if (!acc.find((e) => e.label === entry.label && e.tabId === entry.tabId)) acc.push(entry);
+        if (!acc.find(e => e.label === entry.label && e.tabId === entry.tabId)) acc.push(entry);
         return acc;
       }, [])
     : null;
 
-  const filteredNavItems = searchResults
-    ? navItems.filter((item) => searchResults.some((r) => r.tabId === item.id))
-    : navItems;
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
-  };
-
-  const handleTabChange = (tabId: string) => {
-    onTabChange(tabId);
-    setSidebarOpen(false);
-  };
+  const handleSignOut = async () => { await signOut(); navigate("/"); };
+  const handleTabChange = (tabId: string) => { onTabChange(tabId); setSidebarOpen(false); };
 
   const initials = profile?.full_name
-    ?.split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "U";
+    ?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "U";
 
-  const renderNavItem = (item: NavItem, isMobile = false) => (
+  // ── Single nav button ──
+  const NavBtn = ({ item, isMobile = false, onItemClick }: { item: NavItem; isMobile?: boolean; onItemClick?: () => void }) => (
     <button
       key={item.id}
-      onClick={() => handleTabChange(item.id)}
-      className={`w-full flex items-center gap-3 px-3 ${isMobile ? 'py-2.5' : 'py-2'} rounded-lg text-sm font-medium transition-colors ${
+      onClick={() => { handleTabChange(item.id); onItemClick?.(); }}
+      className={`w-full flex items-center gap-3 px-3 ${isMobile ? "py-2.5" : "py-2"} rounded-lg text-sm font-medium transition-colors ${
         activeTab === item.id
           ? "bg-primary text-primary-foreground"
-          : "hover:bg-secondary"
+          : "hover:bg-secondary text-foreground"
       }`}
     >
-      <item.icon
-        className="w-4 h-4 shrink-0"
-        style={{ color: activeTab === item.id ? 'currentColor' : item.color }}
-      />
-      <span className={activeTab === item.id ? "" : "text-muted-foreground"}>
-        {item.label}
-      </span>
+      <EmojiIcon emoji={item.emoji} size="w-5 h-5" />
+      <span className={activeTab === item.id ? "" : "text-muted-foreground"}>{item.label}</span>
     </button>
   );
+
+  // ── Full sectioned nav ──
+  const SectionedNav = ({ isMobile = false, onItemClick }: { isMobile?: boolean; onItemClick?: () => void }) => {
+    if (searchResults !== null) {
+      if (searchResults.length === 0)
+        return <p className="text-xs text-muted-foreground text-center py-4">No results found</p>;
+      const matchedItems = allNavItems.filter(item => searchResults.some(r => r.tabId === item.id));
+      return (
+        <div className="space-y-0.5">
+          {matchedItems.map(item => (
+            <button
+              key={item.id}
+              onClick={() => { handleTabChange(item.id); onItemClick?.(); }}
+              className={`w-full flex items-center gap-3 px-3 ${isMobile ? "py-2.5" : "py-2"} rounded-lg text-sm font-medium transition-colors ${
+                activeTab === item.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary"
+              }`}
+            >
+              <EmojiIcon emoji={item.emoji} />
+              <span className="flex-1 text-left">
+                {searchResults.find(r => r.tabId === item.id)?.label || item.label}
+                {searchResults.find(r => r.tabId === item.id)?.sublabel && (
+                  <span className="block text-[10px] opacity-60 font-normal">
+                    {searchResults.find(r => r.tabId === item.id)?.sublabel}
+                  </span>
+                )}
+              </span>
+            </button>
+          ))}
+        </div>
+      );
+    }
+    return (
+      <div className="space-y-4">
+        {navSections.map(section => (
+          <div key={section.heading}>
+            <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase px-3 mb-1.5">
+              {section.heading}
+            </p>
+            <div className="space-y-0.5">
+              {section.items.map(item => <NavBtn key={item.id} item={item} isMobile={isMobile} onItemClick={onItemClick} />)}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Bottom bar: first 4 items from all nav + Website + More
+  const bottomBarItems = allNavItems.slice(0, 4);
 
   return (
     <div className="min-h-screen bg-background flex">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 bg-card border-r border-border shrink-0 sticky top-0 h-screen">
-        {/* Logo */}
         <div className="p-4 border-b border-border">
           <Link to="/" className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-lg gradient-hero flex items-center justify-center">
@@ -163,7 +197,6 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
           </Link>
         </div>
 
-        {/* Profile */}
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-3">
             {profile?.avatar_url ? (
@@ -190,92 +223,46 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
               type="text"
               placeholder="Search menu..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-          {searchResults !== null ? (
-            searchResults.length > 0 ? searchResults.map((result) => {
-              const navItem = navItems.find((n) => n.id === result.tabId)!;
-              return (
-                <button
-                  key={result.label + result.tabId}
-                  onClick={() => handleTabChange(result.tabId)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    activeTab === result.tabId
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-secondary"
-                  }`}
-                >
-                  <navItem.icon className="w-4 h-4 shrink-0" style={activeTab !== result.tabId ? { color: navItem.color } : undefined} />
-                  <span className="flex-1 text-left">
-                    {result.label}
-                    {result.sublabel && (
-                      <span className="block text-[10px] opacity-60 font-normal">{result.sublabel}</span>
-                    )}
-                  </span>
-                </button>
-              );
-            }) : <p className="text-xs text-muted-foreground text-center py-4">No results found</p>
-          ) : navItems.map((item) => renderNavItem(item, false))}
+        <nav className="flex-1 p-3 overflow-y-auto">
+          <SectionedNav />
         </nav>
 
-        {/* Footer */}
         <div className="p-3 border-t border-border space-y-1">
-          <Link
-            to="/"
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-          >
-            <ExternalLink className="w-4 h-4" />
-            Main Website
+          <Link to="/" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+            <ExternalLink className="w-4 h-4" /> Main Website
           </Link>
           {profile?.role === "admin" && (
-            <Link
-              to="/admin"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-warning hover:bg-warning/10 transition-colors"
-            >
-              <Shield className="w-4 h-4" />
-              Admin Panel
+            <Link to="/admin" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-warning hover:bg-warning/10 transition-colors">
+              <Shield className="w-4 h-4" /> Admin Panel
             </Link>
           )}
-          {(profile?.role === "teacher") && (
-            <Link
-              to="/teacher"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
-            >
-              <Shield className="w-4 h-4" />
-              Teacher Panel
+          {profile?.role === "teacher" && (
+            <Link to="/teacher" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors">
+              <Shield className="w-4 h-4" /> Teacher Panel
             </Link>
           )}
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Sign Out
+          <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors">
+            <LogOut className="w-4 h-4" /> Sign Out
           </button>
         </div>
       </aside>
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top bar */}
         <header className="sticky top-0 z-40 h-14 bg-card border-b border-border flex items-center px-4 gap-3">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-lg hover:bg-secondary text-foreground"
-          >
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-secondary text-foreground">
             <Menu className="w-5 h-5" />
           </button>
           <h1 className="font-heading font-semibold text-foreground capitalize">
-            {findLabel(navItems, activeTab) || "Dashboard"}
+            {allNavItems.find(item => item.id === activeTab)?.label || "Dashboard"}
           </h1>
           <div className="ml-auto flex items-center gap-2">
-            {/* Header search toggle */}
             <div className="hidden sm:flex items-center">
               {searchOpen ? (
                 <div className="flex items-center gap-1">
@@ -286,33 +273,22 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
                       type="text"
                       placeholder="Search sections..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={e => setSearchQuery(e.target.value)}
                       className="pl-8 pr-3 py-1.5 text-xs w-48 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
-                  <button
-                    onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
-                    className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground"
-                  >
+                  <button onClick={() => { setSearchOpen(false); setSearchQuery(""); }} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => setSearchOpen(true)}
-                  className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors"
-                  title="Search sections"
-                >
+                <button onClick={() => setSearchOpen(true)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors" title="Search sections">
                   <Search className="w-4 h-4" />
                 </button>
               )}
             </div>
             <NotificationBell />
-            <button
-              onClick={toggle}
-              className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors"
-              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            >
+            <button onClick={toggle} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors" title={isDark ? "Switch to light mode" : "Switch to dark mode"}>
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
             <button onClick={() => onTabChange("profile")} className="p-1">
@@ -327,39 +303,27 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
           </div>
         </header>
 
-        {/* Content */}
         <main className="flex-1 p-4 md:p-6 pb-20 lg:pb-6">{children}</main>
       </div>
 
+      {/* Mobile bottom bar */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card border-t border-border">
         <div className="flex items-center justify-around py-1">
-          {navItems.slice(0, 4).map((item) => (
+          {bottomBarItems.map(item => (
             <button
               key={item.id}
               onClick={() => handleTabChange(item.id)}
-              className={`flex flex-col items-center gap-0.5 p-2 min-w-[3rem] ${
-                activeTab === item.id ? "text-primary" : ""
-              }`}
+              className={`flex flex-col items-center gap-0.5 p-2 min-w-[3rem] ${activeTab === item.id ? "text-primary" : "text-muted-foreground"}`}
             >
-              <item.icon
-                className="w-5 h-5"
-                style={{ color: activeTab === item.id ? undefined : item.color }}
-              />
+              <span className="text-lg leading-none">{item.emoji}</span>
               <span className="text-[10px] font-medium">{item.label}</span>
             </button>
           ))}
-          {/* Main Website button */}
-          <Link
-            to="/"
-            className="flex flex-col items-center gap-0.5 p-2 min-w-[3rem] text-primary"
-          >
+          <Link to="/" className="flex flex-col items-center gap-0.5 p-2 min-w-[3rem] text-primary">
             <ExternalLink className="w-5 h-5" />
             <span className="text-[10px] font-medium">Website</span>
           </Link>
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="flex flex-col items-center gap-0.5 p-2 min-w-[3rem] text-muted-foreground"
-          >
+          <button onClick={() => setSidebarOpen(true)} className="flex flex-col items-center gap-0.5 p-2 min-w-[3rem] text-muted-foreground">
             <Menu className="w-5 h-5" />
             <span className="text-[10px] font-medium">More</span>
           </button>
@@ -377,7 +341,6 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
                 <X className="w-5 h-5" />
               </button>
             </div>
-            {/* Mobile search */}
             <div className="px-3 py-2 border-b border-border">
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
@@ -385,52 +348,20 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
                   type="text"
                   placeholder="Search menu..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
-            <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-              {searchResults !== null ? (
-                searchResults.length > 0 ? searchResults.map((result) => {
-                  const navItem = navItems.find((n) => n.id === result.tabId)!;
-                  return (
-                    <button
-                      key={result.label + result.tabId}
-                      onClick={() => handleTabChange(result.tabId)}
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                        activeTab === result.tabId
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-secondary"
-                      }`}
-                    >
-                       <navItem.icon className="w-4 h-4 shrink-0" style={activeTab !== result.tabId ? { color: navItem.color } : undefined} />
-                      <span className="flex-1 text-left">
-                        {result.label}
-                        {result.sublabel && (
-                          <span className="block text-[10px] opacity-60 font-normal">{result.sublabel}</span>
-                        )}
-                      </span>
-                    </button>
-                  );
-                }) : <p className="text-xs text-muted-foreground text-center py-4">No results found</p>
-              ) : navItems.map((item) => renderNavItem(item, true))}
+            <nav className="flex-1 p-3 overflow-y-auto">
+              <SectionedNav isMobile onItemClick={() => setSidebarOpen(false)} />
             </nav>
             <div className="p-3 border-t border-border space-y-1">
-              <Link
-                to="/"
-                onClick={() => setSidebarOpen(false)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary"
-              >
-                <ExternalLink className="w-4 h-4" />
-                Main Website
+              <Link to="/" onClick={() => setSidebarOpen(false)} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary">
+                <ExternalLink className="w-4 h-4" /> Main Website
               </Link>
-              <button
-                onClick={handleSignOut}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10"
-              >
-                <LogOut className="w-4 h-4" />
-                Sign Out
+              <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10">
+                <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </div>
           </div>
@@ -441,3 +372,4 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
 };
 
 export default DashboardLayout;
+          

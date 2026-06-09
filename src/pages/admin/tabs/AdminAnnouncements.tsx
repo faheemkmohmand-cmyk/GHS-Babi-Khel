@@ -334,7 +334,7 @@ const AchievementsSection = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const { data: achievements = [], isLoading } = useQuery<Achievement[]>({
+const { data: achievements = [], isLoading } = useQuery<Achievement[]>({
     queryKey: ["admin-achievements"],
     queryFn: async () => {
       const { data, error } = await supabase.from("achievements").select("*").order("created_at", { ascending: false });

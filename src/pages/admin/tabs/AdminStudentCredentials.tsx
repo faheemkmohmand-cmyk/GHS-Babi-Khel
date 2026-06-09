@@ -116,4 +116,3 @@ const AdminStudentCredentials = () => {
 };
 
 export default AdminStudentCredentials;
-              

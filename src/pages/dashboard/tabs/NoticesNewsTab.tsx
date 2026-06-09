@@ -13,10 +13,14 @@ const NoticesNewsTab = () => (
     <Tabs defaultValue="notices" className="w-full">
       <TabsList className="w-full grid grid-cols-2 sm:inline-flex sm:w-auto">
         <TabsTrigger value="notices" className="gap-1.5 text-xs sm:text-sm">
-          <Bell className="w-3.5 h-3.5" /><span>Notices</span>
+          <span className="flex items-center justify-center w-5 h-5 rounded-md bg-amber-100 dark:bg-amber-900/40 shrink-0">
+            <Bell className="w-3 h-3 text-amber-500" />
+          </span><span>Notices</span>
         </TabsTrigger>
         <TabsTrigger value="news" className="gap-1.5 text-xs sm:text-sm">
-          <Newspaper className="w-3.5 h-3.5" /><span>News</span>
+          <span className="flex items-center justify-center w-5 h-5 rounded-md bg-sky-100 dark:bg-sky-900/40 shrink-0">
+            <Newspaper className="w-3 h-3 text-sky-500" />
+          </span><span>News</span>
         </TabsTrigger>
       </TabsList>
       <TabsContent value="notices" className="mt-4"><NoticesTab /></TabsContent>

@@ -18,10 +18,14 @@ const ScheduleHubTab = ({ ExamScheduleTab }: { ExamScheduleTab: React.ComponentT
     <Tabs defaultValue="timetable" className="w-full">
       <TabsList className="w-full grid grid-cols-2 sm:inline-flex sm:w-auto">
         <TabsTrigger value="timetable" className="gap-1.5 text-xs sm:text-sm">
-          <Calendar className="w-3.5 h-3.5" /><span>Timetable</span>
+          <span className="flex items-center justify-center w-5 h-5 rounded-md bg-blue-100 dark:bg-blue-900/40 shrink-0">
+            <Calendar className="w-3 h-3 text-blue-500" />
+          </span><span>Timetable</span>
         </TabsTrigger>
         <TabsTrigger value="exam" className="gap-1.5 text-xs sm:text-sm">
-          <CalendarCheck className="w-3.5 h-3.5" /><span>Exam Schedule</span>
+          <span className="flex items-center justify-center w-5 h-5 rounded-md bg-orange-100 dark:bg-orange-900/40 shrink-0">
+            <CalendarCheck className="w-3 h-3 text-orange-500" />
+          </span><span>Exam Schedule</span>
         </TabsTrigger>
       </TabsList>
       <TabsContent value="timetable" className="mt-4"><TimetableTab /></TabsContent>

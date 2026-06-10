@@ -29,7 +29,6 @@ const navSections: NavSection[] = [
     items: [
       { id: "overview",   label: "Overview",      emoji: "🏠" },
       { id: "profile",    label: "My Profile",    emoji: "👤" },
-      { id: "analytics",  label: "Analytics",     emoji: "📈" },
     ],
   },
   {
@@ -381,4 +380,5 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
 };
 
 export default DashboardLayout;
-          
+
+        

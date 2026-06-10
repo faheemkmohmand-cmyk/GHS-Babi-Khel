@@ -28,8 +28,7 @@ const navSections: NavSection[] = [
     items: [
       { id: "overview",       label: "Dashboard",             emoji: "📊" },
       { id: "settings",       label: "School Settings",       emoji: "⚙️" },
-      { id: "analytics",      label: "Analytics",             emoji: "📈" },
-      { id: "site-analytics", label: "Site Analytics",        emoji: "🌐" },
+
     ],
   },
   {
@@ -363,4 +362,5 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
 };
 
 export default AdminLayout;
+
         

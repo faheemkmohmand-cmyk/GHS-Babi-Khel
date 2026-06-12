@@ -3,24 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Primary title — React Helmet overrides this per-route after JS loads -->
-    <title>GHS Babi Khel - Government High School</title>
+    <!--
+      NOTE: All SEO meta tags (title, description, canonical, OG, Twitter Card,
+      hreflang, robots, JSON-LD) are injected by React Helmet via SEO.tsx +
+      SiteSchema.tsx + RouteSEOInjector.tsx.
 
-    <!-- Static OG fallbacks for social bots and non-JS crawlers (React Helmet overrides at runtime) -->
-    <meta name="description" content="Government High School Babi Khel, District Mohmand, KPK Pakistan. Quality education, notices, news, results, online classes, library and admissions." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://ghsbabikhel.indevs.in/" />
-    <meta property="og:title" content="GHS Babi Khel — Government High School, District Mohmand KPK" />
-    <meta property="og:description" content="Official website of Government High School Babi Khel — notices, results, online classes, admissions and more." />
-    <meta property="og:image" content="https://ghsbabikhel.indevs.in/og-image.jpg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:site_name" content="GHS Babi Khel" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="GHS Babi Khel — Government High School" />
-    <meta name="twitter:description" content="Official website of Government High School Babi Khel, District Mohmand KPK Pakistan." />
-    <meta name="twitter:image" content="https://ghsbabikhel.indevs.in/og-image.jpg" />
-    <link rel="canonical" href="https://ghsbabikhel.indevs.in/" />
+      Duplicate static tags were REMOVED because they conflicted with Helmet's
+      runtime output — Google saw two conflicting <title> and <meta description>
+      per page, which hurt rankings.
+
+      React Helmet is the single source of truth for ALL meta tags.
+    -->
+    <title>GHS Babi Khel — Government High School, District Mohmand KPK</title>
 
     <!-- Google Search Console ownership verification -->
     <meta name="google-site-verification" content="oxtaDh5_WKTGGtiPsV1j8KLLqg8b64a8r2F825a7JPQ" />
@@ -35,12 +29,8 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
 
-    <!--
-      NOTE: description, keywords, robots, canonical, hreflang, OG, Twitter card,
-      and JSON-LD are ALL injected by React Helmet (SEO.tsx + SiteSchema.tsx).
-      Keeping them here too causes duplicate tags that confuse Google and hurt rankings.
-      React Helmet is the single source of truth for all meta tags.
-    -->
+    <!-- RSS Feed — discoverable by browsers and feed readers -->
+    <link rel="alternate" type="application/rss+xml" title="GHS Babi Khel — News & Notices" href="/rss.xml" />
 
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -50,22 +40,6 @@
     <link rel="dns-prefetch" href="https://supabase.co" />
     <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
-    <!--
-      ── Plausible Analytics ──────────────────────────────────────────────────
-      Loaded only when VITE_PLAUSIBLE_DOMAIN is set at build time.
-      The React usePlausible() hook handles SPA route-change pageviews.
-      This tag gives Plausible the initial pageload hit for non-JS crawlers
-      and covers the very first paint before React hydrates.
-
-      TO ENABLE:
-        1. Sign up at https://plausible.io (free 30-day trial, then ~$9/mo)
-           OR self-host: https://plausible.io/docs/self-hosting
-        2. Add your site domain in the Plausible dashboard
-        3. Set VITE_PLAUSIBLE_DOMAIN=ghsbabikhel.indevs.in in Vercel env vars
-        4. Redeploy — this script tag appears automatically
-
-      The "plausible-script" id prevents the React hook from double-injecting.
-    -->
     <!-- PLAUSIBLE_INJECT_PLACEHOLDER -->
 
     <!-- Fonts are loaded via @import in src/index.css with display=swap -->

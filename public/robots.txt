@@ -25,7 +25,6 @@ Allow: /
 User-agent: *
 Allow: /
 Crawl-delay: 5
-
 # ── Private pages — no indexing ───────────────────────────────────────────
 Disallow: /admin
 Disallow: /admin/

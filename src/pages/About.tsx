@@ -105,6 +105,58 @@ const About = () => {
         </div>
       </section>
 
+      {/* Principal's Message */}
+      {!isLoading && (settings?.principal_message || settings?.principal_photo_url) && (
+        <section className="py-16 bg-secondary/50">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-10"
+            >
+              <Users className="w-8 h-8 text-primary mx-auto mb-3" />
+              <h2 className="text-2xl font-heading font-bold text-foreground">Principal's Message</h2>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="bg-card rounded-2xl shadow-card p-6 md:p-10 max-w-4xl mx-auto grid md:grid-cols-[200px_1fr] gap-8 items-start"
+            >
+              <div className="flex flex-col items-center md:items-start">
+                <div className="w-40 h-40 rounded-2xl overflow-hidden shadow-elevated bg-secondary shrink-0">
+                  {settings?.principal_photo_url ? (
+                    <img
+                      src={settings.principal_photo_url}
+                      alt={settings?.principal_name || "Principal"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      <Users className="w-12 h-12" />
+                    </div>
+                  )}
+                </div>
+                {settings?.principal_name && (
+                  <p className="mt-4 font-heading font-semibold text-foreground text-center md:text-left">
+                    {settings.principal_name}
+                  </p>
+                )}
+                <p className="text-sm text-muted-foreground text-center md:text-left">Principal</p>
+              </div>
+
+              <div>
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                  {settings?.principal_message}
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      )}
+
       {/* Stats */}
       <section className="py-16 bg-secondary/50">
         <div className="container mx-auto px-4">
@@ -197,3 +249,4 @@ const About = () => {
 };
 
 export default About;
+                      

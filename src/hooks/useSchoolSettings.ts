@@ -19,6 +19,9 @@ export interface SchoolSettings {
   pass_percentage: number;
   location_lat: number | null;
   location_lng: number | null;
+  principal_name: string | null;
+  principal_message: string | null;
+  principal_photo_url: string | null;
 }
 
 export const fallbackSettings: SchoolSettings = {
@@ -40,6 +43,9 @@ export const fallbackSettings: SchoolSettings = {
   pass_percentage: 98,
   location_lat: 34.4084,
   location_lng: 71.3707,
+  principal_name: null,
+  principal_message: null,
+  principal_photo_url: null,
 };
 
 export function safeMediaUrl(url: string | null | undefined): string | null {
@@ -84,7 +90,7 @@ async function fetchSettings(client: typeof supabase) {
   const { data, error } = await client
     .from("school_settings")
     .select(
-      "id, school_name, tagline, description, about_text, logo_url, banner_url, emis_code, address, phone, email, established_year, total_students, total_teachers, pass_percentage, location_lat, location_lng"
+      "id, school_name, tagline, description, about_text, logo_url, banner_url, emis_code, address, phone, email, established_year, total_students, total_teachers, pass_percentage, location_lat, location_lng, principal_name, principal_message, principal_photo_url"
     )
     .eq("id", 1)
     .single();
@@ -94,6 +100,7 @@ async function fetchSettings(client: typeof supabase) {
     ...data,
     logo_url: safeMediaUrl(data.logo_url),
     banner_url: safeMediaUrl(data.banner_url),
+    principal_photo_url: safeMediaUrl(data.principal_photo_url),
   } as SchoolSettings;
 }
 
@@ -137,4 +144,5 @@ export function useSchoolSettings() {
     // Keep showing previous data while refetching — never blank out.
     placeholderData: (previousData) => previousData ?? readCache() ?? fallbackSettings,
   });
-}
+    }
+      

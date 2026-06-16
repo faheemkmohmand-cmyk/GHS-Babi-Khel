@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, Lock, User, GraduationCap, ArrowRight, Loader2, Phone, Clock } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useSchoolSettings, safeMediaUrl } from "@/hooks/useSchoolSettings";
 import toast from "react-hot-toast";
 
 const roles = ["student", "teacher"] as const;
@@ -16,6 +17,8 @@ const SignUp = () => {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
+  const { data: settings } = useSchoolSettings();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -118,11 +121,20 @@ const SignUp = () => {
       >
         <div className="bg-card rounded-2xl shadow-elevated p-8">
           <div className="text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl gradient-hero mx-auto mb-4 flex items-center justify-center">
-              <GraduationCap className="w-8 h-8 text-primary-foreground" />
+            <div className="w-14 h-14 rounded-2xl gradient-hero mx-auto mb-4 flex items-center justify-center overflow-hidden">
+              {settings?.logo_url && !logoFailed ? (
+                <img
+                  src={safeMediaUrl(settings.logo_url)!}
+                  alt={`${settings?.school_name || "GHS Babi Khel"} logo`}
+                  className="w-full h-full object-cover"
+                  onError={() => setLogoFailed(true)}
+                />
+              ) : (
+                <GraduationCap className="w-8 h-8 text-primary-foreground" />
+              )}
             </div>
             <h1 className="text-2xl font-heading font-bold text-foreground">Create Account</h1>
-            <p className="text-sm text-muted-foreground mt-1">Join the GHS Babi Khel community</p>
+            <p className="text-sm text-muted-foreground mt-1">Join the {settings?.school_name || "GHS Babi Khel"} community</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-3.5">
@@ -253,4 +265,4 @@ const SignUp = () => {
 
 export default SignUp;
 
-                      
+              

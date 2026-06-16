@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut, Menu, X, ExternalLink, Moon, Sun, Search, Shield, GraduationCap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -110,6 +110,7 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
   const [searchOpen, setSearchOpen] = useState(false);
   const navigate = useNavigate();
   const { isDark, toggle } = useDarkMode();
+  const mobileNavRef = useRef<HTMLElement>(null);
 
   // The dashboard scrolls at the window/document level (the sidebar is
   // sticky, not the content pane), so switching features must reset the
@@ -118,6 +119,21 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [activeTab]);
+
+  // When the mobile "Menu" slide-out opens, it always renders scrolled to
+  // the top of the list — so if the active feature is further down (e.g.
+  // "Online Classes" or below), it's hidden off-screen and looks like
+  // nothing is selected. Scroll the highlighted item into view instead.
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const el = mobileNavRef.current?.querySelector(`[data-nav-id="${activeTab}"]`);
+    if (el) {
+      // Run after the panel has actually painted/opened.
+      requestAnimationFrame(() => {
+        el.scrollIntoView({ block: "center" });
+      });
+    }
+  }, [sidebarOpen, activeTab]);
 
   const searchResults = searchQuery.trim()
     ? searchIndex.filter(e =>
@@ -139,6 +155,7 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
   const NavBtn = ({ item, isMobile = false, onItemClick }: { item: NavItem; isMobile?: boolean; onItemClick?: () => void }) => (
     <button
       key={item.id}
+      data-nav-id={item.id}
       onClick={() => { handleTabChange(item.id); onItemClick?.(); }}
       className={`w-full flex items-center gap-3 px-3 ${isMobile ? "py-2.5" : "py-2"} rounded-lg text-sm font-medium transition-colors ${
         activeTab === item.id
@@ -369,7 +386,7 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
                 />
               </div>
             </div>
-            <nav className="flex-1 p-3 overflow-y-auto">
+            <nav ref={mobileNavRef} className="flex-1 p-3 overflow-y-auto">
               <SectionedNav isMobile onItemClick={() => setSidebarOpen(false)} />
             </nav>
             <div className="p-3 border-t border-border space-y-1">
@@ -390,4 +407,4 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
 export default DashboardLayout;
 
 
-      
+  

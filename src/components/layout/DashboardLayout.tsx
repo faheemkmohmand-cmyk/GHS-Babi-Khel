@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut, Menu, X, ExternalLink, Moon, Sun, Search, Shield, GraduationCap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -110,6 +110,14 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
   const [searchOpen, setSearchOpen] = useState(false);
   const navigate = useNavigate();
   const { isDark, toggle } = useDarkMode();
+
+  // The dashboard scrolls at the window/document level (the sidebar is
+  // sticky, not the content pane), so switching features must reset the
+  // window scroll position — otherwise the new feature renders while the
+  // page stays scrolled wherever the previous feature left it.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [activeTab]);
 
   const searchResults = searchQuery.trim()
     ? searchIndex.filter(e =>
@@ -381,4 +389,5 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
 
 export default DashboardLayout;
 
-        
+
+      

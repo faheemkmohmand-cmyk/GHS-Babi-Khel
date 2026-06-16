@@ -6,7 +6,6 @@ import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
 
 const roles = ["student", "teacher"] as const;
-const classes = ["6", "7", "8", "9", "10"] as const;
 
 const SignUp = () => {
   const [fullName, setFullName] = useState("");
@@ -14,7 +13,6 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState<string>("student");
-  const [studentClass, setStudentClass] = useState<string>("6");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -57,7 +55,6 @@ const SignUp = () => {
         id: authData.user.id,
         full_name: fullName,
         role,
-        class: role === "student" ? studentClass : null,
         phone: phone || null,
         status: "pending",
       }, { onConflict: "id" });
@@ -217,29 +214,6 @@ const SignUp = () => {
               </div>
             </div>
 
-            {/* Class selection (only for students) */}
-            {role === "student" && (
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block">Class</label>
-                <div className="grid grid-cols-5 gap-2">
-                  {classes.map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => setStudentClass(c)}
-                      className={`px-2 py-2 rounded-lg text-xs font-medium transition-colors ${
-                        studentClass === c
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-secondary text-secondary-foreground hover:bg-muted"
-                      }`}
-                    >
-                      {c}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Phone */}
             <div>
               <label className="text-sm font-medium text-foreground mb-1 block">Phone (optional)</label>
@@ -279,3 +253,4 @@ const SignUp = () => {
 
 export default SignUp;
 
+                      

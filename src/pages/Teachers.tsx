@@ -52,9 +52,6 @@ const Teachers = () => {
 
       <section className="py-16">
         <div className="container mx-auto px-4">
-          {/* SEO h1 — visible to crawlers and screen readers */}
-          <h1 className="sr-only">Teachers at Government High School Babi Khel</h1>
-
           {/* Search */}
           <div className="max-w-md mx-auto mb-10">
             <div className="relative">
@@ -139,4 +136,4 @@ const Teachers = () => {
 };
 
 export default Teachers;
-            
+

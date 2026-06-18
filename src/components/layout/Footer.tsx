@@ -39,7 +39,7 @@ const Footer = () => {
   // Reset logo failed state when URL changes
   useEffect(() => { setLogoFailed(false); }, [settings?.logo_url]);
 
-  const displayEmail = settings?.email || "ghsbabikhel@edu.pk";
+  const displayEmail = settings?.email || "ghsbabikhel@gmail.com";
 
   const displayPhone = settings?.phone && settings.phone.trim().length > 5
     ? settings.phone

@@ -51,6 +51,23 @@ export function HtmlPasteEditor({ value, onChange, placeholder, minHeight = 380 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft]);
 
+  // IMPORTANT: the 600ms debounce above means `value` (the parent's saved
+  // form.content) can lag a few hundred ms behind what's in this textarea.
+  // If the user pastes HTML and immediately hits the page's "Save" button,
+  // the debounce timer may not have fired yet — and the parent would save
+  // the OLD content (e.g. leftover Rich Text HTML) instead of what's on
+  // screen here. To prevent that, flush the draft to the parent the moment
+  // the user leaves this field (blur) or the tab/app loses focus, so by the
+  // time any Save button is clicked, `value` is always current.
+  const flushNow = () => {
+    if (draft !== value) { onChange(draft); setApplied(true); }
+  };
+  useEffect(() => {
+    document.addEventListener("visibilitychange", flushNow);
+    return () => document.removeEventListener("visibilitychange", flushNow);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, value]);
+
   const handlePasteFromClipboard = async () => {
     try {
       const text = await navigator.clipboard.readText();
@@ -86,6 +103,7 @@ export function HtmlPasteEditor({ value, onChange, placeholder, minHeight = 380 
       <textarea
         value={draft}
         onChange={e => setDraft(e.target.value)}
+        onBlur={flushNow}
         placeholder={placeholder || "Paste your HTML here, e.g. <h2>Simple Harmonic Motion</h2><p>...</p>"}
         spellCheck={false}
         autoCapitalize="off"

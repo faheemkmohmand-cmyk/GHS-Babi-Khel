@@ -82,6 +82,7 @@ const DutyPage         = lazyWithRetry(() => import("./pages/Duty"));
 const Search           = lazyWithRetry(() => import("./pages/Search"));
 const NewsDetail       = lazyWithRetry(() => import("./pages/NewsDetail"));
 const NoticeDetail     = lazyWithRetry(() => import("./pages/NoticeDetail"));
+const Contact          = lazyWithRetry(() => import("./pages/Contact"));
 
 const PageSkeleton = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -125,6 +126,7 @@ const App = () => (
               <Routes>
                 <Route path="/"                     element={<Home />} />
                 <Route path="/about"                element={<About />} />
+                <Route path="/contact"              element={<Contact />} />
                 <Route path="/teachers"             element={<Teachers />} />
                 <Route path="/notices"              element={<Notices />} />
                 <Route path="/notices/:id"          element={<NoticeDetail />} />
@@ -182,3 +184,4 @@ const App = () => (
 );
 
 export default App;
+                  

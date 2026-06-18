@@ -8,11 +8,20 @@
       hreflang, robots, JSON-LD) are injected by React Helmet via SEO.tsx +
       SiteSchema.tsx + RouteSEOInjector.tsx.
 
-      Duplicate static tags were REMOVED because they conflicted with Helmet's
-      runtime output — Google saw two conflicting <title> and <meta description>
-      per page, which hurt rankings.
+      Duplicate static tags were REMOVED here because they previously
+      conflicted with Helmet's runtime output — Google saw two conflicting
+      <title> and <meta description> per page, which hurt rankings. That
+      problem is NOT being reintroduced.
 
-      React Helmet is the single source of truth for ALL meta tags.
+      Social-media link-preview crawlers (WhatsApp, Facebook, LinkedIn,
+      X/Twitter, Slack, Discord, iMessage/Applebot) don't execute JS, so
+      this empty shell isn't what they see: middleware.ts detects those
+      crawlers and serves them /api/og — fully-formed, per-route static
+      HTML with correct title/description/OG/Twitter/canonical tags —
+      instead of this file. See middleware.ts and api/og.js.
+
+      React Helmet remains the single source of truth for everything real
+      browsers and Googlebot/Bingbot (which do render JS) see.
     -->
     <title>GHS Babi Khel — Government High School, District Mohmand KPK</title>
 
@@ -81,26 +90,31 @@
       })();
     </script>
 
-    <!-- Smart SW cleanup: only unregister broken/outdated service workers -->
+    <!-- One-time Service Worker cleanup (runs once per browser, not every
+         load): this project intentionally has NO service worker — a prior
+         attempt at one caused pages to hang on refresh by serving stale
+         cached JS chunks (see vite.config.ts). If a visitor's browser still
+         has an old SW registered from before that was reverted, unregister
+         it once so they're not stuck on stale cached assets forever. After
+         that one cleanup, this is a no-op on every subsequent visit so we
+         stop doing unnecessary work (and stop blocking installability —
+         see below). -->
     <script>
-      if ('serviceWorker' in navigator) {
+      if ('serviceWorker' in navigator && !localStorage.getItem('ghs-sw-cleanup-done')) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
           registrations.forEach(function(r) { r.unregister(); });
         });
-      }
-      if (window.caches && !sessionStorage.getItem('cache-cleared-v2')) {
-        caches.keys().then(function(names) {
-          names.forEach(function(name) { caches.delete(name); });
-        });
-        sessionStorage.setItem('cache-cleared-v2', '1');
+        if (window.caches) {
+          caches.keys().then(function(names) {
+            names.forEach(function(name) { caches.delete(name); });
+          });
+        }
+        localStorage.setItem('ghs-sw-cleanup-done', '1');
       }
     </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-  <script>
-    window.addEventListener('beforeinstallprompt', function(e) { e.preventDefault(); });
-  </script>
   </body>
 </html>

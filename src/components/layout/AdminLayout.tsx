@@ -51,6 +51,7 @@ const navSections: NavSection[] = [
     items: [
       { id: "teachers",      label: "Manage Teachers",   emoji: "👨‍🏫" },
       { id: "timetables",    label: "Timetables",        emoji: "📅" },
+      { id: "events",        label: "Event Calendar",    emoji: "🗓️" },
       { id: "announcements", label: "Announcements",     emoji: "📢" },
       { id: "library",       label: "Library",           emoji: "📚" },
       { id: "online-classes",label: "Online Classes",    emoji: "💻" },
@@ -76,6 +77,11 @@ const searchIndex: { label: string; sublabel?: string; tabId: string }[] = [
   { label: "Page Views",        sublabel: "Site Analytics",          tabId: "site-analytics" },
   { label: "Visitors",          sublabel: "Site Analytics",          tabId: "site-analytics" },
   { label: "Notices",          sublabel: "Announcements",        tabId: "announcements" },
+  { label: "Exam Dates",       sublabel: "Event Calendar",       tabId: "events" },
+  { label: "Holidays",         sublabel: "Event Calendar",       tabId: "events" },
+  { label: "PTM",              sublabel: "Event Calendar",       tabId: "events" },
+  { label: "Sports Day",       sublabel: "Event Calendar",       tabId: "events" },
+  { label: "Results Day",      sublabel: "Event Calendar",       tabId: "events" },
   { label: "News",             sublabel: "Announcements",        tabId: "announcements" },
   { label: "Achievements",     sublabel: "Announcements",        tabId: "announcements" },
   { label: "Merit List",       sublabel: "Announcements",        tabId: "announcements" },
@@ -377,6 +383,7 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
 };
 
 export default AdminLayout;
+
 
 
     

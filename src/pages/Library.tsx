@@ -10,8 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import WikipediaWidget from "@/components/shared/WikipediaWidget";
 import VirtualBookLibrary from "@/pages/dashboard/tabs/VirtualBookLibrary";
-import BookQRManager from "@/components/library/BookQRManager";
-import ReadingChallenge from "@/components/library/ReadingChallenge";
+import BookQRManager from "@/components/Library/BookQRManager";
+import ReadingChallenge from "@/components/Library/ReadingChallenge";
 
 const categories = ["All", "Past Papers", "Books", "Notes", "Assignments", "Admission", "Other"];
 const classOptions = ["All", "6", "7", "8", "9", "10"];

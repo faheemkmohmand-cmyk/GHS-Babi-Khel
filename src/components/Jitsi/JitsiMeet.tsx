@@ -18,7 +18,7 @@
  *     classId={cls.id}
  *     subjectColor="#3b82f6"
  *   />
- */
+ */ 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {

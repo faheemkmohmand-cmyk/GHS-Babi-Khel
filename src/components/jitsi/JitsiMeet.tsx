@@ -8,7 +8,7 @@
  *  - "I'm confused" button (anonymous heatmap to teacher)
  *  - Auto-recording note (teacher can paste recording link afterwards)
  *
- * Realtime sync uses Supabase Realtime channels — no extra backend needed.
+ * Realtime sync uses Supabase Realtime channels — no extra backend needed. 
  *
  * Usage:
  *   <JitsiMeet

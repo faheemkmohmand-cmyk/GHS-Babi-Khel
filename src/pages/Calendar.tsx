@@ -12,8 +12,8 @@ import PageLayout from "@/components/layout/PageLayout";
 import PageBanner from "@/components/shared/PageBanner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEvents, EVENT_TYPE_META, type SchoolEvent, type EventType } from "@/hooks/useEvents";
-import ExamCountdown from "@/components/calendar/ExamCountdown";
-import CalendarSubscribe from "@/components/calendar/CalendarSubscribe";
+import ExamCountdown from "@/components/Calendar/ExamCountdown";
+import CalendarSubscribe from "@/components/Calendar/CalendarSubscribe";
 
 // Filter chips: Exams / Holidays / Sports / Fees / Online classes + All + PTMs + Results
 const FILTERS: Array<{ value: EventType | "all"; label: string; emoji: string }> = [

@@ -68,6 +68,7 @@ const SignIn           = lazyWithRetry(() => import("./pages/auth/SignIn"));
 const SignUp           = lazyWithRetry(() => import("./pages/auth/SignUp"));
 const ForgotPassword   = lazyWithRetry(() => import("./pages/auth/ForgotPassword"));
 const ResetPassword    = lazyWithRetry(() => import("./pages/auth/ResetPassword"));
+const AuthCallback     = lazyWithRetry(() => import("./pages/auth/AuthCallback"));
 const UserDashboard    = lazyWithRetry(() => import("./pages/dashboard/UserDashboard"));
 const NotesPage        = lazyWithRetry(() => import("./pages/notes/NotesPage"));
 const SubjectPage      = lazyWithRetry(() => import("./pages/notes/SubjectPage"));
@@ -143,6 +144,7 @@ const App = () => (
                 <Route path="/auth/signup"          element={<SignUp />} />
                 <Route path="/auth/forgot-password" element={<ForgotPassword />} />
                 <Route path="/auth/reset-password"  element={<ResetPassword />} />
+                <Route path="/auth/callback"         element={<AuthCallback />} />
                 <Route
                   path="/dashboard"
                   element={
@@ -186,3 +188,4 @@ const App = () => (
 );
 
 export default App;
+    

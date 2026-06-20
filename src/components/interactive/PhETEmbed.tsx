@@ -83,6 +83,11 @@ export default function PhETEmbed({
   };
 
   const simUrl = simId
+    ? `https://phet.colorado.edu/sims/html/${simId}/latest/${simId}_en-iframe.html`
+    : "";
+  // Direct (non-iframe) link — used for the "Open" / "Open in New Tab" buttons,
+  // since the full standalone page is nicer to use outside an iframe.
+  const simDirectUrl = simId
     ? `https://phet.colorado.edu/sims/html/${simId}/latest/${simId}_en.html`
     : "";
 
@@ -96,7 +101,7 @@ export default function PhETEmbed({
         </div>
         <span className="font-bold text-sm text-foreground">PhET Simulation</span>
         {simId && (
-          <a href={simUrl} target="_blank" rel="noreferrer"
+          <a href={simDirectUrl} target="_blank" rel="noreferrer"
             className="ml-auto text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1">
             Open <ExternalLink className="w-3 h-3" />
           </a>
@@ -175,7 +180,7 @@ export default function PhETEmbed({
                     Your connection may be slow or the simulation may be blocked. Try opening it in a new tab.
                   </p>
                   <div className="flex gap-2 mt-1">
-                    <a href={simUrl} target="_blank" rel="noreferrer"
+                    <a href={simDirectUrl} target="_blank" rel="noreferrer"
                       className="text-xs px-3 py-2 rounded-lg text-white font-semibold flex items-center gap-1.5"
                       style={{ backgroundColor: subjectColor }}>
                       <ExternalLink className="w-3.5 h-3.5" /> Open in New Tab
@@ -210,7 +215,7 @@ export default function PhETEmbed({
               <p className="text-[11px] text-muted-foreground flex-1 min-w-0">
                 Simulation not loading? Try opening it directly:
               </p>
-              <a href={simUrl} target="_blank" rel="noreferrer"
+              <a href={simDirectUrl} target="_blank" rel="noreferrer"
                 className="shrink-0 text-xs px-3 py-1.5 rounded-lg text-white font-semibold flex items-center gap-1.5"
                 style={{ backgroundColor: subjectColor }}>
                 <ExternalLink className="w-3.5 h-3.5" /> New Tab

@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { sanitizeChapterHTML } from "@/components/notes/KaTeXRenderer";
 
 interface PrintOptimizedProps {
   chapter: {
@@ -52,7 +53,7 @@ const PrintOptimized = ({ chapter, subject, schoolName, onClose }: PrintOptimize
 
         <div className="prose prose-base max-w-none dark:prose-invert print:prose-invert print:text-black">
           {chapter.content ? (
-            <div dangerouslySetInnerHTML={{ __html: chapter.content }} />
+            <div dangerouslySetInnerHTML={{ __html: sanitizeChapterHTML(chapter.content) }} />
           ) : (
             <p className="text-muted-foreground">No content available</p>
           )}

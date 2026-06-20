@@ -134,6 +134,31 @@ function escapeHtml(str: string): string {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+// ─── Sanitize chapter HTML ────────────────────────────────────────────────────
+// Chapter content is admin-authored rich text (often pasted from Word/Google
+// Docs/other sources) and is rendered directly into the page via
+// dangerouslySetInnerHTML — NOT inside an iframe. If the saved HTML contains a
+// stray <style> or <script> tag, it leaks into the global document and can
+// override site-wide styles (e.g. turning the footer or whole page white).
+// Strip those tags (and inline event-handler attributes / javascript: URLs)
+// before rendering.
+export function sanitizeChapterHTML(html: string): string {
+  if (!html) return html;
+  let safe = html;
+  // Remove <style>...</style> blocks entirely — these are the main culprit
+  // for global CSS leaks (e.g. a pasted "body { background: white }" rule).
+  safe = safe.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
+  // Remove <script>...</script> blocks — never execute admin-pasted scripts
+  // inline on the live page (animation_code already runs safely in its own
+  // sandboxed iframe elsewhere).
+  safe = safe.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "");
+  // Strip inline on* event handler attributes (onclick=, onerror=, etc.)
+  safe = safe.replace(/\son\w+\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, "");
+  // Strip javascript: URLs in href/src
+  safe = safe.replace(/\s(href|src)\s*=\s*(["'])\s*javascript:[^"']*\2/gi, "");
+  return safe;
+}
+
 // ─── React Component ─────────────────────────────────────────────────────────
 
 interface KaTeXRendererProps {
@@ -165,7 +190,7 @@ const KaTeXRenderer: React.FC<KaTeXRendererProps> = ({ content, className, style
       return;
     }
 
-    let processedContent = content;
+    let processedContent = sanitizeChapterHTML(content);
 
     // Lite mode: strip images
     if (liteMode) {
@@ -232,3 +257,4 @@ export function insertLatexIntoEditor(editor: any, displayMode = false) {
 }
 
 export default KaTeXRenderer;
+  

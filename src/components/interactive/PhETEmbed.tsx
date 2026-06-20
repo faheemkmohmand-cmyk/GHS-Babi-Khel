@@ -82,9 +82,9 @@ export default function PhETEmbed({
     setIframeKey((k) => k + 1);
   };
 
-  const simUrl = simId
-    ? `https://phet.colorado.edu/sims/html/${simId}/latest/${simId}_en-iframe.html`
-    : "";
+  // Route through our own proxy so PhET's frame-ancestors header doesn't block us.
+  // api/phet-proxy.js fetches the sim HTML server-side and rewrites asset URLs.
+  const simUrl = simId ? `/api/phet-proxy?sim=${encodeURIComponent(simId)}` : "";
   // Direct (non-iframe) link — used for the "Open" / "Open in New Tab" buttons,
   // since the full standalone page is nicer to use outside an iframe.
   const simDirectUrl = simId
@@ -232,4 +232,5 @@ export default function PhETEmbed({
       </div>
     </div>
   );
-}
+      }
+          

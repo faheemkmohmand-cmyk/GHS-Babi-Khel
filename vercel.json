@@ -21,6 +21,14 @@
       "destination": "/api/calendar"
     },
     {
+      "source": "/api/phet-proxy",
+      "destination": "/api/phet-proxy"
+    },
+    {
+      "source": "/api/phet-asset",
+      "destination": "/api/phet-asset"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }

@@ -4,6 +4,7 @@ import { LogOut, Menu, X, ExternalLink, Moon, Sun, Search, Shield } from "lucide
 import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/shared/NotificationBell";
 import { useDarkMode } from "@/hooks/useDarkMode";
+import CommandPalette, { PaletteNavItem } from "@/components/shared/CommandPalette";
 
 // ── Emoji icon component ──────────────────────────────────────────────────────
 const EmojiIcon = ({ emoji, size = "w-5 h-5" }: { emoji: string; size?: string }) => (
@@ -97,6 +98,14 @@ const searchIndex: { label: string; sublabel?: string; tabId: string }[] = [
   { label: "Free Books",        sublabel: "Library",          tabId: "library" },
 ];
 
+// Build palette-ready nav items: each page plus its known synonyms as keywords.
+const paletteNavItems: PaletteNavItem[] = allNavItems.map(item => ({
+  id: item.id,
+  label: item.label,
+  emoji: item.emoji,
+  keywords: searchIndex.filter(e => e.tabId === item.id).map(e => e.label),
+}));
+
 interface DashboardLayoutProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -106,8 +115,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutProps) => {
   const { profile, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const navigate = useNavigate();
   const { isDark, toggle } = useDarkMode();
   const mobileNavRef = useRef<HTMLElement>(null);
@@ -135,16 +143,6 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
     }
   }, [sidebarOpen, activeTab]);
 
-  const searchResults = searchQuery.trim()
-    ? searchIndex.filter(e =>
-        e.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        e.sublabel?.toLowerCase().includes(searchQuery.toLowerCase())
-      ).reduce<typeof searchIndex>((acc, entry) => {
-        if (!acc.find(e => e.label === entry.label && e.tabId === entry.tabId)) acc.push(entry);
-        return acc;
-      }, [])
-    : null;
-
   const handleSignOut = async () => { await signOut(); navigate("/"); };
   const handleTabChange = (tabId: string) => { onTabChange(tabId); setSidebarOpen(false); };
 
@@ -169,50 +167,20 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
   );
 
   // ── Full sectioned nav ──
-  const SectionedNav = ({ isMobile = false, onItemClick }: { isMobile?: boolean; onItemClick?: () => void }) => {
-    if (searchResults !== null) {
-      if (searchResults.length === 0)
-        return <p className="text-xs text-muted-foreground text-center py-4">No results found</p>;
-      const matchedItems = allNavItems.filter(item => searchResults.some(r => r.tabId === item.id));
-      return (
-        <div className="space-y-0.5">
-          {matchedItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => { handleTabChange(item.id); onItemClick?.(); }}
-              className={`w-full flex items-center gap-3 px-3 ${isMobile ? "py-2.5" : "py-2"} rounded-lg text-sm font-medium transition-colors ${
-                activeTab === item.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary"
-              }`}
-            >
-              <EmojiIcon emoji={item.emoji} />
-              <span className="flex-1 text-left">
-                {searchResults.find(r => r.tabId === item.id)?.label || item.label}
-                {searchResults.find(r => r.tabId === item.id)?.sublabel && (
-                  <span className="block text-[10px] opacity-60 font-normal">
-                    {searchResults.find(r => r.tabId === item.id)?.sublabel}
-                  </span>
-                )}
-              </span>
-            </button>
-          ))}
-        </div>
-      );
-    }
-    return (
-      <div className="space-y-4">
-        {navSections.map(section => (
-          <div key={section.heading}>
-            <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase px-3 mb-1.5">
-              {section.heading}
-            </p>
-            <div className="space-y-0.5">
-              {section.items.map(item => <NavBtn key={item.id} item={item} isMobile={isMobile} onItemClick={onItemClick} />)}
-            </div>
+  const SectionedNav = ({ isMobile = false, onItemClick }: { isMobile?: boolean; onItemClick?: () => void }) => (
+    <div className="space-y-4">
+      {navSections.map(section => (
+        <div key={section.heading}>
+          <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase px-3 mb-1.5">
+            {section.heading}
+          </p>
+          <div className="space-y-0.5">
+            {section.items.map(item => <NavBtn key={item.id} item={item} isMobile={isMobile} onItemClick={onItemClick} />)}
           </div>
-        ))}
-      </div>
-    );
-  };
+        </div>
+      ))}
+    </div>
+  );
 
   // Bottom bar: first 4 items from all nav + Website + More
   const bottomBarItems = allNavItems.slice(0, 4);
@@ -251,18 +219,18 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
           </div>
         </div>
 
-        {/* Desktop Search */}
+        {/* Desktop Search — opens the command palette */}
         <div className="px-3 py-2 border-b border-border">
-          <div className="relative">
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="w-full flex items-center gap-2 pl-8 pr-2 py-1.5 text-xs rounded-lg bg-secondary border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors relative"
+          >
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Search menu..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
+            <span className="flex-1 text-left">Search anything...</span>
+            <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-border bg-card text-[10px] font-medium text-muted-foreground">
+              ⌘K
+            </kbd>
+          </button>
         </div>
 
         <nav className="flex-1 p-3 overflow-y-auto">
@@ -299,30 +267,13 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
             {allNavItems.find(item => item.id === activeTab)?.label || "Dashboard"}
           </h1>
           <div className="ml-auto flex items-center gap-2">
-            <div className="hidden sm:flex items-center">
-              {searchOpen ? (
-                <div className="flex items-center gap-1">
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-                    <input
-                      autoFocus
-                      type="text"
-                      placeholder="Search sections..."
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      className="pl-8 pr-3 py-1.5 text-xs w-48 rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                    />
-                  </div>
-                  <button onClick={() => { setSearchOpen(false); setSearchQuery(""); }} className="p-1.5 rounded-lg hover:bg-secondary text-muted-foreground">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <button onClick={() => setSearchOpen(true)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors" title="Search sections">
-                  <Search className="w-4 h-4" />
-                </button>
-              )}
-            </div>
+            <button
+              onClick={() => setPaletteOpen(true)}
+              className="hidden sm:flex p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors"
+              title="Search (⌘K)"
+            >
+              <Search className="w-4 h-4" />
+            </button>
             <NotificationBell />
             <button onClick={toggle} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors" title={isDark ? "Switch to light mode" : "Switch to dark mode"}>
               {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -386,16 +337,13 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
               </button>
             </div>
             <div className="px-3 py-2 border-b border-border">
-              <div className="relative">
+              <button
+                onClick={() => { setSidebarOpen(false); setPaletteOpen(true); }}
+                className="w-full flex items-center gap-2 pl-8 pr-2 py-1.5 text-xs rounded-lg bg-secondary border border-border text-muted-foreground relative"
+              >
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-                <input
-                  type="text"
-                  placeholder="Search menu..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
+                <span className="flex-1 text-left">Search anything...</span>
+              </button>
             </div>
             <nav ref={mobileNavRef} className="flex-1 p-3 overflow-y-auto">
               <SectionedNav isMobile onItemClick={() => setSidebarOpen(false)} />
@@ -411,8 +359,18 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
           </div>
         </div>
       )}
+
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        navItems={paletteNavItems}
+        basePath="/dashboard"
+        onTabChange={handleTabChange}
+        enableDataSearch={profile?.role === "admin" || profile?.role === "teacher"}
+      />
     </div>
   );
 };
 
 export default DashboardLayout;
+                          

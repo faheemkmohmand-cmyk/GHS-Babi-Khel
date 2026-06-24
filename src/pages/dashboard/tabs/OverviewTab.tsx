@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   Users, GraduationCap, TrendingUp, Bell, ArrowRight,
   BookOpen, BarChart3, Image, Trophy, Calendar, Newspaper,
-  Shield, ChevronRight, Sparkles, Clock
+  Shield, ChevronRight, Sparkles, Clock, RefreshCw
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";
@@ -23,20 +23,33 @@ const quickActions = [
   { id: "achievements", label: "Achievements", icon: Trophy, desc: "Honor roll" },
 ];
 
+function timeAgo(ms: number) {
+  if (!ms) return "";
+  const diff = Date.now() - ms;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
 interface Props { onNavigate: (tab: string) => void; }
 
 const OverviewTab = ({ onNavigate }: Props) => {
   const { profile } = useAuth();
-  const { data: settings, isLoading: settingsLoading } = useSchoolSettings();
+  const { data: settings, isLoading: settingsLoading, refetch, isFetching, dataUpdatedAt } = useSchoolSettings();
   const { data: notices = [], isLoading: noticesLoading } = useNotices(3);
   const { data: news = [], isLoading: newsLoading } = useNews(2);
 
   const isAdmin = profile?.role === "admin";
 
+  const passRate = settings?.pass_percentage || 0;
   const statsCards = [
     { icon: Users, label: "Total Students", value: settings?.total_students || 0, color: "from-blue-500 to-blue-600", light: "bg-blue-50 dark:bg-blue-950/40" },
     { icon: GraduationCap, label: "Teaching Staff", value: settings?.total_teachers || 0, color: "from-emerald-500 to-emerald-600", light: "bg-emerald-50 dark:bg-emerald-950/40" },
-    { icon: TrendingUp, label: "Pass Rate", value: `${settings?.pass_percentage || 0}%`, color: "from-violet-500 to-violet-600", light: "bg-violet-50 dark:bg-violet-950/40" },
+    { icon: TrendingUp, label: "Pass Rate", value: `${passRate}%`, color: "from-violet-500 to-violet-600", light: "bg-violet-50 dark:bg-violet-950/40",
+      trend: passRate >= 90 ? "Excellent" : passRate >= 75 ? "Good" : "Watch" },
     { icon: Bell, label: "Active Notices", value: notices.length, color: "from-amber-500 to-amber-600", light: "bg-amber-50 dark:bg-amber-950/40" },
   ];
 
@@ -87,9 +100,19 @@ const OverviewTab = ({ onNavigate }: Props) => {
 
       {/* ── Key Stats ── */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <h3 className="font-heading font-semibold text-foreground text-sm uppercase tracking-wide">School Overview</h3>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <h3 className="font-heading font-semibold text-foreground text-sm uppercase tracking-wide">School Overview</h3>
+          </div>
+          <button
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3 h-3 ${isFetching ? "animate-spin" : ""}`} />
+            {dataUpdatedAt ? `Updated ${timeAgo(dataUpdatedAt)}` : "Refresh"}
+          </button>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {settingsLoading
@@ -102,8 +125,17 @@ const OverviewTab = ({ onNavigate }: Props) => {
                   transition={{ delay: i * 0.07 }}
                   className={`relative overflow-hidden rounded-2xl p-5 shadow-card ${s.light} border border-border/40`}
                 >
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-3 shadow-sm`}>
-                    <s.icon className="w-5 h-5 text-white" />
+                  <div className="flex items-start justify-between mb-3">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center shadow-sm`}>
+                      <s.icon className="w-5 h-5 text-white" />
+                    </div>
+                    {"trend" in s && s.trend && (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        s.trend === "Excellent" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" :
+                        s.trend === "Good" ? "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400" :
+                        "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400"
+                      }`}>{s.trend}</span>
+                    )}
                   </div>
                   <div className="text-2xl font-heading font-bold text-foreground">{s.value}</div>
                   <div className="text-xs text-muted-foreground font-medium mt-0.5">{s.label}</div>
@@ -225,4 +257,5 @@ const OverviewTab = ({ onNavigate }: Props) => {
 };
 
 export default OverviewTab;
-                            
+
+     

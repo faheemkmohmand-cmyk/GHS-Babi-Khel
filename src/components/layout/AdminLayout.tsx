@@ -70,6 +70,9 @@ const navSections: NavSection[] = [
 // Flat list for searching
 const allNavItems: NavItem[] = navSections.flatMap(s => s.items);
 
+// First few items for the mobile bottom bar quick-access row
+const bottomBarItems: NavItem[] = allNavItems.slice(0, 4);
+
 // Deep search index
 const searchIndex: { label: string; sublabel?: string; tabId: string }[] = [
   ...allNavItems.map(item => ({ label: item.label, tabId: item.id })),
@@ -323,17 +326,26 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
       {/* Mobile bottom bar */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card border-t border-border">
         <div className="flex items-center justify-around py-1">
-          <button onClick={() => setSidebarOpen(true)} className="flex flex-col items-center gap-0.5 p-2 min-w-[3.5rem] text-muted-foreground">
+          {bottomBarItems.map(item => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onTabChange(item.id)}
+                className={`flex flex-col items-center gap-0.5 p-2 min-w-[3rem] ${isActive ? "text-primary" : "text-muted-foreground"}`}
+              >
+                {item.lucideIcon ? (
+                  <item.lucideIcon className={`w-5 h-5 ${isActive ? "text-primary" : item.lucideColor ?? "text-muted-foreground"}`} />
+                ) : (
+                  <span className="text-lg leading-none">{item.emoji}</span>
+                )}
+                <span className="text-[10px] font-medium truncate max-w-[3.5rem]">{item.label}</span>
+              </button>
+            );
+          })}
+          <button onClick={() => setSidebarOpen(true)} className="flex flex-col items-center gap-0.5 p-2 min-w-[3rem] text-muted-foreground">
             <Menu className="w-5 h-5" />
             <span className="text-[10px] font-medium">Menu</span>
-          </button>
-          <Link to="/" className="flex flex-col items-center gap-0.5 p-2 min-w-[3.5rem] text-primary">
-            <ExternalLink className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Website</span>
-          </Link>
-          <button onClick={handleSignOut} className="flex flex-col items-center gap-0.5 p-2 min-w-[3.5rem] text-destructive">
-            <LogOut className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Sign Out</span>
           </button>
         </div>
       </div>
@@ -392,4 +404,4 @@ export default AdminLayout;
 
 
 
-    
+   

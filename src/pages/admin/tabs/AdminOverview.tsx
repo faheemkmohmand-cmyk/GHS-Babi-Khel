@@ -145,18 +145,44 @@ const StatCard = ({ label, value, icon: Icon, color, bgColor, isLoading, badge }
 );
 
 /* ─── Section Header ────────────────────────────────────────── */
-const SectionHeader = ({ icon: Icon, title }: { icon: React.ElementType; title: string }) => (
-  <div className="flex items-center gap-2 mb-4">
-    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-      <Icon className="w-4 h-4 text-primary" />
+const SectionHeader = ({ icon: Icon, title, action }: { icon: React.ElementType; title: string; action?: React.ReactNode }) => (
+  <div className="flex items-center justify-between mb-4">
+    <div className="flex items-center gap-2">
+      <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+        <Icon className="w-4 h-4 text-primary" />
+      </div>
+      <h3 className="text-base font-bold text-foreground">{title}</h3>
     </div>
-    <h3 className="text-base font-bold text-foreground">{title}</h3>
+    {action}
   </div>
 );
 
+/* ─── Pass Rate Ring ────────────────────────────────────────── */
+const PassRateRing = ({ value }: { value: number }) => {
+  const radius = 26;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (Math.min(value, 100) / 100) * circumference;
+  return (
+    <div className="relative w-16 h-16 shrink-0">
+      <svg viewBox="0 0 64 64" className="w-16 h-16 -rotate-90">
+        <circle cx="32" cy="32" r={radius} fill="none" stroke="currentColor" strokeWidth="6" className="text-white/15" />
+        <circle
+          cx="32" cy="32" r={radius} fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round"
+          className="text-white transition-all duration-700 ease-out"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-sm font-extrabold text-white">{value}%</span>
+      </div>
+    </div>
+  );
+};
+
 /* ─── Main Component ─────────────────────────────────────────── */
 const AdminOverview = () => {
-  const { data: stats, isLoading } = useAdminStats();
+  const { data: stats, isLoading, isFetching, refetch, dataUpdatedAt } = useAdminStats();
   const { data: activity, isLoading: actLoading } = useRecentActivity();
   const { data: settings } = useSchoolSettings();
   const { profile } = useAuth();
@@ -199,37 +225,62 @@ const AdminOverview = () => {
           <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-white translate-y-1/2 -translate-x-1/2" />
         </div>
         <div className="relative z-10">
-          <div className="flex items-start justify-between">
-            <div>
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
               <p className="text-white/70 text-sm font-medium">{greeting},</p>
               <h2 className="text-2xl font-extrabold mt-0.5">{firstName} 👋</h2>
               <p className="text-white/80 text-sm mt-1">{settings?.school_name || "GHS Babi Khel"} — Admin Panel</p>
+              <span className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-white/60">
+                <Calendar className="w-3 h-3" />
+                {now.toLocaleDateString("en-PK", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+              </span>
             </div>
+            <div className="flex flex-col items-center gap-2 shrink-0">
+              <PassRateRing value={settings?.pass_percentage ?? 98} />
+              <span className="text-[10px] font-semibold text-white/70 uppercase tracking-wide">Pass Rate</span>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center justify-between gap-3">
+            {urgentCount > 0 ? (
+              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-xl px-3 py-2 w-fit">
+                <AlertCircle className="w-4 h-4 text-white shrink-0" />
+                <p className="text-white text-xs font-semibold">
+                  {urgentCount} item{urgentCount > 1 ? "s" : ""} need{urgentCount === 1 ? "s" : ""} your attention
+                </p>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 w-fit">
+                <CheckCircle className="w-4 h-4 text-white/80 shrink-0" />
+                <p className="text-white/80 text-xs font-medium">All caught up — nothing pending</p>
+              </div>
+            )}
             <Link
               to="/dashboard"
               title="Go to User Dashboard"
-              className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0 hover:bg-white/30 transition-colors"
+              className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shrink-0 hover:bg-white/25 transition-colors"
             >
-              <Shield className="w-6 h-6 text-white" />
+              <Shield className="w-5 h-5 text-white" />
             </Link>
-          </div>
-          {urgentCount > 0 && (
-            <div className="mt-4 flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-xl px-3 py-2 w-fit">
-              <AlertCircle className="w-4 h-4 text-white shrink-0" />
-              <p className="text-white text-xs font-semibold">
-                {urgentCount} item{urgentCount > 1 ? "s" : ""} need{urgentCount === 1 ? "s" : ""} your attention
-              </p>
-            </div>
-          )}
-          <div className="mt-3 flex items-center gap-4 text-white/70 text-xs">
-            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{now.toLocaleDateString("en-PK", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
           </div>
         </div>
       </div>
 
       {/* ── At a Glance ── */}
       <div>
-        <SectionHeader icon={Activity} title="At a Glance" />
+        <SectionHeader
+          icon={Activity}
+          title="At a Glance"
+          action={
+            <button
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3 h-3 ${isFetching ? "animate-spin" : ""}`} />
+              {dataUpdatedAt ? `Updated ${timeAgo(new Date(dataUpdatedAt).toISOString())}` : "Refresh"}
+            </button>
+          }
+        />
         <div className="grid grid-cols-2 gap-3">
           {/* Summary strip */}
           <div className="col-span-2 grid grid-cols-3 gap-2">
@@ -327,56 +378,4 @@ const AdminOverview = () => {
                     <Skeleton className="h-3 w-1/4" />
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : !activity?.length ? (
-            <div className="p-8 text-center">
-              <Activity className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">No recent activity yet</p>
-            </div>
-          ) : (
-            <ul className="divide-y divide-border">
-              {activity.map((item, i) => (
-                <li key={item.id + i} className="flex items-center gap-3 px-4 py-3 hover:bg-secondary/50 transition-colors">
-                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${activityColor(item.type)}`}>
-                    {activityIcon(item.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{item.label}</p>
-                    {item.status && (
-                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-                        item.status === "pending" ? "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400" :
-                        item.status === "approved" ? "bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400" :
-                        "bg-secondary text-muted-foreground"
-                      }`}>{item.status}</span>
-                    )}
-                  </div>
-                  <span className="text-[11px] text-muted-foreground shrink-0 font-medium">{timeAgo(item.time)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-
-      {/* ── School Info Footer ── */}
-      <div className="bg-secondary/50 border border-border rounded-2xl p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Shield className="w-4 h-4 text-primary" />
-          <p className="text-sm font-bold text-foreground">{settings?.school_name || "GHS Babi Khel"}</p>
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-          <span>📍 {settings?.address || "District Mohmand, KPK"}</span>
-          <span>🏫 Est. {settings?.established_year || 2018}</span>
-          <span>📋 EMIS: {settings?.emis_code || "60673"}</span>
-          {settings?.phone && <span>📞 {settings.phone}</span>}
-          {settings?.email && <span className="col-span-2 truncate">✉️ {settings.email}</span>}
-        </div>
-      </div>
-
-    </div>
-  );
-};
-
-export default AdminOverview;
-      
+     

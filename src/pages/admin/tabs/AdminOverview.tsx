@@ -378,4 +378,55 @@ const AdminOverview = () => {
                     <Skeleton className="h-3 w-1/4" />
                   </div>
                 </div>
-     
+              ))}
+            </div>
+          ) : !activity?.length ? (
+            <div className="p-8 text-center">
+              <Activity className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No recent activity yet</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-border">
+              {activity.map((item, i) => (
+                <li key={item.id + i} className="flex items-center gap-3 px-4 py-3 hover:bg-secondary/50 transition-colors">
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${activityColor(item.type)}`}>
+                    {activityIcon(item.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{item.label}</p>
+                    {item.status && (
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                        item.status === "pending" ? "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400" :
+                        item.status === "approved" ? "bg-green-100 text-green-600 dark:bg-green-500/20 dark:text-green-400" :
+                        "bg-secondary text-muted-foreground"
+                      }`}>{item.status}</span>
+                    )}
+                  </div>
+                  <span className="text-[11px] text-muted-foreground shrink-0 font-medium">{timeAgo(item.time)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {/* ── School Info Footer ── */}
+      <div className="bg-secondary/50 border border-border rounded-2xl p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Shield className="w-4 h-4 text-primary" />
+          <p className="text-sm font-bold text-foreground">{settings?.school_name || "GHS Babi Khel"}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+          <span>📍 {settings?.address || "District Mohmand, KPK"}</span>
+          <span>🏫 Est. {settings?.established_year || 2018}</span>
+          <span>📋 EMIS: {settings?.emis_code || "60673"}</span>
+          {settings?.phone && <span>📞 {settings.phone}</span>}
+          {settings?.email && <span className="col-span-2 truncate">✉️ {settings.email}</span>}
+        </div>
+      </div>
+
+    </div>
+  );
+};
+
+export default AdminOverview;

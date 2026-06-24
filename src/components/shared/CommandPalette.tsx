@@ -134,6 +134,7 @@ const CommandPalette = ({ open, onOpenChange, navItems, basePath, onTabChange, e
         placeholder="Search pages, students, fee vouchers…"
         value={query}
         onValueChange={setQuery}
+        autoFocus={false}
       />
       <CommandList>
         <CommandEmpty>
@@ -188,3 +189,4 @@ const CommandPalette = ({ open, onOpenChange, navItems, basePath, onTabChange, e
 };
 
 export default CommandPalette;
+            

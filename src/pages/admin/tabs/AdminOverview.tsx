@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";
 import { useAuth } from "@/hooks/useAuth";
@@ -204,9 +205,13 @@ const AdminOverview = () => {
               <h2 className="text-2xl font-extrabold mt-0.5">{firstName} 👋</h2>
               <p className="text-white/80 text-sm mt-1">{settings?.school_name || "GHS Babi Khel"} — Admin Panel</p>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+            <Link
+              to="/dashboard"
+              title="Go to User Dashboard"
+              className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0 hover:bg-white/30 transition-colors"
+            >
               <Shield className="w-6 h-6 text-white" />
-            </div>
+            </Link>
           </div>
           {urgentCount > 0 && (
             <div className="mt-4 flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-xl px-3 py-2 w-fit">

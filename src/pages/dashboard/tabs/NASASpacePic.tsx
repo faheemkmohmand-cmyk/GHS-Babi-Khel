@@ -43,6 +43,23 @@ function setCache(date: string, data: APODData): void {
   }
 }
 
+// Convert a YouTube embed URL to a watchable URL so "Watch Video" opens properly.
+// e.g. https://www.youtube.com/embed/AbCdEf → https://www.youtube.com/watch?v=AbCdEf
+// Non-YouTube URLs are returned unchanged.
+function toWatchUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtube.com") && u.pathname.startsWith("/embed/")) {
+      const videoId = u.pathname.replace("/embed/", "").split("?")[0];
+      return `https://www.youtube.com/watch?v=${videoId}`;
+    }
+    if (u.hostname === "youtu.be") {
+      return `https://www.youtube.com/watch?v=${u.pathname.slice(1)}`;
+    }
+  } catch { /* not a valid URL */ }
+  return url;
+}
+
 export default function NASASpacePic() {
   const todayStr = new Date().toISOString().split("T")[0];
 
@@ -89,20 +106,17 @@ export default function NASASpacePic() {
   };
 
   useEffect(() => {
-    // Clear any stale cache entries that still contain raw apod.nasa.gov URLs
-    // (left over from before the server-side URL rewriting was added).
+    // Nuke entire APOD localStorage cache on mount.
+    // Old entries may have raw apod.nasa.gov URLs in url/thumbnail_url
+    // (cached before server-side URL rewriting was added). Fresh fetch
+    // will get properly rewritten URLs from the proxy.
     try {
       for (const key of Object.keys(localStorage)) {
         if (key.startsWith(CACHE_KEY_PREFIX)) {
-          const raw = localStorage.getItem(key);
-          if (raw && raw.includes("apod.nasa.gov")) {
-            localStorage.removeItem(key);
-          }
+          localStorage.removeItem(key);
         }
       }
-    } catch {
-      // ignore localStorage errors
-    }
+    } catch { /* ignore */ }
     fetchAPOD(selectedDate);
   }, [selectedDate]);
 
@@ -245,19 +259,20 @@ export default function NASASpacePic() {
           ) : (
             // Video APOD: show the thumbnail image and a "Watch Video" button.
             // We never embed apod.nasa.gov in an iframe — it blocks browser connections.
-            // Most APOD videos are YouTube; the url field is the YouTube embed URL.
+            // Most APOD videos are YouTube; convert the embed URL to a watch URL.
             <div className="relative bg-slate-950 aspect-video flex items-center justify-center overflow-hidden">
               {apod.thumbnail_url ? (
                 <img
                   src={apod.thumbnail_url}
                   alt={apod.title}
                   className="w-full h-full object-cover opacity-70"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                 />
               ) : (
                 <div className="text-6xl">🎬</div>
               )}
               <a
-                href={apod.url}
+                href={toWatchUrl(apod.url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 hover:bg-black/60 transition-colors"
@@ -316,4 +331,4 @@ export default function NASASpacePic() {
       }
 
 
-    
+        

@@ -5,9 +5,12 @@
 // upstream timeouts). This proxy:
 //   1. Tries the NASA API server-side (avoids CORS)
 //   2. Caches successful responses for 6 hours
-//   3. Falls back to a known-good recent APOD if the API is down
+//   3. Rewrites apod.nasa.gov image URLs → /api/nasa-image?url=... so the
+//      browser never tries to connect to apod.nasa.gov directly (it blocks
+//      browser connections with "refused to connect")
+//   4. Falls back to a known-good recent APOD if the API is down
 //
-// Browser → /api/nasa-apod?date=2026-06-23 → this function → NASA API → cached JSON
+// Browser → /api/nasa-apod?date=2026-06-24 → this function → NASA API → rewritten JSON
 
 const NASA_API_KEY = process.env.VITE_NASA_API_KEY ||
   "I7E0FR0gL0Lvt9cnxh5jsRSvAzWlJVzeYFZRQTKy";
@@ -17,16 +20,43 @@ const cache = new Map();
 const CACHE_TTL = 21600000; // 6 hours
 
 // Fallback APOD data (used when NASA API is down)
-// This is a REAL APOD entry from 2024-06-01 (verified working image URL)
 const FALLBACK_APOD = {
   date: new Date().toISOString().split("T")[0],
   title: "Stereo Helene",
-  explanation: "Get out your red/blue glasses and float next to Helene, small, icy moon of Saturn! Appropriately named Helene is one of four known Trojan moons, so called because it orbits at a Lagrange point. A Lagrange point is a gravitationally stable position near two massive bodies. In this case, the stable L4 point lies near the orbit of the much larger Saturnian moon Dione. In fact, the irregularly shaped (~30 km across) Helene orbits at Dione's leading Lagrange point while the smaller, also irregularly shaped Polydeuces is at Dione's trailing Lagrange point. The sharp stereo anaglyph was created from two Cassini images (N00172886, N00172887) recorded during a close flyby of the moon in 2011. It shows part of the Saturn-facing hemisphere of Helene mottled with craters and gouged by unusual curved grooves.",
-  url: "https://apod.nasa.gov/apod/image/2406/N00172886_92_beltramini.jpg",
-  hdurl: "https://apod.nasa.gov/apod/image/2406/N00172886_92_beltramini.jpg",
+  explanation:
+    "Get out your red/blue glasses and float next to Helene, small, icy moon of Saturn! Appropriately named Helene is one of four known Trojan moons, so called because it orbits at a Lagrange point. A Lagrange point is a gravitationally stable position near two massive bodies. In this case, the stable L4 point lies near the orbit of the much larger Saturnian moon Dione. In fact, the irregularly shaped (~30 km across) Helene orbits at Dione's leading Lagrange point while the smaller, also irregularly shaped Polydeuces is at Dione's trailing Lagrange point. The sharp stereo anaglyph was created from two Cassini images recorded during a close flyby of the moon in 2011.",
+  url: "/api/nasa-image?url=https%3A%2F%2Fapod.nasa.gov%2Fapod%2Fimage%2F2406%2FN00172886_92_beltramini.jpg",
+  hdurl:
+    "https://apod.nasa.gov/apod/image/2406/N00172886_92_beltramini.jpg",
   media_type: "image",
   copyright: "NASA/Cassini Imaging Team",
 };
+
+// Rewrite apod.nasa.gov image URLs through our image proxy.
+// This prevents "refused to connect" errors in the browser.
+// YouTube / other video URLs are left unchanged.
+function rewriteApodUrls(data: any): any {
+  const rewrite = (url: string | undefined): string | undefined => {
+    if (!url) return url;
+    try {
+      const parsed = new URL(url);
+      if (parsed.hostname === "apod.nasa.gov") {
+        return `/api/nasa-image?url=${encodeURIComponent(url)}`;
+      }
+    } catch {
+      // not a valid URL — return as-is
+    }
+    return url;
+  };
+
+  return {
+    ...data,
+    url: rewrite(data.url),
+    hdurl: data.hdurl, // keep hdurl as-is (used for "Full HD" link, not rendered directly)
+    // thumbnail_url is used when media_type === "video"
+    thumbnail_url: rewrite(data.thumbnail_url),
+  };
+}
 
 export default async function handler(req: any, res: any) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -59,21 +89,20 @@ export default async function handler(req: any, res: any) {
       throw new Error(`NASA API returned ${response.status}`);
     }
 
-    const data = await response.json();
+    const raw = await response.json();
+    // Rewrite before caching so cache also stores safe URLs
+    const data = rewriteApodUrls(raw);
 
-    // Cache successful response
     cache.set(cacheKey, { data, time: Date.now() });
 
     return res.status(200).json(data);
   } catch (err: any) {
     console.error("NASA APOD proxy error:", err.message);
 
-    // If we have stale cached data for this date, serve it
     if (cached) {
       return res.status(200).json(cached.data);
     }
 
-    // Try yesterday's cache (in case today's isn't available yet)
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayKey = yesterday.toISOString().split("T")[0];
@@ -82,7 +111,6 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json(yesterdayCached.data);
     }
 
-    // Last resort: return fallback with today's date
     const fallback = { ...FALLBACK_APOD, date: targetDate };
     return res.status(200).json(fallback);
   }

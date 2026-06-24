@@ -189,4 +189,4 @@ const CommandPalette = ({ open, onOpenChange, navItems, basePath, onTabChange, e
 };
 
 export default CommandPalette;
-            
+    

@@ -32,29 +32,60 @@ const FALLBACK_APOD = {
   copyright: "NASA/Cassini Imaging Team",
 };
 
-// Rewrite apod.nasa.gov image URLs through our image proxy.
-// This prevents "refused to connect" errors in the browser.
-// YouTube / other video URLs are left unchanged.
+// Extract YouTube video ID from embed or watch URL
+function getYouTubeId(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (u.pathname.startsWith("/embed/")) return u.pathname.split("/embed/")[1].split("?")[0];
+    if (u.searchParams.get("v")) return u.searchParams.get("v");
+    if (u.hostname === "youtu.be") return u.pathname.slice(1);
+  } catch { /* ignore */ }
+  return null;
+}
+
+// Rewrite APOD URLs:
+// - Images from apod.nasa.gov → proxied through /api/nasa-image (browser can't load directly)
+// - Video url (MP4) → kept as-is (direct link works fine for <video> tags and download links)
+// - thumbnail_url → if YouTube video, use YouTube's img CDN (no auth needed, no CORS issues)
+//                   if apod.nasa.gov thumbnail, proxy through nasa-image
 function rewriteApodUrls(data: any): any {
-  const rewrite = (url: string | undefined): string | undefined => {
+  const isVideo = data.media_type === "video";
+
+  // For images: proxy the url through nasa-image
+  const rewriteImageUrl = (url: string | undefined): string | undefined => {
     if (!url) return url;
     try {
-      const parsed = new URL(url);
-      if (parsed.hostname === "apod.nasa.gov") {
+      if (new URL(url).hostname === "apod.nasa.gov") {
         return `/api/nasa-image?url=${encodeURIComponent(url)}`;
       }
-    } catch {
-      // not a valid URL — return as-is
-    }
+    } catch { /* ignore */ }
     return url;
   };
 
+  // For video thumbnail: prefer YouTube CDN, fall back to proxied apod thumbnail
+  let thumbnailUrl = data.thumbnail_url;
+  if (isVideo) {
+    // Try to get YouTube thumbnail from the embed url
+    const ytId = getYouTubeId(data.url);
+    if (ytId) {
+      thumbnailUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+    } else if (thumbnailUrl) {
+      // It's a direct video (MP4) with an apod.nasa.gov thumbnail — proxy it
+      try {
+        if (new URL(thumbnailUrl).hostname === "apod.nasa.gov") {
+          thumbnailUrl = `/api/nasa-image?url=${encodeURIComponent(thumbnailUrl)}`;
+        }
+      } catch { /* ignore */ }
+    }
+  }
+
   return {
     ...data,
-    url: rewrite(data.url),
-    hdurl: data.hdurl, // keep hdurl as-is (used for "Full HD" link, not rendered directly)
-    // thumbnail_url is used when media_type === "video"
-    thumbnail_url: rewrite(data.thumbnail_url),
+    // Videos: keep original url (direct mp4/youtube embed link — works as href or <video src>)
+    // Images: proxy through nasa-image so browser can load them
+    url: isVideo ? data.url : rewriteImageUrl(data.url),
+    hdurl: data.hdurl, // always keep as-is (used for "Full HD" external link)
+    thumbnail_url: thumbnailUrl,
   };
 }
 

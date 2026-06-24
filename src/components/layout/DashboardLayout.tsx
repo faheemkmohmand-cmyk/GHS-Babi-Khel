@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut, Menu, X, ExternalLink, Moon, Sun, Search, Shield, GraduationCap } from "lucide-react";
+import { LogOut, Menu, X, ExternalLink, Moon, Sun, Search, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/shared/NotificationBell";
 import { useDarkMode } from "@/hooks/useDarkMode";
@@ -223,10 +223,13 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
       <aside className="hidden lg:flex flex-col w-64 bg-card border-r border-border shrink-0 sticky top-0 h-screen">
         <div className="p-4 border-b border-border">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg gradient-hero flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-primary-foreground" />
+            <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 ring-1 ring-border">
+              <img src="/icon-512.png" alt="GHS Babi Khel logo" className="w-full h-full object-cover" />
             </div>
-            <span className="font-heading font-bold text-foreground">GHS Babi Khel</span>
+            <div>
+              <span className="font-heading font-bold text-foreground text-sm leading-tight block">GHS Babi Khel</span>
+              <p className="text-[10px] text-muted-foreground font-medium leading-tight">User Panel</p>
+            </div>
           </Link>
         </div>
 
@@ -369,7 +372,15 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
           <div className="absolute inset-0 bg-foreground/50" onClick={() => setSidebarOpen(false)} />
           <div className="relative w-72 bg-card h-full shadow-elevated flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-border">
-              <span className="font-heading font-bold text-foreground">Menu</span>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 ring-1 ring-border">
+                  <img src="/icon-512.png" alt="GHS Babi Khel logo" className="w-full h-full object-cover" />
+                </div>
+                <div>
+                  <span className="font-heading font-bold text-foreground text-sm leading-tight block">GHS Babi Khel</span>
+                  <p className="text-[10px] text-muted-foreground font-medium leading-tight">User Panel</p>
+                </div>
+              </div>
               <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-lg hover:bg-secondary">
                 <X className="w-5 h-5" />
               </button>
@@ -405,6 +416,3 @@ const DashboardLayout = ({ activeTab, onTabChange, children }: DashboardLayoutPr
 };
 
 export default DashboardLayout;
-
-
-  

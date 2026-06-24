@@ -42,6 +42,20 @@ function setCache(date: string, data: APODData): void {
   }
 }
 
+// Route apod.nasa.gov image URLs through our proxy to avoid "refused to connect".
+// Other hosts (e.g. Wikipedia mirrors) are served directly.
+function proxyImageUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname === "apod.nasa.gov") {
+      return `/api/nasa-image?url=${encodeURIComponent(url)}`;
+    }
+  } catch {
+    // not a valid URL — return as-is
+  }
+  return url;
+}
+
 export default function NASASpacePic() {
   const todayStr = new Date().toISOString().split("T")[0];
 
@@ -209,7 +223,7 @@ export default function NASASpacePic() {
                 </div>
               )}
               <img
-                src={apod.url}
+                src={proxyImageUrl(apod.url)}
                 alt={apod.title}
                 onLoad={() => setImgLoaded(true)}
                 onError={() => setImgLoaded(true)}
@@ -284,4 +298,5 @@ export default function NASASpacePic() {
   );
       }
 
-        
+
+      

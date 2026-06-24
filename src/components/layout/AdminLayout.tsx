@@ -262,9 +262,6 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
         </nav>
 
         <div className="p-3 border-t border-border space-y-1">
-          <Link to="/" className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors">
-            <ExternalLink className="w-4 h-4" /> Main Website
-          </Link>
           <Link to="/dashboard" className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors">
             <GraduationCap className="w-4 h-4" /> User Dashboard
           </Link>
@@ -383,6 +380,7 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
 };
 
 export default AdminLayout;
+
 
 
 

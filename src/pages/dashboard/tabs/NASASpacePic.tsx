@@ -9,6 +9,7 @@ interface APODData {
   explanation: string;
   url: string;
   hdurl?: string;
+  thumbnail_url?: string; // provided by NASA API for video entries (thumbs=true)
   media_type: "image" | "video";
   date: string;
   copyright?: string;
@@ -40,20 +41,6 @@ function setCache(date: string, data: APODData): void {
   } catch {
     // localStorage full or unavailable — silently skip caching
   }
-}
-
-// Route apod.nasa.gov image URLs through our proxy to avoid "refused to connect".
-// Other hosts (e.g. Wikipedia mirrors) are served directly.
-function proxyImageUrl(url: string): string {
-  try {
-    const parsed = new URL(url);
-    if (parsed.hostname === "apod.nasa.gov") {
-      return `/api/nasa-image?url=${encodeURIComponent(url)}`;
-    }
-  } catch {
-    // not a valid URL — return as-is
-  }
-  return url;
 }
 
 export default function NASASpacePic() {
@@ -102,6 +89,20 @@ export default function NASASpacePic() {
   };
 
   useEffect(() => {
+    // Clear any stale cache entries that still contain raw apod.nasa.gov URLs
+    // (left over from before the server-side URL rewriting was added).
+    try {
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith(CACHE_KEY_PREFIX)) {
+          const raw = localStorage.getItem(key);
+          if (raw && raw.includes("apod.nasa.gov")) {
+            localStorage.removeItem(key);
+          }
+        }
+      }
+    } catch {
+      // ignore localStorage errors
+    }
     fetchAPOD(selectedDate);
   }, [selectedDate]);
 
@@ -223,7 +224,7 @@ export default function NASASpacePic() {
                 </div>
               )}
               <img
-                src={proxyImageUrl(apod.url)}
+                src={apod.url}
                 alt={apod.title}
                 onLoad={() => setImgLoaded(true)}
                 onError={() => setImgLoaded(true)}
@@ -242,14 +243,30 @@ export default function NASASpacePic() {
               )}
             </div>
           ) : (
-            <div className="relative bg-slate-950 aspect-video">
-              <iframe
-                src={apod.url}
-                title={apod.title}
-                className="w-full h-full"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-              />
+            // Video APOD: show the thumbnail image and a "Watch Video" button.
+            // We never embed apod.nasa.gov in an iframe — it blocks browser connections.
+            // Most APOD videos are YouTube; the url field is the YouTube embed URL.
+            <div className="relative bg-slate-950 aspect-video flex items-center justify-center overflow-hidden">
+              {apod.thumbnail_url ? (
+                <img
+                  src={apod.thumbnail_url}
+                  alt={apod.title}
+                  className="w-full h-full object-cover opacity-70"
+                />
+              ) : (
+                <div className="text-6xl">🎬</div>
+              )}
+              <a
+                href={apod.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 hover:bg-black/60 transition-colors"
+              >
+                <div className="text-5xl">▶️</div>
+                <span className="text-white text-sm font-semibold bg-black/50 px-3 py-1 rounded-full">
+                  Watch Video
+                </span>
+              </a>
             </div>
           )}
 
@@ -299,4 +316,4 @@ export default function NASASpacePic() {
       }
 
 
-      
+    

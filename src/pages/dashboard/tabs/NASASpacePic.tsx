@@ -43,24 +43,17 @@ function setCache(date: string, data: APODData): void {
   }
 }
 
-// Detect if the APOD video URL is a direct media file (MP4/WebM hosted on apod.nasa.gov)
-// vs a YouTube embed. Direct files are rendered in a <video> tag; YouTube in a link.
+// Detect if the APOD video URL is a direct media file (MP4/WebM)
+// The url for direct videos is the raw apod.nasa.gov MP4 link.
+// YouTube videos have urls like youtube.com/embed/...
 function isDirectVideo(url: string): boolean {
   try {
-    const u = new URL(url);
-    const path = u.pathname.toLowerCase();
-    // Proxied apod.nasa.gov MP4s come through /api/nasa-image?url=...
-    if (u.pathname === "/api/nasa-image") {
-      const inner = u.searchParams.get("url") || "";
-      return inner.includes(".mp4") || inner.includes(".webm") || inner.includes(".gif");
-    }
-    return path.endsWith(".mp4") || path.endsWith(".webm") || path.endsWith(".gif");
+    const lower = url.toLowerCase();
+    return lower.includes(".mp4") || lower.includes(".webm") || lower.includes(".gif");
   } catch { return false; }
 }
 
-// Convert a YouTube embed URL to a watchable URL so "Watch Video" opens properly.
-// e.g. https://www.youtube.com/embed/AbCdEf → https://www.youtube.com/watch?v=AbCdEf
-// Non-YouTube URLs are returned unchanged.
+// Convert YouTube embed URL → watch URL for fallback links
 function toWatchUrl(url: string): string {
   try {
     const u = new URL(url);
@@ -71,7 +64,7 @@ function toWatchUrl(url: string): string {
     if (u.hostname === "youtu.be") {
       return `https://www.youtube.com/watch?v=${u.pathname.slice(1)}`;
     }
-  } catch { /* not a valid URL */ }
+  } catch { /* ignore */ }
   return url;
 }
 
@@ -273,8 +266,8 @@ export default function NASASpacePic() {
             </div>
           ) : (
             // Video APOD — two cases:
-            // 1. Direct MP4/WebM from apod.nasa.gov (proxied via /api/nasa-image): render in <video> tag
-            // 2. YouTube embed URL: show thumbnail + "Watch on YouTube" link
+            // 1. Direct MP4/WebM (apod.nasa.gov): <video> tag plays it inline
+            // 2. YouTube embed URL: render in <iframe> (YouTube iframes work fine, only apod.nasa.gov iframes are blocked)
             <div className="relative bg-slate-950 aspect-video flex items-center justify-center overflow-hidden">
               {isDirectVideo(apod.url) ? (
                 <video
@@ -286,34 +279,18 @@ export default function NASASpacePic() {
                   playsInline
                   poster={apod.thumbnail_url}
                   className="w-full h-full object-contain"
-                  style={{ maxHeight: 420 }}
                 >
                   Your browser does not support the video tag.
                 </video>
               ) : (
-                <>
-                  {apod.thumbnail_url ? (
-                    <img
-                      src={apod.thumbnail_url}
-                      alt={apod.title}
-                      className="w-full h-full object-cover opacity-70"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                    />
-                  ) : (
-                    <div className="text-6xl">🎬</div>
-                  )}
-                  <a
-                    href={toWatchUrl(apod.url)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 hover:bg-black/60 transition-colors"
-                  >
-                    <div className="text-5xl">▶️</div>
-                    <span className="text-white text-sm font-semibold bg-black/50 px-3 py-1 rounded-full">
-                      Watch on YouTube
-                    </span>
-                  </a>
-                </>
+                <iframe
+                  src={apod.url}
+                  title={apod.title}
+                  className="w-full h-full"
+                  allow="autoplay; encrypted-media; fullscreen"
+                  allowFullScreen
+                  style={{ border: "none" }}
+                />
               )}
             </div>
           )}
@@ -364,4 +341,4 @@ export default function NASASpacePic() {
       }
 
 
-    
+                                        

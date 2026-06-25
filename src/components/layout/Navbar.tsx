@@ -116,7 +116,6 @@ const Navbar = () => {
     if (!q) return;
     navigate(`/search?q=${encodeURIComponent(q)}`);
     setOpen(false);
-    setSearchOpen(false);
     setMobileSearch("");
   }, [mobileSearch, navigate]);
 
@@ -244,7 +243,13 @@ const Navbar = () => {
                     ref={searchInputRef}
                     value={searchVal}
                     onChange={(e) => setSearchVal(e.target.value)}
-                    onKeyDown={handleDesktopKeyDown}
+                    onKeyDown={(e) => {
+                      handleDesktopKeyDown(e);
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleDesktopSearch(e as unknown as React.FormEvent);
+                      }
+                    }}
                     placeholder="Search…"
                     aria-label="Search site"
                     className="flex-1 min-w-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none px-2 py-0"
@@ -255,6 +260,13 @@ const Navbar = () => {
                     <button
                       type="submit"
                       aria-label="Go"
+                      onClick={(e) => {
+                        // Direct fallback: in case the motion.form's onSubmit
+                        // doesn't fire (e.g. swallowed by the framer-motion
+                        // animation wrapper), navigate directly from the click.
+                        e.preventDefault();
+                        handleDesktopSearch(e as unknown as React.FormEvent);
+                      }}
                       className="shrink-0 px-2.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
                     >
                       Go
@@ -406,6 +418,10 @@ const Navbar = () => {
                 <button
                   type="submit"
                   aria-label="Search"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMobileSearch(e as unknown as React.FormEvent);
+                  }}
                   style={{
                     flexShrink: 0,
                     padding: "4px 10px",

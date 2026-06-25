@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { LogOut, Menu, X, ExternalLink, Moon, Sun, Search, GraduationCap, BarChart2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useDarkMode } from "@/hooks/useDarkMode";
-import CommandPalette, { PaletteNavItem } from "@/components/shared/CommandPalette";
 
 // ── Emoji icon component ──────────────────────────────────────────────────────
 const EmojiIcon = ({ emoji, size = "w-5 h-5" }: { emoji: string; size?: string }) => (
@@ -115,15 +114,16 @@ const searchIndex: { label: string; sublabel?: string; tabId: string }[] = [
   { label: "Defaulters List",  sublabel: "Fee Management",       tabId: "fees" },
 ];
 
-// Build palette-ready nav items: each page plus its known synonyms as keywords,
-// so typing "fee" surfaces the Fee Management page via the searchIndex synonyms.
-const paletteNavItems: PaletteNavItem[] = allNavItems.map(item => ({
-  id: item.id,
-  label: item.label,
-  emoji: item.emoji,
-  lucideIcon: item.lucideIcon,
-  keywords: searchIndex.filter(e => e.tabId === item.id).map(e => e.label),
-}));
+// Case-insensitive match against a label or any of its known synonyms
+// in searchIndex, so e.g. typing "fee" finds "Fee Management".
+const matchesQuery = (item: NavItem, query: string) => {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  if (item.label.toLowerCase().includes(q)) return true;
+  return searchIndex.some(
+    (e) => e.tabId === item.id && e.label.toLowerCase().includes(q)
+  );
+};
 
 interface AdminLayoutProps {
   activeTab: string;
@@ -134,7 +134,8 @@ interface AdminLayoutProps {
 const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => {
   const { profile, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [desktopQuery, setDesktopQuery] = useState("");
+  const [mobileQuery, setMobileQuery] = useState("");
   const mobileNavRef = useRef<HTMLElement>(null);
   const navigate = useNavigate();
   const { isDark, toggle } = useDarkMode();
@@ -183,21 +184,38 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
     );
   };
 
-  // ── Full sectioned nav list ──
-  const SectionedNav = ({ onItemClick }: { onItemClick?: () => void }) => (
-    <div className="space-y-4">
-      {navSections.map(section => (
-        <div key={section.heading}>
-          <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase px-3 mb-1.5">
-            {section.heading}
-          </p>
-          <div className="space-y-0.5">
-            {section.items.map(item => <NavBtn key={item.id} item={item} onItemClick={onItemClick} />)}
+  // ── Full sectioned nav list — filters in place by query, never leaves the menu ──
+  const SectionedNav = ({ onItemClick, query = "" }: { onItemClick?: () => void; query?: string }) => {
+    const filteredSections = navSections
+      .map(section => ({
+        ...section,
+        items: section.items.filter(item => matchesQuery(item, query)),
+      }))
+      .filter(section => section.items.length > 0);
+
+    if (query.trim() && filteredSections.length === 0) {
+      return (
+        <p className="text-sm text-muted-foreground text-center py-6">
+          No matches for "{query.trim()}"
+        </p>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {filteredSections.map(section => (
+          <div key={section.heading}>
+            <p className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase px-3 mb-1.5">
+              {section.heading}
+            </p>
+            <div className="space-y-0.5">
+              {section.items.map(item => <NavBtn key={item.id} item={item} onItemClick={onItemClick} />)}
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
-  );
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -233,22 +251,22 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
           </div>
         </div>
 
-        {/* Desktop Search — opens the command palette */}
+        {/* Desktop Search — filters the menu below in place, never opens a popup */}
         <div className="px-3 py-2 border-b border-border">
-          <button
-            onClick={() => setPaletteOpen(true)}
-            className="w-full flex items-center gap-2 pl-8 pr-2 py-1.5 text-xs rounded-lg bg-secondary border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors relative"
-          >
+          <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-            <span className="flex-1 text-left">Search anything...</span>
-            <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-border bg-card text-[10px] font-medium text-muted-foreground">
-              ⌘K
-            </kbd>
-          </button>
+            <input
+              type="text"
+              value={desktopQuery}
+              onChange={(e) => setDesktopQuery(e.target.value)}
+              placeholder="Search anything..."
+              className="w-full pl-8 pr-2 py-1.5 text-xs rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-colors"
+            />
+          </div>
         </div>
 
         <nav className="flex-1 p-3 overflow-y-auto">
-          <SectionedNav />
+          <SectionedNav query={desktopQuery} />
         </nav>
 
         <div className="p-3 border-t border-border space-y-1">
@@ -270,13 +288,6 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
             {allNavItems.find(n => n.id === activeTab)?.label || "Admin Dashboard"}
           </h1>
           <div className="ml-auto flex items-center gap-2">
-            <button
-              onClick={() => setPaletteOpen(true)}
-              className="hidden sm:flex p-2 rounded-lg hover:bg-secondary text-muted-foreground transition-colors"
-              title="Search (⌘K)"
-            >
-              <Search className="w-4 h-4" />
-            </button>
             <a href="/" className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-secondary transition-colors">
               <ExternalLink className="w-3.5 h-3.5" /> View Website
             </a>
@@ -340,16 +351,19 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
               </button>
             </div>
             <div className="px-3 py-2 border-b border-border">
-              <button
-                onClick={() => { setSidebarOpen(false); setPaletteOpen(true); }}
-                className="w-full flex items-center gap-2 pl-8 pr-2 py-1.5 text-xs rounded-lg bg-secondary border border-border text-muted-foreground relative"
-              >
+              <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-                <span className="flex-1 text-left">Search anything...</span>
-              </button>
+                <input
+                  type="text"
+                  value={mobileQuery}
+                  onChange={(e) => setMobileQuery(e.target.value)}
+                  placeholder="Search anything..."
+                  className="w-full pl-8 pr-2 py-1.5 text-xs rounded-lg bg-secondary border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-colors"
+                />
+              </div>
             </div>
             <nav ref={mobileNavRef} className="flex-1 p-3 overflow-y-auto">
-              <SectionedNav onItemClick={() => setSidebarOpen(false)} />
+              <SectionedNav onItemClick={() => setSidebarOpen(false)} query={mobileQuery} />
             </nav>
             <div className="p-3 border-t border-border space-y-1">
               <Link to="/" onClick={() => setSidebarOpen(false)} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition-colors">
@@ -362,15 +376,6 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
           </div>
         </div>
       )}
-
-      <CommandPalette
-        open={paletteOpen}
-        onOpenChange={setPaletteOpen}
-        navItems={paletteNavItems}
-        basePath="/admin"
-        onTabChange={onTabChange}
-        enableDataSearch
-      />
     </div>
   );
 };

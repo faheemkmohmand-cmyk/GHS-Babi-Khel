@@ -91,16 +91,6 @@ const Navbar = () => {
     }
   }, [open]);
 
-  // Desktop: submit search → navigate to /search?q=...
-  const handleDesktopSearch = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    const q = searchVal.trim();
-    if (!q) return;
-    navigate(`/search?q=${encodeURIComponent(q)}`);
-    setSearchOpen(false);
-    setSearchVal("");
-  }, [searchVal, navigate]);
-
   // Desktop: close search on Escape
   const handleDesktopKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
@@ -108,16 +98,6 @@ const Navbar = () => {
       setSearchVal("");
     }
   }, []);
-
-  // Mobile: submit search → navigate to /search?q=...
-  const handleMobileSearch = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    const q = mobileSearch.trim();
-    if (!q) return;
-    navigate(`/search?q=${encodeURIComponent(q)}`);
-    setOpen(false);
-    setMobileSearch("");
-  }, [mobileSearch, navigate]);
 
   return (
     <nav
@@ -228,9 +208,8 @@ const Navbar = () => {
             <AnimatePresence mode="wait">
               {searchOpen ? (
                 /* Expanded search bar */
-                <motion.form
+                <motion.div
                   key="search-form"
-                  onSubmit={handleDesktopSearch}
                   initial={{ width: 32, opacity: 0 }}
                   animate={{ width: 220, opacity: 1 }}
                   exit={{ width: 32, opacity: 0 }}
@@ -247,7 +226,11 @@ const Navbar = () => {
                       handleDesktopKeyDown(e);
                       if (e.key === "Enter") {
                         e.preventDefault();
-                        handleDesktopSearch(e as unknown as React.FormEvent);
+                        const q = searchVal.trim();
+                        if (!q) return;
+                        navigate(`/search?q=${encodeURIComponent(q)}`);
+                        setSearchOpen(false);
+                        setSearchVal("");
                       }
                     }}
                     placeholder="Search…"
@@ -258,14 +241,18 @@ const Navbar = () => {
                   {/* Submit / clear */}
                   {searchVal ? (
                     <button
-                      type="submit"
+                      type="button"
                       aria-label="Go"
-                      onClick={(e) => {
-                        // Direct fallback: in case the motion.form's onSubmit
-                        // doesn't fire (e.g. swallowed by the framer-motion
-                        // animation wrapper), navigate directly from the click.
-                        e.preventDefault();
-                        handleDesktopSearch(e as unknown as React.FormEvent);
+                      onClick={() => {
+                        // Plain click handler, no form/submit involved at
+                        // all, so there's no native submit event, no
+                        // preventDefault race, and nothing for the
+                        // framer-motion exit animation to interrupt.
+                        const q = searchVal.trim();
+                        if (!q) return;
+                        navigate(`/search?q=${encodeURIComponent(q)}`);
+                        setSearchOpen(false);
+                        setSearchVal("");
                       }}
                       className="shrink-0 px-2.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
                     >
@@ -281,7 +268,7 @@ const Navbar = () => {
                       <X className="w-3.5 h-3.5" />
                     </button>
                   )}
-                </motion.form>
+                </motion.div>
               ) : (
                 /* Collapsed — just the icon button */
                 <motion.button
@@ -382,8 +369,7 @@ const Navbar = () => {
             transition={{ duration: 0.18 }}
             className="lg:hidden border-b border-border bg-card px-4 py-3"
           >
-            <form
-              onSubmit={handleMobileSearch}
+            <div
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -399,6 +385,16 @@ const Navbar = () => {
                 ref={mobileSearchRef}
                 value={mobileSearch}
                 onChange={(e) => setMobileSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const q = mobileSearch.trim();
+                    if (!q) return;
+                    navigate(`/search?q=${encodeURIComponent(q)}`);
+                    setOpen(false);
+                    setMobileSearch("");
+                  }
+                }}
                 placeholder="Search notices, news, teachers…"
                 aria-label="Search site"
                 autoFocus
@@ -416,11 +412,15 @@ const Navbar = () => {
               />
               {mobileSearch.trim() && (
                 <button
-                  type="submit"
+                  type="button"
                   aria-label="Search"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleMobileSearch(e as unknown as React.FormEvent);
+                  onClick={() => {
+                    // Plain click handler, no form/submit involved.
+                    const q = mobileSearch.trim();
+                    if (!q) return;
+                    navigate(`/search?q=${encodeURIComponent(q)}`);
+                    setOpen(false);
+                    setMobileSearch("");
                   }}
                   style={{
                     flexShrink: 0,
@@ -437,7 +437,7 @@ const Navbar = () => {
                   Go
                 </button>
               )}
-            </form>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

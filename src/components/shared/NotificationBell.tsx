@@ -5,6 +5,7 @@ import {
   Newspaper, Megaphone, BarChart3, Hash, Wallet, IdCard,
   CalendarDays, BookMarked, Video, MonitorPlay, GraduationCap,
   Trophy, ClipboardList, FileText, UserPlus, Upload, HelpCircle,
+  Mail, MessageSquareText,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -47,6 +48,8 @@ const TYPE_META: Record<string, { icon: any; color: string; bg: string }> = {
   homework:              { icon: ClipboardList,color: "text-sky-500",        bg: "bg-sky-500/10"        },
   admission_application: { icon: UserPlus,     color: "text-violet-500",     bg: "bg-violet-500/10"     },
   admission_doc:         { icon: Upload,       color: "text-fuchsia-500",    bg: "bg-fuchsia-500/10"    },
+  contact_message:       { icon: Mail,         color: "text-blue-600",       bg: "bg-blue-600/10"       },
+  chapter_question:      { icon: MessageSquareText, color: "text-stone-500",  bg: "bg-stone-500/10"      },
   default:               { icon: FileText,     color: "text-muted-foreground", bg: "bg-muted"           },
 };
 
@@ -299,3 +302,4 @@ const NotificationBell = () => {
 };
 
 export default NotificationBell;
+                

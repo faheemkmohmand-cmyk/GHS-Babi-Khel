@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Bell, Check, CheckCheck,
+  Bell, Check, CheckCheck, Trash2,
   Newspaper, Megaphone, BarChart3, Hash, Wallet, IdCard,
   CalendarDays, BookMarked, Video, MonitorPlay, GraduationCap,
   Trophy, ClipboardList, FileText, UserPlus, Upload, HelpCircle,
@@ -142,6 +142,17 @@ const NotificationBell = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications", user?.id] }),
   });
 
+  // ── Delete (dismiss) one notification ────────────────────────────────────
+  // Uses the dismiss_notification RPC — this hides it for the current user
+  // only, without removing it for other users who share the same broadcast row.
+  const deleteOneMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("dismiss_notification", { p_notification_id: id });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications", user?.id] }),
+  });
+
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.is_read).length,
     [notifications]
@@ -272,12 +283,23 @@ const NotificationBell = () => {
                       </div>
 
                       {/* Unread dot OR read check */}
-                      <div className="shrink-0 mt-1">
+                      <div className="shrink-0 mt-1 flex flex-col items-center gap-1.5">
                         {isUnread ? (
                           <div className="w-2 h-2 rounded-full bg-primary" />
                         ) : (
                           <Check className="w-3.5 h-3.5 text-muted-foreground/50" />
                         )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteOneMut.mutate(n.id);
+                          }}
+                          disabled={deleteOneMut.isPending}
+                          className="text-muted-foreground/40 hover:text-destructive transition-colors disabled:opacity-30"
+                          aria-label="Delete notification"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
                   );
@@ -302,4 +324,4 @@ const NotificationBell = () => {
 };
 
 export default NotificationBell;
-  
+        

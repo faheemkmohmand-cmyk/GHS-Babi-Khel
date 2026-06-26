@@ -7,11 +7,13 @@ import {
 import PageLayout from "@/components/layout/PageLayout";
 import PageBanner from "@/components/shared/PageBanner";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-/* ── Simple static contact form (no backend — opens mailto) ── */
+/* ── Contact form — saves to contact_messages (notifies admin), then opens mailto ── */
 interface FormState {
   name: string;
   email: string;
@@ -23,6 +25,7 @@ const INIT: FormState = { name: "", email: "", subject: "", message: "" };
 
 const Contact = () => {
   const { data: settings } = useSchoolSettings();
+  const { user } = useAuth();
 
   const displayEmail  = settings?.email  || "ghsbabikhel@edu.pk";
   const displayPhone  = settings?.phone?.trim().length > 5 ? settings.phone : null;
@@ -37,13 +40,30 @@ const Contact = () => {
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       setError("Please fill in your name, email, and message.");
       return;
     }
     setError("");
     setSending(true);
+
+    // Save to DB so the admin dashboard gets notified — this is the source
+    // of truth now. The mailto fallback below is just a convenience so the
+    // sender's own mail client also has a copy ready to go.
+    const { error: dbError } = await supabase.from("contact_messages").insert({
+      name: form.name.trim(),
+      email: form.email.trim(),
+      subject: form.subject.trim() || null,
+      message: form.message.trim(),
+      user_id: user?.id ?? null,
+    });
+
+    if (dbError) {
+      // Don't block the user from reaching us even if the DB insert fails —
+      // mailto still works as a fallback — but surface it in case it keeps failing.
+      console.warn("[Contact] failed to save message:", dbError.message);
+    }
 
     // Build mailto link so the message arrives at the school's inbox
     const body = `Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`;
@@ -308,3 +328,4 @@ const Contact = () => {
 };
 
 export default Contact;
+                    

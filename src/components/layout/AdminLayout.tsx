@@ -30,6 +30,7 @@ const navSections: NavSection[] = [
     heading: "OVERVIEW",
     items: [
       { id: "overview",         label: "Overview",              emoji: "📊" },
+      { id: "messages",         label: "Contact Messages",      emoji: "✉️" },
       { id: "settings",         label: "School Settings",       emoji: "⚙️" },
       { id: "site-analytics",   label: "Site Analytics",        emoji: "📈",
         lucideIcon: BarChart2,  lucideColor: "text-violet-500" },

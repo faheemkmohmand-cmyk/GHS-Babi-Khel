@@ -20,6 +20,8 @@ const AdminNotes             = lazy(() => import("../notes/AdminNotes"));
 const AdminExtras            = lazy(() => import("./tabs/AdminExtras"));
 const AdminOnlineClasses     = lazy(() => import("./tabs/AdminOnlineClasses") as any);
 const AdminAdmissions        = lazy(() => import("./tabs/AdminAdmissions"));
+// ── Contact form submissions ──
+const AdminMessages          = lazy(() => import("./tabs/AdminMessages"));
 // ── Student Credentials (ID Cards + Monitor Pass) ──
 const AdminStudentCredentials = lazy(() => import("./tabs/AdminStudentCredentials"));
 // ── Fee Management ──
@@ -44,6 +46,7 @@ const tabMap: Record<string, React.LazyExoticComponent<React.ComponentType<any>>
   extras:             AdminExtras,
   "online-classes":   AdminOnlineClasses,
   admissions:         AdminAdmissions,
+  messages:           AdminMessages,
   // "id-cards" now lives inside credentials
   "credentials":      AdminStudentCredentials,
   "fees":             AdminFees,
@@ -88,3 +91,4 @@ const AdminDashboard = () => {
 export default AdminDashboard;
 
 
+      

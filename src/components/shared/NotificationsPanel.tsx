@@ -50,6 +50,8 @@ const TYPE_META: Record<string, { icon: any; color: string; bg: string; label: s
   admission_doc:         { icon: Upload,       color: "text-fuchsia-500",    bg: "bg-fuchsia-500/10",    label: "Document"       },
   notes_chapter:         { icon: BookOpen,     color: "text-lime-500",       bg: "bg-lime-500/10",       label: "Notes"          },
   notes_feedback:        { icon: MessageSquare,color: "text-stone-500",      bg: "bg-stone-500/10",      label: "Feedback"       },
+  chapter_question:      { icon: MessageSquare,color: "text-stone-500",      bg: "bg-stone-500/10",      label: "Question"       },
+  contact_message:       { icon: Mail,         color: "text-blue-600",       bg: "bg-blue-600/10",       label: "Contact"        },
   gallery:               { icon: Image,        color: "text-pink-500",       bg: "bg-pink-500/10",       label: "Gallery"        },
   default:               { icon: FileText,     color: "text-muted-foreground", bg: "bg-muted",           label: "Update"         },
 };
@@ -59,7 +61,7 @@ import {
   Megaphone, Newspaper, BarChart3, Hash, Wallet, IdCard,
   CalendarDays, BookMarked, Video, MonitorPlay, GraduationCap,
   Trophy, ClipboardList, UserPlus, Upload, BookOpen, MessageSquare,
-  Image, FileText,
+  Image, FileText, Mail,
 } from "lucide-react";
 
 const metaFor = (type: string) => TYPE_META[type] ?? TYPE_META.default;

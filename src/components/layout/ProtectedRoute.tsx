@@ -18,13 +18,24 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     return <Navigate to="/auth/signin" replace />;
   }
 
+  // If user is authenticated but profile hasn't loaded yet, show spinner
+  // instead of letting them through — prevents pending users from slipping in
+  // during the brief window where profile is null after auth state change.
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   // Admin users always pass through (they are auto-approved)
-  if (profile?.role === "admin") {
+  if (profile.role === "admin") {
     return <>{children}</>;
   }
 
   // Block pending users
-  if (profile?.status === "pending") {
+  if (profile.status === "pending") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <div className="max-w-md w-full bg-card rounded-2xl shadow-elevated p-8 text-center">
@@ -50,7 +61,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   }
 
   // Block rejected users
-  if (profile?.status === "rejected") {
+  if (profile.status === "rejected") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <div className="max-w-md w-full bg-card rounded-2xl shadow-elevated p-8 text-center">

@@ -4,11 +4,14 @@ import { motion } from "framer-motion";
 import { Mail, ArrowRight, Loader2, GraduationCap } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import toast from "react-hot-toast";
+import { useSchoolSettings, safeMediaUrl } from "@/hooks/useSchoolSettings";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
+  const { data: settings } = useSchoolSettings();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,8 +35,17 @@ const ForgotPassword = () => {
         className="w-full max-w-md relative z-10"
       >
         <div className="bg-card rounded-2xl shadow-elevated p-8 text-center">
-          <div className="w-14 h-14 rounded-2xl gradient-hero mx-auto mb-4 flex items-center justify-center">
-            <GraduationCap className="w-8 h-8 text-primary-foreground" />
+          <div className="w-14 h-14 rounded-2xl gradient-hero mx-auto mb-4 flex items-center justify-center overflow-hidden">
+            {settings?.logo_url && !logoFailed ? (
+              <img
+                src={safeMediaUrl(settings.logo_url)!}
+                alt={`${settings?.school_name || "GHS Babi Khel"} logo`}
+                className="w-full h-full object-cover"
+                onError={() => setLogoFailed(true)}
+              />
+            ) : (
+              <GraduationCap className="w-8 h-8 text-primary-foreground" />
+            )}
           </div>
           {sent ? (
             <>

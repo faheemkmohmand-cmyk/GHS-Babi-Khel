@@ -27,7 +27,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Bell, CheckCheck, BellOff, Filter } from "lucide-react";
+import { Bell, CheckCheck, BellOff, Filter, Trash2, Square, CheckSquare, X } from "lucide-react";
 import toast from "react-hot-toast";
 
 // Reuse the same icon map as NotificationBell (kept in sync).
@@ -94,6 +94,8 @@ export default function NotificationsPanel({ title = "Notifications", subtitle }
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [filter, setFilter] = useState<FilterKey>("all");
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // ── Fetch notifications ──────────────────────────────────────────────────
   const { data: notifications = [], isLoading } = useQuery<NotificationRow[]>({
@@ -171,7 +173,77 @@ export default function NotificationsPanel({ title = "Notifications", subtitle }
     },
   });
 
+  // ── Delete (dismiss) one notification ────────────────────────────────────
+  // Uses dismiss_notification RPC — hides it for this user only, leaving the
+  // shared broadcast row untouched for everyone else who can also see it.
+  const deleteOneMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc("dismiss_notification", { p_notification_id: id });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notifications-feed", user?.id] });
+      qc.invalidateQueries({ queryKey: ["notifications", user?.id] });
+    },
+    onError: (err: any) => toast.error(err?.message || "Failed to delete"),
+  });
+
+  // ── Delete a specific set of selected notifications ──────────────────────
+  const deleteSelectedMut = useMutation({
+    mutationFn: async (ids: string[]) => {
+      for (const id of ids) {
+        const { error } = await supabase.rpc("dismiss_notification", { p_notification_id: id });
+        if (error) throw error;
+      }
+    },
+    onSuccess: (_data, ids) => {
+      qc.invalidateQueries({ queryKey: ["notifications-feed", user?.id] });
+      qc.invalidateQueries({ queryKey: ["notifications", user?.id] });
+      toast.success(`Deleted ${ids.length} notification${ids.length !== 1 ? "s" : ""}`);
+      setSelectedIds(new Set());
+      setSelectMode(false);
+    },
+    onError: (err: any) => toast.error(err?.message || "Failed to delete"),
+  });
+
+  // ── Delete everything currently visible (across all pages) ───────────────
+  const deleteAllMut = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc("dismiss_all_notifications");
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notifications-feed", user?.id] });
+      qc.invalidateQueries({ queryKey: ["notifications", user?.id] });
+      toast.success("All notifications deleted");
+      setSelectedIds(new Set());
+      setSelectMode(false);
+    },
+    onError: (err: any) => toast.error(err?.message || "Failed to delete"),
+  });
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === notifications.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(notifications.map((n) => n.id)));
+    }
+  };
+
   const handleClick = (n: NotificationRow) => {
+    if (selectMode) {
+      toggleSelected(n.id);
+      return;
+    }
     if (!n.is_read) markOneReadMut.mutate(n.id);
     if (n.link) navigate(n.link);
   };
@@ -242,8 +314,62 @@ export default function NotificationsPanel({ title = "Notifications", subtitle }
               Mark all read
             </Button>
           )}
+          {notifications.length > 0 && (
+            <Button
+              size="sm"
+              variant={selectMode ? "secondary" : "outline"}
+              onClick={() => {
+                setSelectMode((v) => !v);
+                setSelectedIds(new Set());
+              }}
+              className="gap-1.5"
+            >
+              {selectMode ? <X className="w-3.5 h-3.5" /> : <Trash2 className="w-3.5 h-3.5" />}
+              {selectMode ? "Cancel" : "Select"}
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* ── Bulk action bar (shown while in select mode) ── */}
+      {selectMode && notifications.length > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-lg bg-secondary/60 border border-border">
+          <button
+            onClick={toggleSelectAll}
+            className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+          >
+            {selectedIds.size === notifications.length ? (
+              <CheckSquare className="w-4 h-4" />
+            ) : (
+              <Square className="w-4 h-4" />
+            )}
+            {selectedIds.size > 0 ? `${selectedIds.size} selected` : "Select all"}
+          </button>
+          <div className="flex items-center gap-2">
+            {selectedIds.size > 0 && (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => deleteSelectedMut.mutate(Array.from(selectedIds))}
+                disabled={deleteSelectedMut.isPending}
+                className="gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Delete selected
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => deleteAllMut.mutate()}
+              disabled={deleteAllMut.isPending}
+              className="gap-1.5"
+            >
+              Delete all
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* ── Body ── */}
       <Card>
@@ -287,7 +413,18 @@ export default function NotificationsPanel({ title = "Notifications", subtitle }
                           isUnread ? "bg-primary/5" : ""
                         }`}
                       >
-                        {/* Type icon */}
+                        {/* Checkbox — only in select mode */}
+                        {selectMode && (
+                          <div className="shrink-0 pt-1.5">
+                            {selectedIds.has(n.id) ? (
+                              <CheckSquare className="w-4 h-4 text-primary" />
+                            ) : (
+                              <Square className="w-4 h-4 text-muted-foreground/50" />
+                            )}
+                          </div>
+                        )}
+
+                      {/* Type icon */}
                         <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${meta.bg}`}>
                           <Icon className={`w-4 h-4 ${meta.color}`} />
                         </div>
@@ -298,7 +435,7 @@ export default function NotificationsPanel({ title = "Notifications", subtitle }
                             <p className={`text-sm leading-snug ${isUnread ? "font-semibold text-foreground" : "text-foreground/90"}`}>
                               {n.title}
                             </p>
-                            {isUnread && (
+                            {isUnread && !selectMode && (
                               <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1.5" />
                             )}
                           </div>
@@ -316,6 +453,21 @@ export default function NotificationsPanel({ title = "Notifications", subtitle }
                             </span>
                           </div>
                         </div>
+
+                        {/* Per-item delete — hidden while in select mode (use bulk bar instead) */}
+                        {!selectMode && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteOneMut.mutate(n.id);
+                            }}
+                            disabled={deleteOneMut.isPending}
+                            className="shrink-0 p-1.5 rounded-md text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-30"
+                            aria-label="Delete notification"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
                     );
                   })}
@@ -336,5 +488,4 @@ export default function NotificationsPanel({ title = "Notifications", subtitle }
       )}
     </div>
   );
-         }
-                                           
+}

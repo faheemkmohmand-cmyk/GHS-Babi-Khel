@@ -51,6 +51,7 @@ const TYPE_META: Record<string, { icon: any; color: string; bg: string; label: s
   notes_chapter:         { icon: BookOpen,     color: "text-lime-500",       bg: "bg-lime-500/10",       label: "Notes"          },
   notes_feedback:        { icon: MessageSquare,color: "text-stone-500",      bg: "bg-stone-500/10",      label: "Feedback"       },
   chapter_question:      { icon: MessageSquare,color: "text-stone-500",      bg: "bg-stone-500/10",      label: "Question"       },
+  mistake_report:        { icon: Flag,         color: "text-red-500",        bg: "bg-red-500/10",        label: "Mistake"        },
   contact_message:       { icon: Mail,         color: "text-blue-600",       bg: "bg-blue-600/10",       label: "Contact"        },
   gallery:               { icon: Image,        color: "text-pink-500",       bg: "bg-pink-500/10",       label: "Gallery"        },
   default:               { icon: FileText,     color: "text-muted-foreground", bg: "bg-muted",           label: "Update"         },
@@ -61,7 +62,7 @@ import {
   Megaphone, Newspaper, BarChart3, Hash, Wallet, IdCard,
   CalendarDays, BookMarked, Video, MonitorPlay, GraduationCap,
   Trophy, ClipboardList, UserPlus, Upload, BookOpen, MessageSquare,
-  Image, FileText, Mail,
+  Image, FileText, Mail, Flag,
 } from "lucide-react";
 
 const metaFor = (type: string) => TYPE_META[type] ?? TYPE_META.default;
@@ -436,7 +437,7 @@ export default function NotificationsPanel({ title = "Notifications", subtitle }
                           <Icon className={`w-4 h-4 ${meta.color}`} />
                         </div>
 
-                        {/* Body */}
+                    {/* Body */}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-2">
                             <p className={`text-sm leading-snug ${isUnread ? "font-semibold text-foreground" : "text-foreground/90"}`}>

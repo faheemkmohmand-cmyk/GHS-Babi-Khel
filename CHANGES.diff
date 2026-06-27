@@ -1,0 +1,290 @@
+--- a/src/pages/Results.tsx
++++ b/src/pages/Results.tsx
+@@ -89,6 +89,7 @@
+ }
+ 
+ import { useMemo, useRef, useState, useEffect } from "react";
++import { useSearchParams } from "react-router-dom";
+ import { motion } from "framer-motion";
+ import { Search, GraduationCap, Trophy, Medal, Users, TrendingUp, Award, XCircle, Timer, Clock } from "lucide-react";
+ import PageLayout from "@/components/layout/PageLayout";
+@@ -287,8 +288,19 @@
+ };
+ 
+ const Results = () => {
+-  const [selectedClass, setSelectedClass] = useState("6");
+-  const [selectedExam, setSelectedExam] = useState("1st Semester");
++  // ── URL <-> state sync (fix for issue 2.5) ─────────────────────────────────
++  // Previously the page ignored ?class=N entirely — the footer's
++  // /results?class=6/7/8/9/10 links all landed on the default (Class 6).
++  // Now we read the `class` search param on mount, validate it against the
++  // allowed list, and use it as the initial selection. When the user
++  // clicks a class tab we also push the new value back into the URL so the
++  // page becomes shareable / back-button friendly.
++  const [searchParams, setSearchParams] = useSearchParams();
++  const classFromUrl = searchParams.get("class");
++  const initialClass  = classes.includes(classFromUrl ?? "") ? (classFromUrl as string) : "6";
++
++  const [selectedClass, setSelectedClass] = useState(initialClass);
++  const [selectedExam, setSelectedExam] = useState(examTypes[initialClass][0]);
+   const [selectedYear, setSelectedYear] = useState<number | undefined>();
+   const [search, setSearch] = useState("");
+   const [debouncedSearch, setDebouncedSearch] = useState("");
+@@ -311,6 +323,16 @@
+   const handleClassChange = (cls: string) => {
+     setSelectedClass(cls);
+     setSelectedExam(examTypes[cls][0]);
++    // Reflect the change in the URL without triggering a navigation.
++    // `replace: true` keeps the browser history clean (no extra back entry).
++    setSearchParams(
++      (prev) => {
++        if (cls === "6") prev.delete("class");     // "6" is the default — keep URL clean
++        else             prev.set("class", cls);
++        return prev;
++      },
++      { replace: true }
++    );
+   };
+ 
+   // Stats
+--- a/src/contexts/AuthContext.tsx
++++ b/src/contexts/AuthContext.tsx
+@@ -23,9 +23,24 @@
+   refreshProfile: () => Promise<void>;
+ }
+ 
+-// How long before any single Supabase call is abandoned
++// How long before any single Supabase call is abandoned.
++//
++// ── AUTH_INIT_TIMEOUT_MS (fix for issue 2.6) ──────────────────────────────
++// Previously 8000 ms, which was too long: a parent on 2G mobile would stare
++// at a "Loading…" spinner for 8 seconds before the page became interactive,
++// even though the actual hang was just a stale refresh token. Reduced to
++// 3000 ms — long enough for a healthy network round-trip to Supabase's auth
++// edge, short enough to not torture slow connections.
++//
++// On timeout we now also explicitly call `supabase.auth.signOut()` (see
++// below). This clears the stale refresh token from localStorage and stops
++// the background autoRefreshToken loop from continuing to retry — which
++// was the root cause of the admission form hanging and the original
++// motivation for the `supabasePublic` split in src/lib/supabase.ts. With
++// the stale session cleared at the source, the auth-enabled `supabase`
++// client no longer hangs on subsequent calls either.
+ const PROFILE_FETCH_TIMEOUT_MS = 6000;
+-const AUTH_INIT_TIMEOUT_MS = 8000;
++const AUTH_INIT_TIMEOUT_MS = 3000;
+ 
+ // Wraps a promise with a hard timeout — rejects if the promise doesn't settle in time
+ function withTimeout<T>(promise: PromiseLike<T>, ms: number, label = "timeout"): Promise<T> {
+@@ -108,7 +123,29 @@
+           if (mounted) subscribeToProfileChanges(sess.user.id);
+         }
+       } catch (err) {
+-        console.warn("Auth init error:", err);
++        // ── Timeout / failure path (fix for issue 2.6) ──────────────────────
++        // `getSession()` either timed out or threw. The most common cause is
++        // a stale or expired refresh token sitting in localStorage, which
++        // makes the Supabase JS client try to refresh in the background —
++        // and that refresh loop is what was hanging subsequent calls
++        // (admission form inserts, page-view tracking, etc.).
++        //
++        // The fix: explicitly sign out. This clears the stale token from
++        // localStorage AND terminates the autoRefreshToken loop, so the
++        // auth-enabled `supabase` client behaves like an anonymous client
++        // from this point forward. The user can simply click "Sign In"
++        // again to get a fresh session.
++        //
++        // We don't set a profile or session here — the catch block leaves
++        // them as their initial null values, which is correct for an
++        // anonymous visitor. The `finally` block below unblocks the UI.
++        console.warn("Auth init failed/timed out — clearing stale session:", err);
++        try {
++          await supabase.auth.signOut();
++        } catch {
++          // If signOut itself fails (e.g. network down), there's nothing
++          // more we can do — leave it to the next page load.
++        }
+       } finally {
+         // Always unblock the UI — no matter what happened above
+         if (mounted) {
+--- a/api/sitemap.js
++++ b/api/sitemap.js
+@@ -1,28 +1,56 @@
+ // api/sitemap.js
+ // Vercel Serverless Function — generates sitemap.xml dynamically.
+-// This ensures the sitemap always includes the latest URLs and correct lastmod dates.
+-// Access at: /api/sitemap
++//
++// Fixes for issues 2.7 + 2.8 (batch 2):
++//
++//   • 2.7 — The static `public/sitemap.xml` file was dead code (vercel.json
++//     rewrites /sitemap.xml → /api/sitemap) AND had stale 2025-01-10..2025-06-01
++//     <lastmod> dates, which Google interprets as "low crawl priority". The
++//     static file should be DELETED; this dynamic generator is the single
++//     source of truth.
++//
++//     Additionally, the previous version of this file used `new Date().today`
++//     as <lastmod> for EVERY URL — which is a sitemap-spam signal (Google
++//     penalises sites that claim every page changed today). We now query
++//     Supabase for the real MAX(updated_at) per content type and map each
++//     content type to its corresponding URL. Pages with no DB backing fall
++//     back to a build-time constant (DEPLOY_TIME) so they don't all read
++//     "today".
++//
++//   • 2.8 — /contact was missing from the OLD static sitemap. It was already
++//     present in the previous version of this dynamic generator; verified
++//     again below. (No action needed beyond confirmation.)
++//
++// Access at: /api/sitemap  (vercel.json rewrites /sitemap.xml → here)
++
++import { createClient } from "@supabase/supabase-js";
+ 
+ const SITE_URL = "https://ghsbabikhel.indevs.in";
+ 
+-// Static pages with their SEO metadata
++// Deploy-time anchor for static pages (about, contact, weather, etc.).
++// Falls back to today's date if Vercel doesn't inject BUILD_TIMESTAMP.
++const STATIC_LASTMOD = process.env.BUILD_TIMESTAMP || new Date().toISOString().split("T")[0];
++
++// Static pages with their SEO metadata.
++// `dbSource` (optional) maps a page to a Supabase table whose MAX(updated_at)
++// will be used as <lastmod>. Pages without `dbSource` use STATIC_LASTMOD.
+ const STATIC_PAGES = [
+-  { path: "/", changefreq: "daily", priority: "1.0" },
+-  { path: "/admission", changefreq: "weekly", priority: "0.9" },
+-  { path: "/notices", changefreq: "daily", priority: "0.9" },
+-  { path: "/news", changefreq: "daily", priority: "0.9" },
+-  { path: "/results", changefreq: "weekly", priority: "0.9" },
+-  { path: "/calendar", changefreq: "daily", priority: "0.9" },
+-  { path: "/contact", changefreq: "monthly", priority: "0.8" },
++  { path: "/", changefreq: "daily",   priority: "1.0", dbSource: { table: "notices",     column: "updated_at" } },
++  { path: "/admission", changefreq: "weekly",  priority: "0.9", dbSource: { table: "admissions",  column: "updated_at" } },
++  { path: "/notices", changefreq: "daily",   priority: "0.9", dbSource: { table: "notices",     column: "updated_at" } },
++  { path: "/news", changefreq: "daily",   priority: "0.9", dbSource: { table: "news",        column: "updated_at" } },
++  { path: "/results", changefreq: "weekly",  priority: "0.9", dbSource: { table: "results",     column: "updated_at" } },
++  { path: "/calendar", changefreq: "daily",   priority: "0.9", dbSource: { table: "events",      column: "updated_at" } },
++  { path: "/contact", changefreq: "monthly", priority: "0.8" },  // ← 2.8: present (was missing from old static file)
+   { path: "/about", changefreq: "monthly", priority: "0.8" },
+-  { path: "/teachers", changefreq: "monthly", priority: "0.8" },
+-  { path: "/online-classes", changefreq: "weekly", priority: "0.8" },
+-  { path: "/notes", changefreq: "weekly", priority: "0.8" },
+-  { path: "/library", changefreq: "weekly", priority: "0.8" },
+-  { path: "/duty", changefreq: "weekly", priority: "0.7" },
+-  { path: "/result-card", changefreq: "weekly", priority: "0.7" },
+-  { path: "/gallery", changefreq: "weekly", priority: "0.7" },
+-  { path: "/weather", changefreq: "daily", priority: "0.5" },
++  { path: "/teachers", changefreq: "monthly", priority: "0.8", dbSource: { table: "teachers",    column: "updated_at" } },
++  { path: "/online-classes", changefreq: "weekly",  priority: "0.8", dbSource: { table: "online_classes", column: "updated_at" } },
++  { path: "/notes", changefreq: "weekly",  priority: "0.8", dbSource: { table: "notes",        column: "updated_at" } },
++  { path: "/library", changefreq: "weekly",  priority: "0.8", dbSource: { table: "library_files", column: "updated_at" } },
++  { path: "/duty", changefreq: "weekly",  priority: "0.7", dbSource: { table: "duty_roster", column: "updated_at" } },
++  { path: "/result-card", changefreq: "weekly",  priority: "0.7", dbSource: { table: "results",     column: "updated_at" } },
++  { path: "/gallery", changefreq: "weekly",  priority: "0.7", dbSource: { table: "gallery_photos", column: "updated_at" } },
++  { path: "/weather", changefreq: "daily",   priority: "0.5" },
+ ];
+ 
+ const SUBJECT_PAGES = [
+@@ -30,6 +58,55 @@
+   "urdu", "islamiat", "pakistan-studies", "computer",
+ ];
+ 
++// ── Supabase client (serverless, no session) ────────────────────────────────
++// We create a fresh, lightweight client per request — no auth, no persistence.
++// env vars are exposed by Vercel at runtime.
++const supabaseUrl    = process.env.VITE_SUPABASE_URL;
++const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
++
++let _supabase = null;
++function getSupabase() {
++  if (_supabase) return _supabase;
++  if (!supabaseUrl || !supabaseAnonKey) return null;
++  _supabase = createClient(supabaseUrl, supabaseAnonKey, {
++    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
++  });
++  return _supabase;
++}
++
++/**
++ * Fetch MAX(updated_at) for a single table.
++ * Returns an ISO date string (YYYY-MM-DD) or null if the query fails /
++ * the table is empty / the column doesn't exist.
++ *
++ * We use Supabase's `select` with `order` + `limit 1` instead of an RPC
++ * because anon RLS policies typically allow SELECT on public-facing tables
++ * but may not allow aggregate functions.
++ */
++async function getLastMod(table, column) {
++  const sb = getSupabase();
++  if (!sb) return null;
++  try {
++    const { data, error } = await sb
++      .from(table)
++      .select(column)
++      .order(column, { ascending: false, nullsFirst: false })
++      .limit(1);
++    if (error || !data || data.length === 0) return null;
++    const val = data[0]?.[column];
++    if (!val) return null;
++    // Supabase returns timestamps like "2025-06-12T14:23:11+00:00".
++    // Sitemaps want plain YYYY-MM-DD.
++    return new Date(val).toISOString().split("T")[0];
++  } catch {
++    return null;
++  }
++}
++
++/**
++ * Build the <url> XML element for one page.
++ * Falls back to STATIC_LASTMOD if no DB-backed timestamp is available.
++ */
+ function buildUrlEntry(page, lastmod) {
+   const url = `${SITE_URL}${page.path}`;
+   const hreflangEntries = `
+@@ -46,14 +123,29 @@
+ }
+ 
+ export default async function handler(req, res) {
+-  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
++  // ── Resolve real lastmod per page (in parallel) ──────────────────────────
++  // For pages with a dbSource, fire off a MAX(updated_at) query.
++  // For pages without one, use STATIC_LASTMOD.
++  const lastmodPromises = STATIC_PAGES.map(async (page) => {
++    if (!page.dbSource) return { page, lastmod: STATIC_LASTMOD };
++    const lm = await getLastMod(page.dbSource.table, page.dbSource.column);
++    return { page, lastmod: lm || STATIC_LASTMOD };
++  });
+ 
+-  const staticEntries = STATIC_PAGES.map((page) => buildUrlEntry(page, today));
++  // Subject pages (/notes/math, etc.) share the /notes lastmod.
++  const notesLastmodPromise = getLastMod("notes", "updated_at");
+ 
++  const [pageResults, notesLastmod] = await Promise.all([
++    Promise.all(lastmodPromises),
++    notesLastmodPromise,
++  ]);
++
++  const staticEntries = pageResults.map(({ page, lastmod }) => buildUrlEntry(page, lastmod));
++  const subjectLastmod = notesLastmod || STATIC_LASTMOD;
+   const subjectEntries = SUBJECT_PAGES.map((subject) =>
+     buildUrlEntry(
+       { path: `/notes/${subject}`, changefreq: "weekly", priority: "0.7" },
+-      today
++      subjectLastmod
+     )
+   );
+ 
+@@ -69,6 +161,9 @@
+ </urlset>`;
+ 
+   res.setHeader("Content-Type", "application/xml");
++  // Cache at the CDN for 1 hour, but allow serving stale for up to 24h
++  // while revalidating in the background. This keeps the sitemap cheap
++  // even if Google hammers it.
+   res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
+   return res.status(200).send(xml);
+ }
+
+--- DELETED FILE: public/sitemap.xml ---
+Action: rm public/sitemap.xml (or `git rm`)
+Reason: dead code, superseded by /api/sitemap, stale 2025 lastmod dates.
+See /public/DELETE-sitemap.xml.txt for full explanation.

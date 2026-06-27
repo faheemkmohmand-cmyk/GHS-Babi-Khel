@@ -5,13 +5,12 @@ import {
   Newspaper, Megaphone, BarChart3, Hash, Wallet, IdCard,
   CalendarDays, BookMarked, Video, MonitorPlay, GraduationCap,
   Trophy, ClipboardList, FileText, UserPlus, Upload, HelpCircle,
-  Mail, MessageSquareText,
+  Mail, MessageSquareText, Flag,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
-import toast from "react-hot-toast";
 import { AnimatePresence, m } from "framer-motion";
 
 // ─── Notification type ──────────────────────────────────────────────────────
@@ -51,6 +50,7 @@ const TYPE_META: Record<string, { icon: any; color: string; bg: string }> = {
   admission_doc:         { icon: Upload,       color: "text-fuchsia-500",    bg: "bg-fuchsia-500/10"    },
   contact_message:       { icon: Mail,         color: "text-blue-600",       bg: "bg-blue-600/10"       },
   chapter_question:      { icon: MessageSquareText, color: "text-stone-500",  bg: "bg-stone-500/10"      },
+  mistake_report:        { icon: Flag,         color: "text-red-500",        bg: "bg-red-500/10"        },
   default:               { icon: FileText,     color: "text-muted-foreground", bg: "bg-muted"           },
 };
 
@@ -152,7 +152,6 @@ const NotificationBell = () => {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications", user?.id] }),
-    onError: (err: any) => toast.error(err?.message || "Failed to delete notification"),
   });
 
   const unreadCount = useMemo(
@@ -334,4 +333,4 @@ const NotificationBell = () => {
 
 export default NotificationBell;
 
-                          
+  

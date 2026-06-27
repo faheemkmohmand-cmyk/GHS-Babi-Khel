@@ -245,7 +245,14 @@ export default function NotificationsPanel({ title = "Notifications", subtitle }
       return;
     }
     if (!n.is_read) markOneReadMut.mutate(n.id);
-    if (n.link) navigate(n.link);
+    if (!n.link) return;
+    // mailto: / tel: / external http(s) links must NOT go through the SPA
+    // router — open them directly (e.g. mailto opens the device's mail app).
+    if (/^(mailto:|tel:|https?:\/\/)/i.test(n.link)) {
+      window.location.href = n.link;
+    } else {
+      navigate(n.link);
+    }
   };
 
   // ── Group by day for display ─────────────────────────────────────────────
@@ -424,7 +431,7 @@ export default function NotificationsPanel({ title = "Notifications", subtitle }
                           </div>
                         )}
 
-                      {/* Type icon */}
+                        {/* Type icon */}
                         <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${meta.bg}`}>
                           <Icon className={`w-4 h-4 ${meta.color}`} />
                         </div>

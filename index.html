@@ -76,15 +76,12 @@
           } else if (t === 'light') {
             // no class
           } else {
-            var manual = localStorage.getItem('ghs-dark-mode-manual');
-            var saved  = localStorage.getItem('ghs-dark-mode');
-            var isDark;
-            if (manual !== null) isDark = JSON.parse(manual);
-            else if (saved  !== null) isDark = JSON.parse(saved);
-            else {
-              var h = new Date(Date.now() + 5*3600*1000).getUTCHours();
-              isDark = h >= 18 || h < 6;
-            }
+            // No saved preference ("system" or unset) — match the real OS/browser
+            // color-scheme preference, same check useTheme.ts uses at runtime.
+            // (Previously this guessed dark mode from the clock, which could
+            // disagree with the actual system setting and cause a brief
+            // flash of the wrong theme right after the real check ran.)
+            var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             if (isDark) root.classList.add('dark');
           }
         } catch (e) {}

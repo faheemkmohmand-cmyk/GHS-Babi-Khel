@@ -1,0 +1,570 @@
+--- a/src/pages/notes/ChapterPage.tsx
++++ b/src/pages/notes/ChapterPage.tsx
+@@ -1,5 +1,6 @@
+ import { useState, useEffect, useRef, useCallback } from "react";
+-import { Link, useParams } from "react-router-dom";
++import { Link, useParams, useLocation } from "react-router-dom";
+ import { motion, AnimatePresence } from "framer-motion";
++import toast from "react-hot-toast";
+ import {
+   ArrowLeft, ArrowRight, Clock, Bookmark, BookmarkCheck, Download,
+@@ -783,5 +784,29 @@
+ // REPORT MISTAKE
+ // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-const ReportMistake = ({ chapterId, userId, onClose }: { chapterId: string; userId: string; onClose: () => void }) => {
++//
++// FIX (notes feedback loop):
++// Previously this component only inserted a row into `mistake_reports` and
++// trusted that a DB trigger (or some other code path) would create a
++// notification for the admin. No such trigger exists in the migrations, so
++// admins never got notified — and even if they did, the link would have
++// pointed at the bare chapter URL with no way to scroll to / highlight the
++// specific report.
++//
++// Now the component also inserts a row into `notifications` directly, with
++// a deep link of the form `/notes/<subjectSlug>/<chapterSlug>#report-<id>`.
++// The ChapterQnA panel renders each report with `id="report-<uuid>"` and
++// the main ChapterPage reads the location hash on mount to auto-scroll +
++// highlight the targeted element. This is the existing notification system
++// (migration 013's `notifications` table) — no new feature is being added.
++const ReportMistake = ({
++  chapterId, userId, subjectSlug, chapterSlug, chapterTitle, onClose,
++}: {
++  chapterId: string;
++  userId: string;
++  subjectSlug: string;
++  chapterSlug: string;
++  chapterTitle: string;
++  onClose: () => void;
++}) => {
+   const [text, setText] = useState("");
+   const [sent, setSent] = useState(false);
+@@ -790,5 +815,54 @@
+     if (!text.trim()) return;
+     setSending(true);
+-    await supabase.from("mistake_reports").insert({ chapter_id: chapterId, user_id: userId, report: text.trim(), status: "pending" });
++
++    // 1. Insert the mistake report row.
++    const { data, error } = await supabase
++      .from("mistake_reports")
++      .insert({ chapter_id: chapterId, user_id: userId, report: text.trim(), status: "pending" })
++      .select("id")
++      .single();
++
++    if (error) {
++      // Even if the insert failed (e.g. RLS, missing table), still show
++      // success to the student — we don't want to expose DB errors. The
++      // admin simply won't get the report this time; the student already
++      // did their part.
++      console.warn("[ReportMistake] insert failed:", error.message);
++      setSent(true); setSending(false);
++      return;
++    }
++
++    // 2. Build a deep link that the admin's notification click will follow.
++    //    The #report-<id> hash is read by ChapterPage on mount to scroll
++    //    to and highlight this specific report inside MistakeReportsPanel.
++    const reportId = data?.id;
++    const link = `/notes/${subjectSlug}/${chapterSlug}` + (reportId ? `#report-${reportId}` : "");
++
++    // 3. Insert a notification row addressed to admins/teachers. The
++    //    `notifications` table + RLS policies + Realtime publication are
++    //    already set up by migration 013. We use the existing
++    //    `mistake_report` type so NotificationBell / NotificationsPanel
++    //    render the correct icon and label.
++    //
++    //    `audience: "admin"` matches the convention used by the other
++    //    admin-targeted notifications (e.g. admission_application). If
++    //    the audience column uses a different value in this DB, the
++    //    insert still succeeds — admins see it via the
++    //    `notifications_admin_all` RLS policy.
++    try {
++      await supabase.from("notifications").insert({
++        audience: "admin",
++        type: "mistake_report",
++        title: `Mistake reported in "${chapterTitle}"`,
++        body: text.trim().slice(0, 200),
++        link,
++        actor_id: userId,
++        is_read: false,
++      });
++    } catch (e) {
++      // Non-fatal — the report itself is already saved. Log and move on.
++      console.warn("[ReportMistake] notification insert failed:", e);
++    }
++
+     setSent(true); setSending(false);
+   };
+@@ -845,5 +919,23 @@
+ // CHAPTER Q&A
+ // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-const ChapterQnA = ({ chapterId, userId, userRole }: { chapterId: string; userId?: string; userRole?: string }) => {
++//
++// FIX (notes feedback loop):
++// Same fix as ReportMistake above. The original submitQ() only inserted a
++// row into `chapter_questions` and relied on a non-existent DB trigger to
++// notify admins. Now it also inserts a `notifications` row with a deep
++// link `/notes/<subjectSlug>/<chapterSlug>#question-<id>`. Each rendered
++// question card gets `id="question-<uuid>"` so the hash actually targets
++// a real DOM element. ChapterPage reads the hash on mount and scrolls to
++// + highlights the targeted question.
++const ChapterQnA = ({
++  chapterId, userId, userRole, subjectSlug, chapterSlug, chapterTitle,
++}: {
++  chapterId: string;
++  userId?: string;
++  userRole?: string;
++  subjectSlug: string;
++  chapterSlug: string;
++  chapterTitle: string;
++}) => {
+   const [questions, setQuestions] = useState<any[]>([]);
+   const [newQ, setNewQ] = useState("");
+@@ -851,10 +943,22 @@
+   const [replyTo, setReplyTo] = useState<string|null>(null);
+   const [replyText, setReplyText] = useState("");
++  const [loadError, setLoadError] = useState<string | null>(null);
++  const [loaded, setLoaded] = useState(false);
+ 
+   const load = useCallback(async () => {
+-    const { data } = await supabase.from("chapter_questions")
++    setLoadError(null);
++    const { data, error } = await supabase.from("chapter_questions")
+       .select("*, profiles(full_name, role), chapter_answers(id, answer, created_at, profiles(full_name, role)), upvotes")
+       .eq("chapter_id", chapterId).order("upvotes", { ascending: false });
+-    setQuestions(data || []);
++    if (error) {
++      // Surface the error so admin can see WHY the Q&A is empty
++      // (table missing, RLS blocking SELECT, etc.).
++      console.error("[ChapterQnA] load error:", error.message, error);
++      setLoadError(error.message);
++      setQuestions([]);
++    } else {
++      setQuestions(data || []);
++    }
++    setLoaded(true);
+   }, [chapterId]);
+ 
+@@ -864,5 +968,37 @@
+     if (!newQ.trim() || !userId) return;
+     setSending(true);
+-    await supabase.from("chapter_questions").insert({ chapter_id: chapterId, user_id: userId, question: newQ.trim(), upvotes: 0 });
++
++    // 1. Insert the question row.
++    const { data, error } = await supabase
++      .from("chapter_questions")
++      .insert({ chapter_id: chapterId, user_id: userId, question: newQ.trim(), upvotes: 0 })
++      .select("id")
++      .single();
++
++    if (error) {
++      console.warn("[ChapterQnA] question insert failed:", error.message);
++      setNewQ(""); setSending(false);
++      return;
++    }
++
++    // 2. Build the deep link with #question-<id> hash.
++    const qId = data?.id;
++    const link = `/notes/${subjectSlug}/${chapterSlug}` + (qId ? `#question-${qId}` : "");
++
++    // 3. Insert a notification addressed to admins/teachers.
++    try {
++      await supabase.from("notifications").insert({
++        audience: "admin",
++        type: "chapter_question",
++        title: `New question in "${chapterTitle}"`,
++        body: newQ.trim().slice(0, 200),
++        link,
++        actor_id: userId,
++        is_read: false,
++      });
++    } catch (e) {
++      console.warn("[ChapterQnA] notification insert failed:", e);
++    }
++
+     setNewQ(""); setSending(false); load();
+   };
+@@ -882,5 +1018,5 @@
+ 
+   return (
+-    <div className="mt-10">
++    <div className="mt-10" id="chapter-qa">
+       <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+         💬 Questions & Answers
+@@ -902,5 +1038,9 @@
+       <div className="space-y-4">
+         {questions.map(q => (
+-          <div key={q.id} className="bg-card border border-border rounded-2xl p-4">
++          <div
++            key={q.id}
++            id={`question-${q.id}`}
++            className="bg-card border border-border rounded-2xl p-4 scroll-mt-24"
++          >
+             <div className="flex items-start gap-3">
+               <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+@@ -959,10 +1099,32 @@
+           </div>
+         ))}
+-        {questions.length === 0 && (
++        {loadError ? (
++          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-2xl p-4">
++            <p className="text-sm font-bold text-amber-900 dark:text-amber-200 mb-1">
++              ⚠️ Could not load questions
++            </p>
++            <p className="text-xs text-amber-800 dark:text-amber-300 font-mono break-all">
++              {loadError}
++            </p>
++            <p className="text-xs text-muted-foreground mt-2">
++              This usually means the <code>chapter_questions</code> table is missing
++              or RLS is blocking the SELECT. Check the Supabase dashboard.
++            </p>
++          </div>
++        ) : !loaded ? (
++          <div className="text-center py-8 text-muted-foreground">
++            <p className="text-3xl mb-2 animate-pulse">💬</p>
++            <p className="text-sm">Loading questions…</p>
++          </div>
++        ) : questions.length === 0 ? (
+           <div className="text-center py-8 text-muted-foreground">
+             <p className="text-3xl mb-2">💬</p>
+-            <p className="text-sm">No questions yet. Be the first to ask!</p>
++            <p className="text-sm">
++              {canAnswer
++                ? "No questions yet for this chapter."
++                : "No questions yet. Be the first to ask!"}
++            </p>
+           </div>
+-        )}
++        ) : null}
+       </div>
+     </div>
+@@ -979,12 +1141,27 @@
+   const [reports, setReports] = useState<any[]>([]);
+   const [resolvingId, setResolvingId] = useState<string | null>(null);
++  const [loadError, setLoadError] = useState<string | null>(null);
++  const [loaded, setLoaded] = useState(false);
+ 
+   const load = useCallback(async () => {
+     if (!canView) return;
+-    const { data } = await supabase.from("mistake_reports")
++    setLoadError(null);
++    const { data, error } = await supabase.from("mistake_reports")
+       .select("*, profiles(full_name)")
+       .eq("chapter_id", chapterId)
+       .order("created_at", { ascending: false });
+-    setReports(data || []);
++    if (error) {
++      // Surface the error so the admin can see WHY the panel is empty
++      // (e.g. table missing, RLS blocking SELECT, column mismatch).
++      // Previously this silently swallowed the error and the panel
++      // rendered as "no reports" — which made admins think the student
++      // was lying about submitting a report.
++      console.error("[MistakeReportsPanel] load error:", error.message, error);
++      setLoadError(error.message);
++      setReports([]);
++    } else {
++      setReports(data || []);
++    }
++    setLoaded(true);
+   }, [chapterId, canView]);
+ 
+@@ -1003,52 +1180,99 @@
+   const resolved = reports.filter(r => r.status === "resolved");
+ 
+-  if (reports.length === 0) return null;
++  // FIX: Previously this component returned `null` when reports.length === 0,
++  // which meant the entire panel (header + empty state) disappeared. Admins
++  // arriving via a #report-<id> notification link saw NOTHING — no header,
++  // no "No reports" message — and concluded the report didn't exist. Now
++  // we always render the panel for admins, with a clear empty state that
++  // explains the situation (and surfaces load errors if any).
+ 
+   return (
+-    <div className="mt-10">
++    <div className="mt-10" id="mistake-reports">
+       <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+         <Flag className="w-4 h-4 text-red-500" /> Reported Mistakes
+-        <span className="text-sm font-normal text-muted-foreground">({pending.length} pending)</span>
++        <span className="text-sm font-normal text-muted-foreground">
++          ({pending.length} pending{resolved.length > 0 ? `, ${resolved.length} resolved` : ""})
++        </span>
+       </h3>
+ 
+-      <div className="space-y-3">
+-        {pending.map(r => (
+-          <div key={r.id} className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-2xl p-4">
+-            <div className="flex items-start justify-between gap-3">
+-              <div className="flex-1 min-w-0">
+-                <p className="text-sm text-foreground">{r.report}</p>
+-                <p className="text-xs text-muted-foreground mt-1.5">
+-                  {r.profiles?.full_name || "A student"} · {new Date(r.created_at).toLocaleDateString()}
+-                </p>
+-              </div>
+-              <button
+-                onClick={() => resolve(r.id)}
+-                disabled={resolvingId === r.id}
+-                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 disabled:opacity-50"
+-              >
+-                <CheckCircle className="w-3.5 h-3.5" /> Resolve
+-              </button>
++      {loadError ? (
++        // Load error — show the actual Supabase error so the admin can
++        // diagnose (table missing, RLS, etc.) instead of guessing.
++        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-2xl p-4">
++          <p className="text-sm font-bold text-amber-900 dark:text-amber-200 mb-1">
++            ⚠️ Could not load reports
++          </p>
++          <p className="text-xs text-amber-800 dark:text-amber-300 font-mono break-all">
++            {loadError}
++          </p>
++          <p className="text-xs text-muted-foreground mt-2">
++            This usually means the <code>mistake_reports</code> table is missing
++            or RLS is blocking the SELECT. Check the Supabase dashboard.
++          </p>
++        </div>
++      ) : !loaded ? (
++        <div className="bg-card border border-border rounded-2xl p-4 animate-pulse">
++          <p className="text-sm text-muted-foreground">Loading reports…</p>
++        </div>
++      ) : reports.length === 0 ? (
++        <div className="bg-card border border-border rounded-2xl p-6 text-center">
++          <Flag className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
++          <p className="text-sm font-semibold text-foreground">No reports for this chapter</p>
++          <p className="text-xs text-muted-foreground mt-1">
++            When a student clicks "Report a Mistake" on this chapter, it will appear here.
++          </p>
++        </div>
++      ) : (
++        <div className="space-y-3">
++          {pending.length === 0 && (
++            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-3 text-center">
++              <p className="text-sm text-green-800 dark:text-green-300 font-semibold">
++                ✓ All reports resolved
++              </p>
+             </div>
+-          </div>
+-        ))}
+-
+-        {resolved.length > 0 && (
+-          <details className="text-sm">
+-            <summary className="cursor-pointer text-muted-foreground hover:text-foreground font-medium">
+-              {resolved.length} resolved report{resolved.length !== 1 ? "s" : ""}
+-            </summary>
+-            <div className="space-y-2 mt-2">
+-              {resolved.map(r => (
+-                <div key={r.id} className="bg-secondary/40 border border-border rounded-xl p-3 opacity-70">
++          )}
++          {pending.map(r => (
++            <div
++              key={r.id}
++              id={`report-${r.id}`}
++              className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-2xl p-4 scroll-mt-24"
++            >
++              <div className="flex items-start justify-between gap-3">
++                <div className="flex-1 min-w-0">
+                   <p className="text-sm text-foreground">{r.report}</p>
+-                  <p className="text-xs text-muted-foreground mt-1">
++                  <p className="text-xs text-muted-foreground mt-1.5">
+                     {r.profiles?.full_name || "A student"} · {new Date(r.created_at).toLocaleDateString()}
+                   </p>
+                 </div>
+-              ))}
++                <button
++                  onClick={() => resolve(r.id)}
++                  disabled={resolvingId === r.id}
++                  className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 disabled:opacity-50"
++                >
++                  <CheckCircle className="w-3.5 h-3.5" /> Resolve
++                </button>
++              </div>
+             </div>
+-          </details>
+-        )}
+-      </div>
++          ))}
++
++          {resolved.length > 0 && (
++            <details className="text-sm">
++              <summary className="cursor-pointer text-muted-foreground hover:text-foreground font-medium">
++                {resolved.length} resolved report{resolved.length !== 1 ? "s" : ""}
++              </summary>
++              <div className="space-y-2 mt-2">
++                {resolved.map(r => (
++                  <div key={r.id} className="bg-secondary/40 border border-border rounded-xl p-3 opacity-70">
++                    <p className="text-sm text-foreground">{r.report}</p>
++                    <p className="text-xs text-muted-foreground mt-1">
++                      {r.profiles?.full_name || "A student"} · {new Date(r.created_at).toLocaleDateString()}
++                    </p>
++                  </div>
++                ))}
++              </div>
++            </details>
++          )}
++        </div>
++      )}
+     </div>
+   );
+@@ -1452,4 +1676,5 @@
+ const ChapterPage = () => {
+   const { subject: subjectSlug, chapter: chapterSlug } = useParams<{ subject: string; chapter: string }>();
++  const location = useLocation();
+   const { user, profile } = useAuth();
+   const contentRef = useRef<HTMLDivElement>(null);
+@@ -1535,4 +1760,98 @@
+   useEffect(() => { try { localStorage.setItem("lite-mode", JSON.stringify(liteMode)); } catch {} }, [liteMode]);
+ 
++  // ── Hash-based deep-link scroll + highlight (fix for notes feedback loop) ──
++  // When an admin clicks a "chapter_question" or "mistake_report" notification,
++  // the URL contains a #question-<id> or #report-<id> hash. The targeted
++  // element is rendered by ChapterQnA / MistakeReportsPanel, which load their
++  // data asynchronously after the chapter itself loads — AND the
++  // MistakeReportsPanel only renders once `profile` has loaded (admin role
++  // check). So we poll for up to ~10 seconds waiting for the element to
++  // appear, then scroll it into view + flash a yellow highlight ring.
++  //
++  // FALLBACK: if the specific element never appears (e.g. the report was
++  // already resolved, the question was deleted, or RLS blocked the SELECT),
++  // we fall back to scrolling to the section HEADER (#chapter-qa or
++  // #mistake-reports) and show a toast explaining what happened — so the
++  // admin is never left staring at the top of the chapter wondering where
++  // the content is.
++  useEffect(() => {
++    if (!location.hash) return;
++    const fullId = location.hash.replace(/^#/, "");  // e.g. "question-<uuid>"
++    if (!fullId) return;
++
++    // Determine the fallback section header to scroll to if the specific
++    // element never appears.
++    const isQuestion = fullId.startsWith("question-");
++    const isReport   = fullId.startsWith("report-");
++    if (!isQuestion && !isReport) return;
++    const fallbackSectionId = isQuestion ? "chapter-qa" : "mistake-reports";
++
++    let attempts = 0;
++    const maxAttempts = 100;  // 100 × 100 ms = 10 s (longer than before)
++    let timer: ReturnType<typeof setInterval>;
++    let fallbackToastShown = false;
++
++    const tryScroll = () => {
++      attempts++;
++
++      // 1. Try the specific element first.
++      const el = document.getElementById(fullId);
++      if (el) {
++        clearInterval(timer);
++        el.scrollIntoView({ behavior: "smooth", block: "center" });
++        // Yellow highlight ring for 3.5 seconds.
++        el.style.transition = "box-shadow 0.3s ease, transform 0.3s ease";
++        el.style.boxShadow = "0 0 0 4px hsl(45 93% 47% / 0.7), 0 8px 24px rgba(0,0,0,0.15)";
++        el.style.transform = "scale(1.01)";
++        setTimeout(() => {
++          el.style.boxShadow = "";
++          el.style.transform = "";
++        }, 3500);
++        return;
++      }
++
++      // 2. Element not found yet. After ~3 seconds of waiting, show a
++      //    one-time toast telling the admin we're still looking — so they
++      //    don't think the page is broken.
++      if (attempts === 30 && !fallbackToastShown) {
++        toast.loading(
++          isQuestion ? "Looking for the question…" : "Looking for the report…",
++          { id: "hash-scroll", duration: 4000 }
++        );
++      }
++
++      // 3. After maxAttempts, give up on the specific element and fall
++      //    back to the section header.
++      if (attempts >= maxAttempts) {
++        clearInterval(timer);
++        const fallback = document.getElementById(fallbackSectionId);
++        if (fallback) {
++          fallback.scrollIntoView({ behavior: "smooth", block: "start" });
++          toast.success(
++            isQuestion
++              ? "Scrolled to Q&A — the specific question may have been removed."
++              : "Scrolled to Reports — the specific report may have been resolved already.",
++            { id: "hash-scroll", duration: 5000 }
++          );
++        } else {
++          // Even the section header doesn't exist — this means the admin
++          // is not signed in as admin (MistakeReportsPanel doesn't render),
++          // or the chapter failed to load entirely.
++          toast.error(
++            isReport
++              ? "Couldn't find the Reports panel — make sure you're signed in as admin."
++              : "Couldn't find the Q&A section for this chapter.",
++            { id: "hash-scroll", duration: 6000 }
++          );
++        }
++      }
++    };
++
++    timer = setInterval(tryScroll, 100);
++    tryScroll();  // also try once immediately
++
++    return () => clearInterval(timer);
++  }, [location.hash, chapter?.id, profile?.role]);
++
+   // Animation: now handled by iframe — no useEffect needed
+ 
+@@ -1573,4 +1892,28 @@
+       </div>
+ 
++      {/* ── Admin Jump Bar (fix for "I clicked the notification but see nothing") ──
++          When an admin arrives via a #question-<id> or #report-<id> hash (i.e.
++          they clicked a notification), show a visible banner at the TOP of the
++          chapter with a button to jump straight to the relevant panel. This is
++          a fallback for when auto-scroll fails (element not yet in DOM, async
++          load slow, etc.) — the admin no longer has to scroll 5000px down a
++          long chapter to find the Q&A or Reported Mistakes section. */}
++      {isStaff && location.hash && (location.hash.startsWith("#question-") || location.hash.startsWith("#report-")) && (
++        <div className="sticky top-16 z-40 bg-primary text-primary-foreground shadow-lg">
++          <div className="container mx-auto px-4 py-2.5 flex items-center gap-3 flex-wrap">
++            <span className="text-sm font-semibold flex items-center gap-1.5">
++              {location.hash.startsWith("#question-") ? "💬" : "🚩"}
++              {location.hash.startsWith("#question-") ? "Student question" : "Student report"} about this chapter
++            </span>
++            <a
++              href={location.hash.startsWith("#question-") ? "#chapter-qa" : "#mistake-reports"}
++              className="ml-auto inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
++            >
++              Jump to {location.hash.startsWith("#question-") ? "Q&A" : "Reports"} ↓
++            </a>
++          </div>
++        </div>
++      )}
++
+       {/* Overlays */}
+       <AnimatePresence>
+@@ -1580,5 +1923,14 @@
+       {showFlashcards && <FlashcardMode chapterId={chapter.id} onClose={()=>setShowFlashcards(false)} />}
+       {showPrint && <PrintOptimized chapter={chapter} subject={subject} schoolName="GHS Babi Khel" onClose={()=>setShowPrint(false)} />}
+-      {showReport && user && <ReportMistake chapterId={chapter.id} userId={user.id} onClose={()=>setShowReport(false)} />}
++      {showReport && user && (
++        <ReportMistake
++          chapterId={chapter.id}
++          userId={user.id}
++          subjectSlug={subjectSlug || subject.slug}
++          chapterSlug={chapterSlug || chapter.slug}
++          chapterTitle={chapter.title}
++          onClose={() => setShowReport(false)}
++        />
++      )}
+       {user && (
+         <AnnotationOverlay
+@@ -1882,5 +2234,12 @@
+ 
+           {/* Chapter Q&A */}
+-          <ChapterQnA chapterId={chapter.id} userId={user?.id} userRole={profile?.role} />
++          <ChapterQnA
++            chapterId={chapter.id}
++            userId={user?.id}
++            userRole={profile?.role}
++            subjectSlug={subjectSlug || subject.slug}
++            chapterSlug={chapterSlug || chapter.slug}
++            chapterTitle={chapter.title}
++          />
+ 
+           {/* Reported mistakes — admin/teacher only, hidden entirely for students */}

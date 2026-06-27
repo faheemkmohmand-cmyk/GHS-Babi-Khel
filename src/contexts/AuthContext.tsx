@@ -25,22 +25,28 @@ interface AuthContextValue {
 
 // How long before any single Supabase call is abandoned.
 //
-// ── AUTH_INIT_TIMEOUT_MS (fix for issue 2.6) ──────────────────────────────
-// Previously 8000 ms, which was too long: a parent on 2G mobile would stare
-// at a "Loading…" spinner for 8 seconds before the page became interactive,
-// even though the actual hang was just a stale refresh token. Reduced to
-// 3000 ms — long enough for a healthy network round-trip to Supabase's auth
-// edge, short enough to not torture slow connections.
+// ── AUTH_INIT_TIMEOUT_MS ──────────────────────────────────────────────────
+// This used to be 8000ms, then 3000ms (to avoid a long spinner on slow
+// connections), paired with a `signOut()` call on timeout. That combination
+// was the actual bug behind two reported issues:
+//   1. Refreshing the page while genuinely signed in would sometimes log
+//      the user back out — `getSession()` is a local read, but it can
+//      still take >3s on a slow/throttled mobile connection or briefly
+//      stall on a Web Locks race, and the timeout handler treated that as
+//      "stale session" and called signOut(), destroying a perfectly valid
+//      session.
+//   2. Because of (1), navigating Dashboard → Home could leave the user
+//      looking signed-out (Dashboard/Admin buttons gone) until they signed
+//      in again — the session really had been deleted, not just slow to
+//      load.
 //
-// On timeout we now also explicitly call `supabase.auth.signOut()` (see
-// below). This clears the stale refresh token from localStorage and stops
-// the background autoRefreshToken loop from continuing to retry — which
-// was the root cause of the admission form hanging and the original
-// motivation for the `supabasePublic` split in src/lib/supabase.ts. With
-// the stale session cleared at the source, the auth-enabled `supabase`
-// client no longer hangs on subsequent calls either.
+// Fix: the timeout no longer calls signOut() (see the catch block below) —
+// it just stops blocking the UI and lets `onAuthStateChange`'s
+// INITIAL_SESSION event deliver the real session shortly after. Bumped to
+// 5000ms as a bit more headroom for slow connections; this is now just
+// "how long to show a spinner," not "how long until we delete your login."
 const PROFILE_FETCH_TIMEOUT_MS = 6000;
-const AUTH_INIT_TIMEOUT_MS = 3000;
+const AUTH_INIT_TIMEOUT_MS = 5000;
 
 // Wraps a promise with a hard timeout — rejects if the promise doesn't settle in time
 function withTimeout<T>(promise: PromiseLike<T>, ms: number, label = "timeout"): Promise<T> {
@@ -123,29 +129,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (mounted) subscribeToProfileChanges(sess.user.id);
         }
       } catch (err) {
-        // ── Timeout / failure path (fix for issue 2.6) ──────────────────────
-        // `getSession()` either timed out or threw. The most common cause is
-        // a stale or expired refresh token sitting in localStorage, which
-        // makes the Supabase JS client try to refresh in the background —
-        // and that refresh loop is what was hanging subsequent calls
-        // (admission form inserts, page-view tracking, etc.).
+        // ── Timeout / failure path ──────────────────────────────────────────
+        // `getSession()` either timed out or threw. This used to call
+        // `supabase.auth.signOut()` here on the theory that a timeout means
+        // a stale/corrupt refresh token. In practice, on slow mobile
+        // connections (2G/3G, throttled Wi-Fi) or due to a known
+        // supabase-js Web Locks race (multiple tabs / fast remounts),
+        // `getSession()` can simply be SLOW or briefly stuck — even though
+        // the session in storage is perfectly valid. Signing the user out
+        // in that case was actively destroying good sessions: refreshing
+        // the page would intermittently log the admin/user out for no
+        // reason, and the Dashboard/Admin buttons would vanish until they
+        // signed in again.
         //
-        // The fix: explicitly sign out. This clears the stale token from
-        // localStorage AND terminates the autoRefreshToken loop, so the
-        // auth-enabled `supabase` client behaves like an anonymous client
-        // from this point forward. The user can simply click "Sign In"
-        // again to get a fresh session.
-        //
-        // We don't set a profile or session here — the catch block leaves
-        // them as their initial null values, which is correct for an
-        // anonymous visitor. The `finally` block below unblocks the UI.
-        console.warn("Auth init failed/timed out — clearing stale session:", err);
-        try {
-          await supabase.auth.signOut();
-        } catch {
-          // If signOut itself fails (e.g. network down), there's nothing
-          // more we can do — leave it to the next page load.
-        }
+        // Fix: don't sign out here. Just leave user/profile as null for
+        // now and let `onAuthStateChange`'s INITIAL_SESSION event (STEP 2
+        // below) deliver the real session shortly after — it reads from
+        // the same storage but isn't bound by this timeout, so it recovers
+        // a valid session instead of erasing it. We only ever clear state
+        // here; we never call signOut(), so a real stale/expired token is
+        // simply left for Supabase's own refresh logic to sort out (or for
+        // the user to hit a 401 and be redirected, same as any other API
+        // failure) rather than being treated as "guaranteed garbage."
+        console.warn("Auth init: getSession was slow or failed (will retry via onAuthStateChange):", err);
       } finally {
         // Always unblock the UI — no matter what happened above
         if (mounted) {
@@ -268,6 +274,4 @@ export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
   return ctx;
-                     }
-
-        
+}

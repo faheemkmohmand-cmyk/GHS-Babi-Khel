@@ -164,7 +164,14 @@ const NotificationBell = () => {
   const handleNotificationClick = (n: NotificationRow) => {
     if (!n.is_read) markOneReadMut.mutate(n.id);
     setOpen(false);
-    if (n.link) navigate(n.link);
+    if (!n.link) return;
+    // mailto: / tel: / external http(s) links must NOT go through the SPA
+    // router — open them directly (e.g. mailto opens the device's mail app).
+    if (/^(mailto:|tel:|https?:\/\/)/i.test(n.link)) {
+      window.location.href = n.link;
+    } else {
+      navigate(n.link);
+    }
   };
 
   const markAllRead = () => {

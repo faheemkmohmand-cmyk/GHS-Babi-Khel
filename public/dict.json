@@ -1,0 +1,877 @@
+[
+  {
+    "word": "perseverance",
+    "phonetics": [
+      {
+        "text": "/ˌpɜːsɪˈvɪərəns/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/perseverance-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "Continued effort and determination despite difficulty or delay in achieving success.",
+            "example": "Her perseverance paid off when she finally passed the exam.",
+            "synonyms": [
+              "persistence",
+              "tenacity",
+              "determination"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "eloquent",
+    "phonetics": [
+      {
+        "text": "/ˈɛləkwənt/",
+        "audio": ""
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "adjective",
+        "definitions": [
+          {
+            "definition": "Fluent and persuasive in speaking or writing.",
+            "example": "He gave an eloquent speech that moved the audience.",
+            "synonyms": [
+              "articulate",
+              "expressive",
+              "fluent"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "ambition",
+    "phonetics": [
+      {
+        "text": "/æmˈbɪʃən/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/ambition-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "A strong desire and determination to achieve success.",
+            "example": "Her ambition drove her to study harder every day.",
+            "synonyms": [
+              "drive",
+              "determination",
+              "aspiration"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "diligent",
+    "phonetics": [
+      {
+        "text": "/ˈdɪlɪdʒənt/",
+        "audio": ""
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "adjective",
+        "definitions": [
+          {
+            "definition": "Having or showing care and effort in your work or duties.",
+            "example": "A diligent student always completes homework on time.",
+            "synonyms": [
+              "hardworking",
+              "industrious",
+              "thorough"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "resilience",
+    "phonetics": [
+      {
+        "text": "/rɪˈzɪliəns/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/resilience-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "The ability to recover quickly from difficulties or setbacks.",
+            "example": "Resilience helped him overcome every obstacle.",
+            "synonyms": [
+              "toughness",
+              "strength",
+              "flexibility"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "curiosity",
+    "phonetics": [
+      {
+        "text": "/ˌkjʊərɪˈɒsɪti/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/curiosity-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "A strong desire to know or learn something.",
+            "example": "The student's curiosity led her to ask many questions.",
+            "synonyms": [
+              "inquisitiveness",
+              "interest",
+              "wonder"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "integrity",
+    "phonetics": [
+      {
+        "text": "/ɪnˈtɛɡrɪti/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/integrity-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "The quality of being honest and having strong moral principles.",
+            "example": "A person of integrity never cheats on an exam.",
+            "synonyms": [
+              "honesty",
+              "honour",
+              "virtue"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "knowledge",
+    "phonetics": [
+      {
+        "text": "/ˈnɒlɪdʒ/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/knowledge-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "Facts, information, and skills acquired through experience or education.",
+            "example": "Reading books increases your knowledge greatly.",
+            "synonyms": [
+              "understanding",
+              "learning",
+              "wisdom"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "endeavor",
+    "phonetics": [
+      {
+        "text": "/ɪnˈdɛvər/",
+        "audio": ""
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "An attempt to achieve a goal, especially a difficult one.",
+            "example": "Every endeavor requires hard work and patience.",
+            "synonyms": [
+              "effort",
+              "attempt",
+              "undertaking"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "compassion",
+    "phonetics": [
+      {
+        "text": "/kəmˈpæʃən/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/compassion-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "Sympathetic concern for the sufferings or misfortunes of others.",
+            "example": "A good teacher shows compassion towards struggling students.",
+            "synonyms": [
+              "empathy",
+              "sympathy",
+              "kindness"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "achieve",
+    "phonetics": [
+      {
+        "text": "/əˈtʃiːv/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/achieve-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "definitions": [
+          {
+            "definition": "Successfully reach a desired goal or result by effort, skill, or courage.",
+            "example": "You can achieve anything you set your mind to.",
+            "synonyms": [
+              "accomplish",
+              "attain",
+              "reach"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "wisdom",
+    "phonetics": [
+      {
+        "text": "/ˈwɪzdəm/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/wisdom-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "The quality of having experience, knowledge, and good judgement.",
+            "example": "Wisdom comes from years of learning and experience.",
+            "synonyms": [
+              "insight",
+              "knowledge",
+              "judgement"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "discipline",
+    "phonetics": [
+      {
+        "text": "/ˈdɪsɪplɪn/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/discipline-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "The practice of training yourself to obey rules and control your behaviour.",
+            "example": "Discipline is the key to academic success.",
+            "synonyms": [
+              "self-control",
+              "order",
+              "training"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "inspire",
+    "phonetics": [
+      {
+        "text": "/ɪnˈspaɪər/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/inspire-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "definitions": [
+          {
+            "definition": "Fill someone with the urge or ability to do or feel something.",
+            "example": "A great teacher can inspire students to love learning.",
+            "synonyms": [
+              "motivate",
+              "encourage",
+              "stimulate"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "courage",
+    "phonetics": [
+      {
+        "text": "/ˈkɜːrɪdʒ/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/courage-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "The ability to do something that frightens you; bravery.",
+            "example": "It takes courage to admit when you are wrong.",
+            "synonyms": [
+              "bravery",
+              "boldness",
+              "fearlessness"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "brilliant",
+    "phonetics": [
+      {
+        "text": "/ˈbrɪliənt/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/brilliant-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "adjective",
+        "definitions": [
+          {
+            "definition": "Exceptionally clever or talented.",
+            "example": "She is a brilliant scientist who made many discoveries.",
+            "synonyms": [
+              "gifted",
+              "talented",
+              "intelligent"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "flourish",
+    "phonetics": [
+      {
+        "text": "/ˈflɜːrɪʃ/",
+        "audio": ""
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "definitions": [
+          {
+            "definition": "Grow or develop in a healthy or vigorous way.",
+            "example": "Plants flourish when they receive sunlight and water.",
+            "synonyms": [
+              "thrive",
+              "prosper",
+              "bloom"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "potential",
+    "phonetics": [
+      {
+        "text": "/pəˈtɛnʃəl/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/potential-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "Qualities or abilities that may be developed and lead to future success.",
+            "example": "Every student has the potential to excel.",
+            "synonyms": [
+              "capacity",
+              "ability",
+              "promise"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "dedicate",
+    "phonetics": [
+      {
+        "text": "/ˈdɛdɪkeɪt/",
+        "audio": ""
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "definitions": [
+          {
+            "definition": "Devote time, effort, or yourself to a task or purpose.",
+            "example": "She dedicated her life to teaching children.",
+            "synonyms": [
+              "commit",
+              "devote",
+              "pledge"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "harmony",
+    "phonetics": [
+      {
+        "text": "/ˈhɑːrməni/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/harmony-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "A state of peaceful agreement and cooperation.",
+            "example": "The students worked in harmony to complete the project.",
+            "synonyms": [
+              "unity",
+              "peace",
+              "agreement"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "illuminate",
+    "phonetics": [
+      {
+        "text": "/ɪˈluːmɪneɪt/",
+        "audio": ""
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "definitions": [
+          {
+            "definition": "Make something clear and easier to understand.",
+            "example": "A good example can illuminate a difficult concept.",
+            "synonyms": [
+              "clarify",
+              "explain",
+              "enlighten"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "patience",
+    "phonetics": [
+      {
+        "text": "/ˈpeɪʃəns/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/patience-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "The ability to wait calmly without becoming frustrated.",
+            "example": "Learning a new skill requires patience and practice.",
+            "synonyms": [
+              "calmness",
+              "tolerance",
+              "endurance"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "triumph",
+    "phonetics": [
+      {
+        "text": "/ˈtraɪəmf/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/triumph-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "A great victory or achievement.",
+            "example": "Passing the exam was a personal triumph for him.",
+            "synonyms": [
+              "victory",
+              "success",
+              "achievement"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "grateful",
+    "phonetics": [
+      {
+        "text": "/ˈɡreɪtfʊl/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/grateful-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "adjective",
+        "definitions": [
+          {
+            "definition": "Feeling or showing thanks for something received.",
+            "example": "She was grateful for her teacher's help.",
+            "synonyms": [
+              "thankful",
+              "appreciative",
+              "obliged"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "innovate",
+    "phonetics": [
+      {
+        "text": "/ˈɪnəveɪt/",
+        "audio": ""
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "definitions": [
+          {
+            "definition": "Introduce new methods, ideas, or products.",
+            "example": "Schools must innovate to keep students engaged.",
+            "synonyms": [
+              "create",
+              "pioneer",
+              "invent"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "scholar",
+    "phonetics": [
+      {
+        "text": "/ˈskɒlər/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/scholar-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "A person who is highly educated or who excels in a particular subject.",
+            "example": "He became a respected scholar of mathematics.",
+            "synonyms": [
+              "academic",
+              "intellectual",
+              "student"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "determine",
+    "phonetics": [
+      {
+        "text": "/dɪˈtɜːrmɪn/",
+        "audio": ""
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "definitions": [
+          {
+            "definition": "Decide firmly what you are going to do; resolve.",
+            "example": "She determined to finish her homework before dinner.",
+            "synonyms": [
+              "decide",
+              "resolve",
+              "commit"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "ambitious",
+    "phonetics": [
+      {
+        "text": "/æmˈbɪʃəs/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/ambitious-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "adjective",
+        "definitions": [
+          {
+            "definition": "Having a strong desire and determination to succeed.",
+            "example": "An ambitious student sets high goals for herself.",
+            "synonyms": [
+              "driven",
+              "motivated",
+              "determined"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "empathy",
+    "phonetics": [
+      {
+        "text": "/ˈɛmpəθi/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/empathy-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "The ability to understand and share the feelings of another person.",
+            "example": "Showing empathy makes you a better friend.",
+            "synonyms": [
+              "understanding",
+              "compassion",
+              "sensitivity"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "excellence",
+    "phonetics": [
+      {
+        "text": "/ˈɛksələns/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/excellence-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "noun",
+        "definitions": [
+          {
+            "definition": "The quality of being outstanding or extremely good.",
+            "example": "The school is known for its excellence in science.",
+            "synonyms": [
+              "superiority",
+              "quality",
+              "distinction"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "navigate",
+    "phonetics": [
+      {
+        "text": "/ˈnævɪɡeɪt/",
+        "audio": ""
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "definitions": [
+          {
+            "definition": "Find a way through a difficult situation using skill and knowledge.",
+            "example": "He learned to navigate through complex problems calmly.",
+            "synonyms": [
+              "direct",
+              "guide",
+              "steer"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "profound",
+    "phonetics": [
+      {
+        "text": "/prəˈfaʊnd/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/profound-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "adjective",
+        "definitions": [
+          {
+            "definition": "Very great or intense; having deep meaning.",
+            "example": "Reading gave her a profound understanding of life.",
+            "synonyms": [
+              "deep",
+              "intense",
+              "meaningful"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "aspire",
+    "phonetics": [
+      {
+        "text": "/əˈspaɪər/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/aspire-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "verb",
+        "definitions": [
+          {
+            "definition": "Have a strong ambition to achieve something great.",
+            "example": "She aspires to become a doctor one day.",
+            "synonyms": [
+              "aim",
+              "seek",
+              "strive"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "mindful",
+    "phonetics": [
+      {
+        "text": "/ˈmaɪndfʊl/",
+        "audio": ""
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "adjective",
+        "definitions": [
+          {
+            "definition": "Conscious or aware of something; being present and attentive.",
+            "example": "Being mindful of others' feelings creates a kind environment.",
+            "synonyms": [
+              "aware",
+              "attentive",
+              "conscious"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "word": "versatile",
+    "phonetics": [
+      {
+        "text": "/ˈvɜːrsətaɪl/",
+        "audio": "https://api.dictionaryapi.dev/media/pronunciations/en/versatile-us.mp3"
+      }
+    ],
+    "meanings": [
+      {
+        "partOfSpeech": "adjective",
+        "definitions": [
+          {
+            "definition": "Able to adapt to many different functions or activities.",
+            "example": "A versatile student can excel in both science and arts.",
+            "synonyms": [
+              "adaptable",
+              "flexible",
+              "all-round"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

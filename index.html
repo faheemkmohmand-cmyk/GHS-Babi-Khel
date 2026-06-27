@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      NOTE: All SEO meta tags (title, description, canonical, OG, Twitter Card,
+      hreflang, robots, JSON-LD) are injected by React Helmet via SEO.tsx +
+      SiteSchema.tsx + RouteSEOInjector.tsx.
+
+      Duplicate static tags were REMOVED here because they previously
+      conflicted with Helmet's runtime output — Google saw two conflicting
+      <title> and <meta description> per page, which hurt rankings. That
+      problem is NOT being reintroduced.
+
+      Social-media link-preview crawlers (WhatsApp, Facebook, LinkedIn,
+      X/Twitter, Slack, Discord, iMessage/Applebot) don't execute JS, so
+      this empty shell isn't what they see: middleware.ts detects those
+      crawlers and serves them /api/og — fully-formed, per-route static
+      HTML with correct title/description/OG/Twitter/canonical tags —
+      instead of this file. See middleware.ts and api/og.js.
+
+      React Helmet remains the single source of truth for everything real
+      browsers and Googlebot/Bingbot (which do render JS) see.
+    -->
+    <title>GHS Babi Khel — Government High School, District Mohmand KPK</title>
+
+    <!-- Google Search Console ownership verification — multiple codes supported (one per owner/account) -->
+    <meta name="google-site-verification" content="oxtaDh5_WKTGGtiPsV1j8KLLqg8b64a8r2F825a7JPQ" />
+    <meta name="google-site-verification" content="vMHBxxfMdLuDtfzSgtcONIbHMrc7GFyft3yJSlCZ6Z4" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#0086FF" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- RSS Feed — discoverable by browsers and feed readers -->
+    <link rel="alternate" type="application/rss+xml" title="GHS Babi Khel — News & Notices" href="/rss.xml" />
+
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="dns-prefetch" href="https://supabase.co" />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+
+    <!-- PLAUSIBLE_INJECT_PLACEHOLDER -->
+
+    <!-- Fonts are loaded via @import in src/index.css with display=swap -->
+
+    <!-- Inline critical CSS -->
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 0;
+        background: hsl(210, 40%, 98%);
+      }
+      #root { min-height: 100vh; }
+    </style>
+
+    <!-- Theme bootstrap — prevents flash of wrong theme -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('ghs-theme');
+          var root = document.documentElement;
+          ['dark','theme-midnight','theme-forest','theme-violet'].forEach(function(c){ root.classList.remove(c); });
+          if (t === 'dark' || t === 'midnight' || t === 'forest' || t === 'violet') {
+            root.classList.add(t === 'dark' ? 'dark' : 'theme-' + t);
+          } else if (t === 'light') {
+            // no class
+          } else {
+            var manual = localStorage.getItem('ghs-dark-mode-manual');
+            var saved  = localStorage.getItem('ghs-dark-mode');
+            var isDark;
+            if (manual !== null) isDark = JSON.parse(manual);
+            else if (saved  !== null) isDark = JSON.parse(saved);
+            else {
+              var h = new Date(Date.now() + 5*3600*1000).getUTCHours();
+              isDark = h >= 18 || h < 6;
+            }
+            if (isDark) root.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- One-time Service Worker cleanup (runs once per browser, not every
+         load): this project intentionally has NO service worker — a prior
+         attempt at one caused pages to hang on refresh by serving stale
+         cached JS chunks (see vite.config.ts). If a visitor's browser still
+         has an old SW registered from before that was reverted, unregister
+         it once so they're not stuck on stale cached assets forever. After
+         that one cleanup, this is a no-op on every subsequent visit so we
+         stop doing unnecessary work (and stop blocking installability —
+         see below). -->
+    <script>
+      if ('serviceWorker' in navigator && !localStorage.getItem('ghs-sw-cleanup-done')) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          registrations.forEach(function(r) { r.unregister(); });
+        });
+        if (window.caches) {
+          caches.keys().then(function(names) {
+            names.forEach(function(name) { caches.delete(name); });
+          });
+        }
+        localStorage.setItem('ghs-sw-cleanup-done', '1');
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

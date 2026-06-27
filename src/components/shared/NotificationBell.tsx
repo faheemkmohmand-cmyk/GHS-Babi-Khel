@@ -11,6 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
+import toast from "react-hot-toast";
 import { AnimatePresence, m } from "framer-motion";
 
 // ─── Notification type ──────────────────────────────────────────────────────
@@ -151,6 +152,7 @@ const NotificationBell = () => {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications", user?.id] }),
+    onError: (err: any) => toast.error(err?.message || "Failed to delete notification"),
   });
 
   const unreadCount = useMemo(
@@ -331,4 +333,5 @@ const NotificationBell = () => {
 };
 
 export default NotificationBell;
-        
+
+                          

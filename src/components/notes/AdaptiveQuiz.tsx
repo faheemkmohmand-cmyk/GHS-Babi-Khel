@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CircleCheck as CheckCircle, Circle as XCircle, ChevronRight, RotateCcw, BookOpen, Zap } from "lucide-react";
 import { useNoteQuestions, saveQuizResult, awardPoints, removeWrongAnswer } from "@/hooks/useNotes";
+import { enrollSRSCard } from "@/hooks/useSRS";
 import { supabase } from "@/lib/supabase";
 import confetti from "canvas-confetti";
 import { Button } from "@/components/ui/button";
@@ -100,6 +101,9 @@ const AdaptiveQuiz = ({ quizId, chapterId, userId }: AdaptiveQuizProps) => {
           { user_id: userId, question_id: questions[i].id, given_answer: answers[i] },
           { onConflict: "user_id,question_id" }
         );
+        // Add this question to the student's spaced-repetition queue so it
+        // resurfaces tomorrow, then at growing intervals, until mastered.
+        await enrollSRSCard(userId, questions[i].id);
       } else {
         await removeWrongAnswer(userId, questions[i].id);
       }
@@ -333,3 +337,4 @@ const AdaptiveQuiz = ({ quizId, chapterId, userId }: AdaptiveQuizProps) => {
 };
 
 export default AdaptiveQuiz;
+                      

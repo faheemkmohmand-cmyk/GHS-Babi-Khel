@@ -52,7 +52,7 @@ const navSections: NavSection[] = [
   {
     heading: "LEARNING",
     items: [
-      { id: "notes",       label: "Notes Manager",    emoji: "📓" },
+      { id: "notes",       label: "Notes",    emoji: "📓" },
       { id: "leaderboard", label: "Leaderboard",      emoji: "🏆" },
       { id: "library",     label: "Library",           emoji: "📚" },
       { id: "gallery",     label: "Media",             emoji: "🎬" },

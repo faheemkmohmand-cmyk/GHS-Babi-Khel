@@ -60,10 +60,62 @@ function withTimeout<T>(promise: PromiseLike<T>, ms: number, label = "timeout"):
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// ── Profile cache ───────────────────────────────────────────────────────
+// Persists the last-known profile (role, name, etc.) in localStorage so it's
+// available SYNCHRONOUSLY on first render — before the async getSession() /
+// fetchProfile() round trip resolves. Without this, every fresh mount of
+// AuthProvider (page refresh, or navigating back to "/") starts with
+// profile=null, so isAdmin is false for a few seconds and the Admin Panel
+// link disappears from the Navbar until the fetch finishes.
+const PROFILE_CACHE_KEY = "ghsbk_profile_cache";
+
+function readCachedProfile(userId: string | null): Profile | null {
+  if (!userId) return null;
+  try {
+    const raw = localStorage.getItem(PROFILE_CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw) as { userId: string; profile: Profile };
+    return cached.userId === userId ? cached.profile : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedProfile(userId: string, profile: Profile | null) {
+  try {
+    if (profile) {
+      localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify({ userId, profile }));
+    } else {
+      localStorage.removeItem(PROFILE_CACHE_KEY);
+    }
+  } catch {
+    // ignore (e.g. private browsing / storage full)
+  }
+}
+
+// Reads whatever Supabase session is already sitting in localStorage,
+// synchronously, so we can seed `profile` from cache on the very first
+// render — before getSession() (which is async) has a chance to resolve.
+function getCachedUserId(): string | null {
+  try {
+    const keys = Object.keys(localStorage).filter((k) => k.startsWith("sb-") && k.endsWith("-auth-token"));
+    for (const k of keys) {
+      const raw = localStorage.getItem(k);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      const uid = parsed?.user?.id || parsed?.currentSession?.user?.id;
+      if (uid) return uid;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser]       = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(() => readCachedProfile(getCachedUserId()));
   const [loading, setLoading] = useState(true);
 
   // Prevents a stale onAuthStateChange callback from setting loading=true
@@ -125,6 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // fetchProfile already has its own internal timeout
           const prof = await fetchProfile(sess.user.id);
           if (mounted) setProfile(prof);
+          if (prof) writeCachedProfile(sess.user.id, prof);
           // Subscribe to realtime changes for this user's profile row
           if (mounted) subscribeToProfileChanges(sess.user.id);
         }
@@ -172,6 +225,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSession(null);
           setUser(null);
           setProfile(null);
+          writeCachedProfile("", null);
           // Don't touch loading here — sign-out is instant
           return;
         }
@@ -187,6 +241,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // asynchronously once the fetch completes.
           fetchProfile(sess.user.id).then((prof) => {
             if (mounted) setProfile(prof);
+            if (prof) writeCachedProfile(sess.user.id, prof);
           });
         } else {
           setProfile(null);
@@ -221,6 +276,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (!mounted) return;
             const fresh = await fetchProfile(userId);
             if (mounted) setProfile(fresh);
+            writeCachedProfile(userId, fresh);
           }
         )
         .subscribe();
@@ -253,6 +309,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
     setUser(null);
     setSession(null);
+    writeCachedProfile("", null);
     await supabase.auth.signOut();
   };
 
@@ -260,6 +317,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) {
       const prof = await fetchProfile(user.id);
       setProfile(prof);
+      writeCachedProfile(user.id, prof);
     }
   };
 
@@ -274,4 +332,4 @@ export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
   return ctx;
-}
+                       }

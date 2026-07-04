@@ -16,8 +16,7 @@ const AdminLibrary           = lazy(() => import("./tabs/AdminLibrary"));
 const AdminExamRollNumbers   = lazy(() => import("./tabs/AdminExamRollNumbers"));
 // ── Exam Seating Plan Engine (new) ──
 const AdminExamSeating       = lazy(() => import("./tabs/AdminExamSeating"));
-// ── Live Exam Hall Operations Console ──
-const AdminExamConsole       = lazy(() => import("./tabs/AdminExamConsole"));
+// (Live Exam Console is now a nested tab inside AdminExamSeating, not a standalone route)
 const AdminVideos            = lazy(() => import("./tabs/AdminVideos"));
 const AdminNotes             = lazy(() => import("../notes/AdminNotes"));
 // ── New feature admin tabs ──
@@ -45,8 +44,8 @@ const tabMap: Record<string, React.LazyExoticComponent<React.ComponentType<any>>
   "exam-rolls":       AdminExamRollNumbers,
   // ── Exam Seating Plan Engine ──
   "exam-seating":     AdminExamSeating,
-  // ── Live Exam Hall Operations Console ──
-  "exam-console":     AdminExamConsole,
+  // Redirect any old bookmarks/deep-links for the standalone console to Exam Seating (now nested there)
+  "exam-console":     AdminExamSeating,
   notes:              AdminNotes,
   videos:             AdminVideos,
   extras:             AdminExtras,
@@ -94,3 +93,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+      

@@ -463,10 +463,20 @@
 
 /* Print styles */
 @media print {
-  nav, footer, .scroll-to-top, button, .no-print { display: none !important; }
+  /* Hide all app chrome. The admin layout uses <aside> for its sidebar and
+     <header> for its top bar — neither was covered before, so printing any
+     admin page (like Timetables) printed the full-height sidebar/header too,
+     producing extra blank pages beyond the actual content. */
+  nav, footer, header, aside, .scroll-to-top, button, .no-print { display: none !important; }
   body { background: white !important; color: black !important; }
   .shadow-card, .shadow-elevated { box-shadow: none !important; }
   * { break-inside: avoid; }
-                                }
 
-                                                                    
+  /* Collapse any fixed-height / scrollable app containers so the browser
+     doesn't try to paginate their full scroll height (a common cause of
+     trailing blank pages) — let content flow naturally instead. */
+  html, body, #root { height: auto !important; overflow: visible !important; }
+  .h-screen, .min-h-screen { height: auto !important; min-height: 0 !important; }
+  .overflow-y-auto, .overflow-auto, .overflow-hidden { overflow: visible !important; }
+     }
+     

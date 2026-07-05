@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Printer, Download, Clock, MapPin, Video, ChevronRight, CalendarDays } from "lucide-react";
+import { Download, Clock, MapPin, Video, ChevronRight, CalendarDays } from "lucide-react";
 import { useTimetable, useTimetableSettings } from "@/hooks/useTimetable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -205,9 +205,6 @@ const TimetableTab = () => {
           <Button variant="outline" size="sm" onClick={() => exportPDF(selectedClass, entries, periodNames)} className="gap-1.5 text-xs">
             <Download className="w-3.5 h-3.5" /> <span className="hidden sm:inline">PDF</span>
           </Button>
-          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5 text-xs">
-            <Printer className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Print</span>
-          </Button>
         </div>
       </div>
 
@@ -372,3 +369,4 @@ const TimetableTab = () => {
 };
 
 export default TimetableTab;
+                 

@@ -10,7 +10,7 @@
  *     desk order.
  *  4. View per-room desk-layout grid (color-coded by class).
  *  5. Print desk-layout map (PDF) per room — for pasting on the hall wall.
- *  6. Print/export "Roll No → Seat → Room" lookup (PDF + CSV).
+ *  6. Print/export "Roll No → Seat → Room" lookup (PDF + CSV). 
  *  7. Print per-desk QR sticker sheet (PDF) — one sticker per desk so
  *     invigilators can scan to mark attendance against that exact seat.
  *  8. Publish the plan so students can look up their own seat.

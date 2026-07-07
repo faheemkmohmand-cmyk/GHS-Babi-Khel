@@ -1643,7 +1643,7 @@ const AdminExamRollNumbers = () => {
                         sit in arrangement order (8th, 7th, 6th) and the
                         invigilator walks the aisles scanning/entering any
                         student's QR or roll number. */}
-                    <option value="all">📚 All-Classes (combined)</option>
+                    <option value="all">All-Classes</option>
                     {availableClasses.map((c: string) => <option key={c} value={c}>Class {c}</option>)}
                   </select>
                 </div>

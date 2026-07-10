@@ -2,7 +2,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // LIVE EXAM SEATING WAR ROOM — the admin's god-tier view of an exam hall.
 //
-// Capabilities:
+// Capabilities: 
 //   1. Plan picker — choose any generated/published plan to enter the war room.
 //   2. 2.5D interactive hall map (HallMap2D5) — drag students between seats,
 //      color-coded by live attendance status, risk halo for frequent absentees.

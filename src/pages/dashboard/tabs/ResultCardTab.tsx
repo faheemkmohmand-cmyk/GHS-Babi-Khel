@@ -234,19 +234,42 @@ const ResultCardTab = () => {
 
       // ── Fallback: fill in exam_roll_no from exam_roll_numbers table ──────
       // (see ResultCard.tsx for full explanation — a result row can have a
-      // blank exam_roll_no even though a roll number exists for the student.)
+      // blank exam_roll_no even though a roll number exists for the student.
+      // exam_roll_numbers is scoped by session_id, and each session has its
+      // own exam_year + exam_term, so we match through exam_roll_sessions on
+      // year + term + class + student rather than just student_id + class.)
       const missing = rows.filter(r => !r.exam_roll_no && r.student_id && r.class);
       if (missing.length > 0) {
-        const { data: rolls } = await supabase
-          .from("exam_roll_numbers")
-          .select("student_id,class,exam_roll_no")
-          .in("student_id", missing.map(r => r.student_id));
-        if (rolls?.length) {
-          rows = rows.map(r => {
-            if (r.exam_roll_no) return r;
-            const match = rolls.find(rl => rl.student_id === r.student_id && rl.class === r.class);
-            return match ? { ...r, exam_roll_no: match.exam_roll_no } : r;
-          });
+        const years = Array.from(new Set(missing.map(r => r.year)));
+        const terms = Array.from(new Set(missing.map(r => r.exam_type)));
+        const { data: sessions } = await supabase
+          .from("exam_roll_sessions")
+          .select("id, exam_year, exam_term")
+          .in("exam_year", years)
+          .in("exam_term", terms);
+
+        if (sessions?.length) {
+          const { data: rolls } = await supabase
+            .from("exam_roll_numbers")
+            .select("student_id, class, exam_roll_no, session_id")
+            .in("session_id", sessions.map(s => s.id))
+            .in("student_id", missing.map(r => r.student_id));
+
+          if (rolls?.length) {
+            const sessionKey = (id: string) => {
+              const s = sessions.find(s => s.id === id);
+              return s ? `${s.exam_year}|${s.exam_term}` : "";
+            };
+            rows = rows.map(r => {
+              if (r.exam_roll_no) return r;
+              const match = rolls.find(rl =>
+                rl.student_id === r.student_id &&
+                rl.class === r.class &&
+                sessionKey(rl.session_id) === `${r.year}|${r.exam_type}`
+              );
+              return match ? { ...r, exam_roll_no: match.exam_roll_no } : r;
+            });
+          }
         }
       }
 

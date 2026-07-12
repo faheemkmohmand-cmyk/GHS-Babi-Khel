@@ -87,8 +87,7 @@ const ResultCardTab = () => {
           const { data: rolls } = await supabase
             .from("exam_roll_numbers")
             .select("student_id, class, exam_roll_no, session_id")
-            .in("session_id", sessions.map(s => s.id))
-            .in("student_id", missing.map(r => r.student_id));
+            .in("session_id", sessions.map(s => s.id));
 
           if (rolls?.length) {
             const sessionKey = (id: string) => {
@@ -97,34 +96,73 @@ const ResultCardTab = () => {
             };
             rows = rows.map(r => {
               if (r.exam_roll_no) return r;
-              const match = rolls.find(rl =>
+              // Primary match: same student_id + class + session year/term
+              let match = rolls.find(rl =>
                 rl.student_id === r.student_id &&
                 rl.class === r.class &&
                 sessionKey(rl.session_id) === `${r.year}|${r.exam_type}`
               );
+              // Fallback: same student_id + session year/term, ignore class
+              // (covers cases where the roll was issued for a slightly
+              // different class label, e.g. "8" vs "8th")
+              if (!match) {
+                match = rolls.find(rl =>
+                  rl.student_id === r.student_id &&
+                  sessionKey(rl.session_id) === `${r.year}|${r.exam_type}`
+                );
+              }
               return match ? { ...r, exam_roll_no: match.exam_roll_no } : r;
             });
           }
         }
       }
 
-      // ── Fetch total students per class/exam/year for "X of Y" position ──
+      // ── Compute Rank + Class Position client-side ────────────────────────
+      // The `position` column on the results table is never persisted by the
+      // admin panel (AdminResults.tsx computes rank purely client-side), so
+      // we replicate that same logic here: for each class/exam/year group,
+      // fetch ALL published results, dedupe by student (keep latest/highest),
+      // sort by percentage desc, and rank = index + 1.
       const groups = Array.from(new Set(rows.map(r => `${r.class}|${r.exam_type}|${r.year}`)));
-      if (groups.length > 0) {
-        const counts = await Promise.all(groups.map(async (g) => {
-          const [cls, examType, year] = g.split("|");
-          const { count } = await supabase
-            .from("results")
-            .select("id", { count: "exact", head: true })
-            .eq("class", cls)
-            .eq("exam_type", examType)
-            .eq("year", Number(year))
-            .eq("is_published", true);
-          return { key: g, count: count || 0 };
-        }));
-        const countMap = Object.fromEntries(counts.map(c => [c.key, c.count]));
-        rows = rows.map(r => ({ ...r, total_students: countMap[`${r.class}|${r.exam_type}|${r.year}`] || null }));
-      }
+      const rankMaps: Record<string, { rank: Map<string, number>; total: number }> = {};
+
+      await Promise.all(groups.map(async (g) => {
+        const [cls, examType, year] = g.split("|");
+        const { data: groupRows } = await supabase
+          .from("results")
+          .select("id,student_id,percentage,created_at")
+          .eq("class", cls)
+          .eq("exam_type", examType)
+          .eq("year", Number(year))
+          .eq("is_published", true);
+
+        const list = groupRows || [];
+        const seen = new Map<string, typeof list[0]>();
+        for (const r of list) {
+          if (!seen.has(r.student_id)) {
+            seen.set(r.student_id, r);
+          } else {
+            const existing = seen.get(r.student_id)!;
+            if (r.percentage > existing.percentage || r.created_at > existing.created_at) {
+              seen.set(r.student_id, r);
+            }
+          }
+        }
+        const deduped = Array.from(seen.values()).sort((a, b) => b.percentage - a.percentage);
+        const rankMap = new Map<string, number>();
+        deduped.forEach((r, i) => rankMap.set(r.student_id, i + 1));
+        rankMaps[g] = { rank: rankMap, total: deduped.length };
+      }));
+
+      rows = rows.map(r => {
+        const key = `${r.class}|${r.exam_type}|${r.year}`;
+        const g = rankMaps[key];
+        return {
+          ...r,
+          position: g?.rank.get(r.student_id) ?? null,
+          total_students: g?.total ?? null,
+        };
+      });
 
       setResults(rows);
     } catch { toast.error("Search failed. Try again."); }
@@ -219,7 +257,7 @@ const ResultCardTab = () => {
                         ))}
                     </div>
 
-                    {r.subject_marks && Object.keys(r.subject_marks).length > 0 && (
+                    {r.subject_marks && Object.keys(r.subject_marks).length > 0 ? (
                       <div className="px-5 py-4 border-b border-border space-y-2">
                         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Subject-wise Marks</p>
                         {Object.entries(r.subject_marks).map(([sub, m]) => {
@@ -234,6 +272,12 @@ const ResultCardTab = () => {
                             </div>
                           );
                         })}
+                      </div>
+                    ) : (
+                      <div className="px-5 py-4 border-b border-border">
+                        <p className="text-xs text-muted-foreground text-center bg-secondary/40 rounded-lg py-3">
+                          Subject-wise marks not entered for this result. See totals above.
+                        </p>
                       </div>
                     )}
 
@@ -262,3 +306,4 @@ const ResultCardTab = () => {
 };
 
 export default ResultCardTab;
+            

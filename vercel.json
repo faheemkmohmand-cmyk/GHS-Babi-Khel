@@ -1,0 +1,112 @@
+{
+  "regions": ["bom1"],
+  "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/api/robots"
+    },
+    {
+      "source": "/rss.xml",
+      "destination": "/api/rss"
+    },
+    {
+      "source": "/feed.xml",
+      "destination": "/api/rss"
+    },
+    {
+      "source": "/calendar.ics",
+      "destination": "/api/calendar"
+    },
+    {
+      "source": "/api/phet-proxy",
+      "destination": "/api/phet-proxy"
+    },
+    {
+      "source": "/api/phet-asset",
+      "destination": "/api/phet-asset"
+    },
+    {
+      "source": "/Hall_3D.html",
+      "destination": "/Hall_3D.html"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/Hall_3D.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/(.*).html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/api/phet-(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(self), microphone=(), geolocation=(self)"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com https://plausible.io https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https: https://*.tile.openstreetmap.org https://apod.nasa.gov https://server.arcgisonline.com https://*.opentopomap.org https://covers.openlibrary.org https://gutendex.com https://newsdata.io https://*.newsdata.io https://api.alquran.cloud https://*.alquran.cloud https://flagcdn.com https://*.flagcdn.com https://upload.wikimedia.org; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://opentdb.com https://api.cloudinary.com https://en.wikipedia.org https://restcountries.com https://api.open-meteo.com https://air-quality-api.open-meteo.com https://ipapi.co https://ipwho.is https://freeipapi.com https://api.bigdatacloud.net https://nominatim.openstreetmap.org https://overpass-api.de https://api.rainviewer.com https://*.tile.openstreetmap.org https://tile.openstreetmap.org https://server.arcgisonline.com https://*.opentopomap.org https://api.nasa.gov https://api.wheretheiss.at https://api.open-notify.org https://api.allorigins.win https://numbersapi.com https://plausible.io https://openlibrary.org https://gutendex.com https://newsdata.io https://*.newsdata.io https://pubchem.ncbi.nlm.nih.gov https://services.swpc.noaa.gov https://raw.githubusercontent.com https://countriesnow.space; media-src 'self' https://res.cloudinary.com https://*.supabase.co; frame-src 'self' blob: https: https://www.youtube.com https://youtube.com https://youtu.be https://meet.jit.si https://*.meet.jit.si https://www.geogebra.org https://phet.colorado.edu https://*.phet.colorado.edu; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+        }
+      ]
+    }
+  ]
+}

@@ -27,7 +27,7 @@
 //   page never sees or depends on) stores a copy for next time.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CACHE_VERSION = "ghs-v3";
+const CACHE_VERSION = "ghs-v4";
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 
@@ -87,6 +87,52 @@ async function networkFirstAsset(request) {
   }
 }
 
+const SHELL_URL = "/";
+
+async function networkFirstNavigation(request) {
+  const cache = await caches.open(ASSET_CACHE);
+  try {
+    // Always try the real network first — this is what keeps a fresh
+    // deploy visible immediately and is the same reasoning that protects
+    // JS/CSS chunks above. Never serve cache when the network is fine.
+    const res = await fetch(request);
+    // Cache a copy of the homepage shell specifically (not every URL) so
+    // there's always a known-good page to fall back to.
+    if (res && res.ok) {
+      const url = new URL(request.url);
+      if (url.pathname === "/" || url.pathname === "/index.html") {
+        cache.put(SHELL_URL, res.clone()).catch(() => {});
+      }
+    }
+    return res;
+  } catch (err) {
+    // Genuinely offline. Per product decision: any offline landing (typed
+    // URL, bookmark, hard refresh — regardless of path) shows the
+    // HOMEPAGE, not the originally-requested route. Once there, in-app
+    // clicks to About/News/Notices/Contact work instantly and offline,
+    // because those become client-side route swaps inside the already
+    // -loaded SPA (no new navigation request), with data already restored
+    // from IndexedDB (src/lib/queryPersist.ts) and their JS chunks cached
+    // by networkFirstAsset from any prior visit.
+    //
+    // A plain cached-HTML response would keep the browser's address bar on
+    // the original URL (e.g. /about), and BrowserRouter reads that address
+    // bar on mount — so it would render About, not the homepage. To
+    // actually land on the homepage, redirect the navigation to "/" first;
+    // the browser then requests "/", which this same handler serves from
+    // cache below.
+    const url = new URL(request.url);
+    if (url.pathname !== "/" && url.pathname !== "/index.html") {
+      return Response.redirect(SHELL_URL, 302);
+    }
+    const cachedShell = await cache.match(SHELL_URL);
+    if (cachedShell) return cachedShell;
+    // No shell cached yet (first-ever visit was offline) — nothing we can
+    // do, let the browser show its normal offline error.
+    throw err;
+  }
+}
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
@@ -98,8 +144,13 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Never touch navigation (HTML) requests — always network, always fresh.
-  if (request.mode === "navigate") return;
+  // Navigation requests (typed URL, bookmark, hard refresh, or the very
+  // first load): try network first for freshness, fall back to the cached
+  // homepage shell only if genuinely offline. See networkFirstNavigation.
+  if (request.mode === "navigate") {
+    event.respondWith(networkFirstNavigation(request));
+    return;
+  }
 
   if (isImageRequest(url)) {
     // Do NOT call event.respondWith() for images. Let the browser load the

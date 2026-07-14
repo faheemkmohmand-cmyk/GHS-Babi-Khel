@@ -3,38 +3,25 @@ import App from "./App.tsx";
 import "./index.css";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SERVICE WORKER CLEANUP
+// SERVICE WORKER — re-enabled for homepage offline support
 // ─────────────────────────────────────────────────────────────────────────────
-// The project previously used VitePWA which registered a Service Worker.
-// VitePWA was removed because the SW was serving stale/broken cached JS
-// chunks, causing interactive components (Graphing, ConceptMap, etc.) to
-// fail on mobile devices that had the old SW registered.
+// History: VitePWA's SW previously served stale/broken cached JS chunks,
+// breaking interactive components on mobile. It was removed and every load
+// force-unregistered any leftover SW.
 //
-// Even though VitePWA is gone from the build, old SWs are STILL registered
-// on users' phones from previous visits. This code unregisters ALL service
-// workers on every page load, ensuring stale caches don't interfere.
+// This is a NEW, hand-written SW (public/sw.js) built specifically to avoid
+// that failure mode: it never cache-first's JS/CSS or HTML navigation, only
+// Cloudinary images (cache-first + background refresh) and build assets
+// (network-first, cache only as an offline fallback). See public/sw.js for
+// the full reasoning.
+//
+// Registered only after the page has fully loaded, so it can never delay
+// or interfere with the initial page render.
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      for (const reg of registrations) {
-        reg.unregister().then((success) => {
-          if (success) {
-            console.log("[SW Cleanup] Unregistered stale service worker:", reg.scope);
-          }
-        }).catch(() => {
-          // ignore — can't do anything about it
-        });
-      }
-      // Also clear all caches if the Cache API is available
-      if ("caches" in window) {
-        caches.keys().then((keys) => {
-          for (const key of keys) {
-            caches.delete(key).then(() => {
-              console.log("[SW Cleanup] Deleted cache:", key);
-            });
-          }
-        });
-      }
+    navigator.serviceWorker.register("/sw.js").catch(() => {
+      // Registration failing (unsupported browser, blocked, etc.) is not
+      // fatal — the site just runs without offline caching, same as before.
     });
   });
 }

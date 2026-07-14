@@ -22,7 +22,7 @@
 //      as before.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CACHE_VERSION = "ghs-v1";
+const CACHE_VERSION = "ghs-v2";
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 
@@ -60,32 +60,58 @@ function isBuildAsset(url) {
 async function cacheFirstImage(request) {
   const cache = await caches.open(IMAGE_CACHE);
   const cached = await cache.match(request);
+
   if (cached) {
     // Stale-while-revalidate: return cached instantly, refresh in background.
-    fetch(request)
-      .then((res) => { if (res && res.ok) cache.put(request, res.clone()); })
-      .catch(() => {});
+    // This background refresh must NEVER be able to affect what the page
+    // actually receives — it only updates the cache for next time.
+    fetch(request.clone())
+      .then((res) => {
+        // Cloudinary is cross-origin: successful responses may be "opaque"
+        // (status 0, ok === false) when the request has no CORS mode, which
+        // is expected and NOT a failure — opaque responses are still valid
+        // to cache and display, we just can't inspect their status/body.
+        if (res && (res.ok || res.type === "opaque")) {
+          cache.put(request, res).catch(() => {});
+        }
+      })
+      .catch(() => {
+        // Background refresh failing is fine — we already returned the
+        // cached image below. Nothing more to do.
+      });
     return cached;
   }
+
+  // Nothing cached yet — this is the real network request the page is
+  // waiting on. Whatever happens here must resolve to the actual network
+  // response (or throw, letting the browser handle it normally); it must
+  // NEVER resolve to a synthetic error response, or images silently break.
   try {
-    const res = await fetch(request);
-    if (res && res.ok) cache.put(request, res.clone());
+    const res = await fetch(request.clone());
+    if (res && (res.ok || res.type === "opaque")) {
+      // Cache in the background; failure to cache must not affect the
+      // response we're about to return to the page.
+      cache.put(request, res.clone()).catch(() => {});
+    }
     return res;
   } catch (err) {
-    return cached || Response.error();
+    // True network failure with nothing cached — let the browser's normal
+    // fetch (which we haven't consumed, thanks to .clone() above) proceed
+    // and produce its own natural error. Do NOT synthesize Response.error().
+    return fetch(request);
   }
 }
 
 async function networkFirstAsset(request) {
   const cache = await caches.open(ASSET_CACHE);
   try {
-    const res = await fetch(request);
-    if (res && res.ok) cache.put(request, res.clone());
+    const res = await fetch(request.clone());
+    if (res && res.ok) cache.put(request, res.clone()).catch(() => {});
     return res;
   } catch (err) {
     const cached = await cache.match(request);
     if (cached) return cached;
-    throw err;
+    return fetch(request);
   }
 }
 

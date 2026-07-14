@@ -5,7 +5,7 @@
  * Features:
  *  • Plan picker — lists all generated/published plans.
  *  • Countdown to paper-start and paper-end (updates every second).
- *  • Live present / absent / late / leave tally as invigilators scan QR
+ *  • Live present / absent / late / leave tally as invigilators scan QR 
  *    codes. Uses Supabase realtime on exam_attendance for instant updates.
  *  • Auto-red-flag when absent count crosses a configurable threshold
  *    (default 20%, adjustable 5–50% via a slider).

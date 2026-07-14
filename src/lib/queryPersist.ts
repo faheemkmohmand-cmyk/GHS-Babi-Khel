@@ -1,16 +1,21 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Homepage offline data cache
+// Offline data cache — Homepage, About, Contact, News, Notices
 // ─────────────────────────────────────────────────────────────────────────────
-// Persists the React Query cache for HOMEPAGE queries only (notices, news,
-// teachers, achievements) into IndexedDB, so that when the homepage loads
-// with no internet, it can paint instantly from the last-seen data instead
-// of showing empty/loading states. When the network is back, React Query's
-// normal background refetch (staleTime) updates it silently — the user
-// never notices a "sync" happening.
+// Persists the React Query cache for these public pages' data (notices,
+// news, teachers, achievements, school settings) into IndexedDB, so that
+// when a page loads with no internet, it can paint instantly from the
+// last-seen data instead of showing empty/loading states. When the network
+// is back, React Query's normal background refetch (staleTime) updates it
+// silently — the user never notices a "sync" happening.
+//
+// About and Contact only need school-settings (already covered below).
+// News/Notices list pages use the "news"/"notices" keys. Individual
+// news/notice detail pages ("news-item"/"notice-item") are intentionally
+// NOT persisted yet — offline scope so far is these five list-style pages.
 //
 // Deliberately scoped to a small allow-list of query keys (not the whole
 // app) so this cannot interfere with admin/dashboard data, which must
-// always be fresh and is out of scope per the "homepage only" requirement.
+// always be fresh and is out of scope.
 //
 // No new dependency added — uses the browser's built-in IndexedDB directly
 // so this stays a pure file-drop change.
@@ -136,4 +141,4 @@ export function persistHomepageCache(queryClient: QueryClient): () => void {
     if (timer) clearTimeout(timer);
     unsubscribe();
   };
-}
+                             }

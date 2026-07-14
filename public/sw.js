@@ -5,28 +5,32 @@
 // with the last-seen photos, plus the app shell (JS/CSS/fonts) so the page
 // itself can boot without network.
 //
-// IMPORTANT — lessons from the last SW attempt (see index.html / main.tsx
-// history): that SW served STALE cached JS chunks after a deploy, which hung
-// pages on refresh. This SW avoids that specific failure mode by:
-//   1. NEVER caching JS/CSS with cache-first. Scripts/styles use
-//      network-first with a short timeout, falling back to cache only if
-//      the network truly fails (offline). A fresh deploy is picked up on
-//      the very next successful network request, not stuck behind a cache.
-//   2. Using a versioned cache name (CACHE_VERSION). Bumping it on deploy
-//      guarantees old cached files are wiped in activate().
-//   3. skipWaiting() + clients.claim() so a new SW takes over immediately
-//      instead of leaving two versions running side by side.
-//   4. Never intercepting navigation requests (HTML) with cache — always
-//      goes to network first, so the app shell HTML is always fresh and
-//      lazyWithRetry's chunk-recovery logic in App.tsx still works exactly
-//      as before.
+// IMPORTANT — history of two prior failures, both now fixed by simplifying:
+//
+//   Failure 1 (original SW, pre-this-project): served STALE cached JS
+//   chunks after a deploy, hanging pages on refresh. Fixed by NEVER
+//   caching JS/CSS with cache-first, and never touching navigation (HTML)
+//   requests at all — those always go straight to network.
+//
+//   Failure 2 (v1 of this file): intercepted image requests with
+//   event.respondWith() and returned whatever the SW's own fetch() got
+//   back. Cross-origin opaque responses and edge cases in that logic
+//   caused logo/banner/gallery images to render as broken icons — because
+//   respondWith() controls EXACTLY what bytes the <img> tag receives, so
+//   any mistake in that response is a broken image, full stop.
+//
+//   Fix: images are no longer intercepted with respondWith() at all. The
+//   browser loads every image exactly as it always did — completely
+//   untouched by this service worker, so it is now IMPOSSIBLE for this
+//   file to break an image the way it did before. Caching for offline use
+//   still happens, but passively: a separate background fetch (that the
+//   page never sees or depends on) stores a copy for next time.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CACHE_VERSION = "ghs-v2";
+const CACHE_VERSION = "ghs-v3";
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 
-// Hosts we treat as "safe to cache-first" images (Cloudinary + local static).
 const IMAGE_HOSTS = ["res.cloudinary.com"];
 
 self.addEventListener("install", (event) => {
@@ -53,53 +57,21 @@ function isImageRequest(url) {
 }
 
 function isBuildAsset(url) {
-  // Vite-built JS/CSS chunks live under /assets/
   return url.origin === self.location.origin && url.pathname.startsWith("/assets/");
 }
 
-async function cacheFirstImage(request) {
-  const cache = await caches.open(IMAGE_CACHE);
-  const cached = await cache.match(request);
-
-  if (cached) {
-    // Stale-while-revalidate: return cached instantly, refresh in background.
-    // This background refresh must NEVER be able to affect what the page
-    // actually receives — it only updates the cache for next time.
-    fetch(request.clone())
+// Passive background caching — fired alongside the real request, never
+// gates or replaces it. Whatever happens in here has zero effect on what
+// the browser actually displays, because we never call respondWith() for
+// images (see fetch handler below).
+function cacheImageInBackground(request) {
+  caches.open(IMAGE_CACHE).then((cache) => {
+    fetch(request)
       .then((res) => {
-        // Cloudinary is cross-origin: successful responses may be "opaque"
-        // (status 0, ok === false) when the request has no CORS mode, which
-        // is expected and NOT a failure — opaque responses are still valid
-        // to cache and display, we just can't inspect their status/body.
-        if (res && (res.ok || res.type === "opaque")) {
-          cache.put(request, res).catch(() => {});
-        }
+        if (res) cache.put(request, res).catch(() => {});
       })
-      .catch(() => {
-        // Background refresh failing is fine — we already returned the
-        // cached image below. Nothing more to do.
-      });
-    return cached;
-  }
-
-  // Nothing cached yet — this is the real network request the page is
-  // waiting on. Whatever happens here must resolve to the actual network
-  // response (or throw, letting the browser handle it normally); it must
-  // NEVER resolve to a synthetic error response, or images silently break.
-  try {
-    const res = await fetch(request.clone());
-    if (res && (res.ok || res.type === "opaque")) {
-      // Cache in the background; failure to cache must not affect the
-      // response we're about to return to the page.
-      cache.put(request, res.clone()).catch(() => {});
-    }
-    return res;
-  } catch (err) {
-    // True network failure with nothing cached — let the browser's normal
-    // fetch (which we haven't consumed, thanks to .clone() above) proceed
-    // and produce its own natural error. Do NOT synthesize Response.error().
-    return fetch(request);
-  }
+      .catch(() => {});
+  }).catch(() => {});
 }
 
 async function networkFirstAsset(request) {
@@ -130,7 +102,12 @@ self.addEventListener("fetch", (event) => {
   if (request.mode === "navigate") return;
 
   if (isImageRequest(url)) {
-    event.respondWith(cacheFirstImage(request));
+    // Do NOT call event.respondWith() for images. Let the browser load the
+    // image exactly as it normally would — this service worker never sits
+    // between the page and the image response, so it CANNOT break an
+    // image the way the previous version did. We only piggyback a
+    // best-effort background copy into cache for offline use later.
+    cacheImageInBackground(request.clone());
     return;
   }
 

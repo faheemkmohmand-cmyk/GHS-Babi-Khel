@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
@@ -13,8 +13,23 @@ import ProtectedRoute        from "./components/layout/ProtectedRoute";
 import AdminProtectedRoute   from "./components/layout/AdminProtectedRoute";
 import TeacherProtectedRoute from "./components/layout/TeacherProtectedRoute";
 import { AuthProvider }      from "./contexts/AuthContext";
+import { restoreHomepageCache, persistHomepageCache } from "./lib/queryPersist";
 
 const PageTracker = () => { usePageTracker(); return null; };
+
+// Restores homepage data (notices/news/teachers/achievements) from
+// IndexedDB on cold start so the homepage can paint instantly even with
+// no network, then keeps that cache updated in the background whenever
+// fresh data arrives. Scoped to homepage-only query keys — see
+// src/lib/queryPersist.ts.
+const HomepageCacheBootstrap = ({ queryClient }: { queryClient: QueryClient }) => {
+  useEffect(() => {
+    restoreHomepageCache(queryClient);
+    const stopPersisting = persistHomepageCache(queryClient);
+    return stopPersisting;
+  }, [queryClient]);
+  return null;
+};
 
 // ✅ On every page load, clear ALL stale "chunk-reload-*" flags from sessionStorage.
 // These flags are set by lazyWithRetry to prevent infinite reload loops, but they
@@ -113,6 +128,7 @@ const App = () => (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+        <HomepageCacheBootstrap queryClient={queryClient} />
         <LazyMotion features={domAnimation} strict>
           <SiteSchema />
           <Toaster
@@ -188,4 +204,5 @@ const App = () => (
 );
 
 export default App;
-    
+
+                  

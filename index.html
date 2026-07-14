@@ -88,28 +88,11 @@
       })();
     </script>
 
-    <!-- One-time Service Worker cleanup (runs once per browser, not every
-         load): this project intentionally has NO service worker — a prior
-         attempt at one caused pages to hang on refresh by serving stale
-         cached JS chunks (see vite.config.ts). If a visitor's browser still
-         has an old SW registered from before that was reverted, unregister
-         it once so they're not stuck on stale cached assets forever. After
-         that one cleanup, this is a no-op on every subsequent visit so we
-         stop doing unnecessary work (and stop blocking installability —
-         see below). -->
-    <script>
-      if ('serviceWorker' in navigator && !localStorage.getItem('ghs-sw-cleanup-done')) {
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          registrations.forEach(function(r) { r.unregister(); });
-        });
-        if (window.caches) {
-          caches.keys().then(function(names) {
-            names.forEach(function(name) { caches.delete(name); });
-          });
-        }
-        localStorage.setItem('ghs-sw-cleanup-done', '1');
-      }
-    </script>
+    <!-- Service Worker: registered in src/main.tsx (public/sw.js). Caches
+         Cloudinary images + build assets for homepage offline support.
+         No inline cleanup script here anymore — that script unregistered
+         ANY service worker on first load, which would immediately kill
+         the one we now intentionally register. -->
   </head>
   <body>
     <div id="root"></div>

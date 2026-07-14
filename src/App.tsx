@@ -17,12 +17,12 @@ import { restoreHomepageCache, persistHomepageCache } from "./lib/queryPersist";
 
 const PageTracker = () => { usePageTracker(); return null; };
 
-// Restores homepage data (notices/news/teachers/achievements) from
-// IndexedDB on cold start so the homepage can paint instantly even with
-// no network, then keeps that cache updated in the background whenever
-// fresh data arrives. Scoped to homepage-only query keys — see
-// src/lib/queryPersist.ts.
-const HomepageCacheBootstrap = ({ queryClient }: { queryClient: QueryClient }) => {
+// Restores offline-cached data (notices/news/teachers/achievements/
+// school-settings) from IndexedDB on cold start so Home, About, Contact,
+// News, and Notices can paint instantly even with no network, then keeps
+// that cache updated in the background whenever fresh data arrives.
+// Scoped to a small allow-list of query keys — see src/lib/queryPersist.ts.
+const OfflineCacheBootstrap = ({ queryClient }: { queryClient: QueryClient }) => {
   useEffect(() => {
     restoreHomepageCache(queryClient);
     const stopPersisting = persistHomepageCache(queryClient);
@@ -128,7 +128,7 @@ const App = () => (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-        <HomepageCacheBootstrap queryClient={queryClient} />
+        <OfflineCacheBootstrap queryClient={queryClient} />
         <LazyMotion features={domAnimation} strict>
           <SiteSchema />
           <Toaster
@@ -205,4 +205,4 @@ const App = () => (
 
 export default App;
 
-                  
+  

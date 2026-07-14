@@ -31,6 +31,46 @@ const OfflineCacheBootstrap = ({ queryClient }: { queryClient: QueryClient }) =>
   return null;
 };
 
+// Quietly pre-loads the JS for About/Contact/News/Notices once the
+// homepage has finished its own work, so those pages are already cached
+// and work offline even on a person's very first visit — not just after
+// they've manually opened each page once while online.
+//
+// Uses the exact same import() calls App.tsx already uses to lazy-load
+// these routes, so this is not a second/duplicate loading mechanism — it's
+// just triggering the normal one early, in the background. Each import()
+// is an ordinary fetch that the service worker's networkFirstAsset handler
+// (see public/sw.js) caches exactly like a real visit would.
+//
+// Deliberately: only runs when online (no point trying while offline —
+// there's nothing to fetch), waits until the browser is idle so it never
+// competes with the homepage's own initial load, and silently does
+// nothing on failure (this is a nice-to-have, never something that should
+// visibly break anything).
+function prefetchOfflineRoutes() {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return;
+
+  const run = () => {
+    import("./pages/About").catch(() => {});
+    import("./pages/Contact").catch(() => {});
+    import("./pages/News").catch(() => {});
+    import("./pages/Notices").catch(() => {});
+  };
+
+  if (typeof (window as any).requestIdleCallback === "function") {
+    (window as any).requestIdleCallback(run, { timeout: 5000 });
+  } else {
+    setTimeout(run, 3000);
+  }
+}
+
+const OfflineRoutePrefetch = () => {
+  useEffect(() => {
+    prefetchOfflineRoutes();
+  }, []);
+  return null;
+};
+
 // ✅ On every page load, clear ALL stale "chunk-reload-*" flags from sessionStorage.
 // These flags are set by lazyWithRetry to prevent infinite reload loops, but they
 // must be cleared on a fresh page load so that a future chunk failure can retry.
@@ -50,9 +90,22 @@ try {
 // ✅ lazyWithRetry: if a chunk fails to load (stale cache, network blip),
 // reload ONCE using a flag stored in sessionStorage to prevent infinite loops.
 // The flag is cleared on the next fresh page load (see above).
+//
+// IMPORTANT: while offline, this must NOT reload the page. A reload can't
+// fix a missing chunk without a network to fetch it from — it only turns a
+// simple "this route isn't cached yet" situation into a full browser
+// navigation, which the service worker's offline-navigation fallback then
+// redirects to the homepage (see public/sw.js). That's what made tapping
+// Contact/News/Notices while offline look like it "did nothing" / bounced
+// back to the homepage instead of showing a normal error. Offline, we let
+// the error bubble up to ErrorBoundary immediately instead, which shows a
+// real, in-place message the person can read and dismiss.
 function lazyWithRetry(factory: () => Promise<any>) {
   return lazy(() =>
     factory().catch((err) => {
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        throw err;
+      }
       // Build a stable key from the factory source so each chunk gets its own flag
       const key = "chunk-reload-" + btoa(factory.toString().slice(0, 80)).replace(/[^a-z0-9]/gi, "");
       const alreadyRetried = sessionStorage.getItem(key);
@@ -129,6 +182,7 @@ const App = () => (
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
         <OfflineCacheBootstrap queryClient={queryClient} />
+        <OfflineRoutePrefetch />
         <LazyMotion features={domAnimation} strict>
           <SiteSchema />
           <Toaster
@@ -205,4 +259,4 @@ const App = () => (
 
 export default App;
 
-  
+          

@@ -1,17 +1,25 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Offline data cache — Homepage, About, Contact, News, Notices
+// Offline data cache — Homepage, About, Contact, News, Notices, Calendar, Results
 // ─────────────────────────────────────────────────────────────────────────────
 // Persists the React Query cache for these public pages' data (notices,
-// news, teachers, achievements, school settings) into IndexedDB, so that
-// when a page loads with no internet, it can paint instantly from the
-// last-seen data instead of showing empty/loading states. When the network
-// is back, React Query's normal background refetch (staleTime) updates it
-// silently — the user never notices a "sync" happening.
+// news, teachers, achievements, school settings, school events, results)
+// into IndexedDB, so that when a page loads with no internet, it can paint
+// instantly from the last-seen data instead of showing empty/loading
+// states. When the network is back, React Query's normal background
+// refetch (staleTime) updates it silently — the user never notices a
+// "sync" happening.
 //
 // About and Contact only need school-settings (already covered below).
 // News/Notices list pages use the "news"/"notices" keys. Individual
 // news/notice detail pages ("news-item"/"notice-item") are intentionally
-// NOT persisted yet — offline scope so far is these five list-style pages.
+// NOT persisted yet — out of scope so far.
+//
+// Calendar uses "school-events" (a specific month range) and
+// "school-events-upcoming". Results uses "results" (filtered by class/
+// exam/year/search) and "result-years". Both are persisted like everything
+// else, EXCEPT one-off text searches on Results — see shouldPersist below
+// — since a search term is rarely repeated and would just fill up storage
+// with entries nobody will hit from cache again.
 //
 // Deliberately scoped to a small allow-list of query keys (not the whole
 // app) so this cannot interfere with admin/dashboard data, which must
@@ -30,11 +38,32 @@ const STORAGE_KEY = "homepage-query-cache";
 
 // Only these top-level query key prefixes are persisted. Anything else
 // (admin data, auth, dashboards) is left entirely alone.
-const PERSISTED_KEY_PREFIXES = ["notices", "news", "teachers", "achievements", "school-settings"];
+const PERSISTED_KEY_PREFIXES = [
+  "notices",
+  "news",
+  "teachers",
+  "achievements",
+  "school-settings",
+  "school-events",
+  "school-events-upcoming",
+  "results",
+  "result-years",
+];
 
 function shouldPersist(queryKey: readonly unknown[]): boolean {
   const prefix = queryKey[0];
-  return typeof prefix === "string" && PERSISTED_KEY_PREFIXES.includes(prefix);
+  if (typeof prefix !== "string" || !PERSISTED_KEY_PREFIXES.includes(prefix)) return false;
+
+  // Results query key shape: ["results", classFilter, examType, year, search]
+  // Skip persisting a specific search-text result — search terms are rarely
+  // repeated, so caching them offline has little value and would otherwise
+  // grow storage with one-off entries indefinitely.
+  if (prefix === "results") {
+    const search = queryKey[4];
+    if (typeof search === "string" && search.trim().length > 0) return false;
+  }
+
+  return true;
 }
 
 function openDb(): Promise<IDBDatabase | null> {
@@ -141,4 +170,4 @@ export function persistHomepageCache(queryClient: QueryClient): () => void {
     if (timer) clearTimeout(timer);
     unsubscribe();
   };
-                             }
+}

@@ -27,7 +27,7 @@
 //   page never sees or depends on) stores a copy for next time.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CACHE_VERSION = "ghs-v4";
+const CACHE_VERSION = "ghs-v5";
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 
@@ -50,6 +50,17 @@ self.addEventListener("activate", (event) => {
     })()
   );
 });
+
+// NOTE on precaching About/Contact/News/Notices' JS chunks: this service
+// worker deliberately does NOT try to guess and precache their filenames
+// here, because Vite content-hashes every chunk (e.g. About-a1b2c3.js) and
+// that hash changes on every build — a static sw.js has no reliable way to
+// know it. Precaching those chunks proactively (so they work offline even
+// on a first visit) is instead done from the app side, in src/App.tsx,
+// via ordinary import() calls once the homepage is idle — see
+// prefetchOfflineRoutes() there. Those import() calls are regular fetches
+// that pass through the networkFirstAsset handler below exactly like a
+// real visit would, which is what actually warms the cache.
 
 function isImageRequest(url) {
   if (IMAGE_HOSTS.includes(url.hostname)) return true;
@@ -90,18 +101,26 @@ async function networkFirstAsset(request) {
 const SHELL_URL = "/";
 
 async function networkFirstNavigation(request) {
-  const cache = await caches.open(ASSET_CACHE);
   try {
-    // Always try the real network first — this is what keeps a fresh
-    // deploy visible immediately and is the same reasoning that protects
-    // JS/CSS chunks above. Never serve cache when the network is fine.
+    // Fire the real network request FIRST, with nothing in front of it.
+    // (Previously this awaited caches.open() before fetching at all, which
+    // added a real, measurable delay to every single navigation — even
+    // fast online ones — because it forced the browser to wait on the
+    // Cache API before starting the network request instead of the two
+    // racing. That was the cause of the extra load delay after tapping a
+    // Google search result.)
     const res = await fetch(request);
-    // Cache a copy of the homepage shell specifically (not every URL) so
-    // there's always a known-good page to fall back to.
+
+    // Only touch the cache AFTER we already have the network response in
+    // hand — this can't slow down what the browser is waiting for, since
+    // we return `res` immediately and cache-writing happens in the
+    // background without being awaited.
     if (res && res.ok) {
       const url = new URL(request.url);
       if (url.pathname === "/" || url.pathname === "/index.html") {
-        cache.put(SHELL_URL, res.clone()).catch(() => {});
+        caches.open(ASSET_CACHE).then((cache) => {
+          cache.put(SHELL_URL, res.clone()).catch(() => {});
+        }).catch(() => {});
       }
     }
     return res;
@@ -125,6 +144,7 @@ async function networkFirstNavigation(request) {
     if (url.pathname !== "/" && url.pathname !== "/index.html") {
       return Response.redirect(SHELL_URL, 302);
     }
+    const cache = await caches.open(ASSET_CACHE);
     const cachedShell = await cache.match(SHELL_URL);
     if (cachedShell) return cachedShell;
     // No shell cached yet (first-ever visit was offline) — nothing we can

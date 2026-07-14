@@ -18,10 +18,11 @@ import { restoreHomepageCache, persistHomepageCache } from "./lib/queryPersist";
 const PageTracker = () => { usePageTracker(); return null; };
 
 // Restores offline-cached data (notices/news/teachers/achievements/
-// school-settings) from IndexedDB on cold start so Home, About, Contact,
-// News, and Notices can paint instantly even with no network, then keeps
-// that cache updated in the background whenever fresh data arrives.
-// Scoped to a small allow-list of query keys — see src/lib/queryPersist.ts.
+// school-settings/school-events/results) from IndexedDB on cold start so
+// Home, About, Contact, News, Notices, Calendar, and Results can paint
+// instantly even with no network, then keeps that cache updated in the
+// background whenever fresh data arrives. Scoped to a small allow-list of
+// query keys — see src/lib/queryPersist.ts.
 const OfflineCacheBootstrap = ({ queryClient }: { queryClient: QueryClient }) => {
   useEffect(() => {
     restoreHomepageCache(queryClient);
@@ -31,10 +32,10 @@ const OfflineCacheBootstrap = ({ queryClient }: { queryClient: QueryClient }) =>
   return null;
 };
 
-// Quietly pre-loads the JS for About/Contact/News/Notices once the
-// homepage has finished its own work, so those pages are already cached
-// and work offline even on a person's very first visit — not just after
-// they've manually opened each page once while online.
+// Quietly pre-loads the JS for About/Contact/News/Notices/Calendar/Results
+// once the homepage has finished its own work, so those pages are already
+// cached and work offline even on a person's very first visit — not just
+// after they've manually opened each page once while online.
 //
 // Uses the exact same import() calls App.tsx already uses to lazy-load
 // these routes, so this is not a second/duplicate loading mechanism — it's
@@ -55,6 +56,8 @@ function prefetchOfflineRoutes() {
     import("./pages/Contact").catch(() => {});
     import("./pages/News").catch(() => {});
     import("./pages/Notices").catch(() => {});
+    import("./pages/Calendar").catch(() => {});
+    import("./pages/Results").catch(() => {});
   };
 
   if (typeof (window as any).requestIdleCallback === "function") {
@@ -259,4 +262,3 @@ const App = () => (
 
 export default App;
 
-          

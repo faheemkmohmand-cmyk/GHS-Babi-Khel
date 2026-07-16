@@ -2,7 +2,7 @@
 //
 // Site Analytics — a rich analytics dashboard embedded in the admin overview.
 // Shows visitor metrics, trend charts, device breakdowns, top pages,
-// referrers, and comparison data with configurable time periods.
+// referrers, and comparison data with configurable time periods. 
 // Fully mobile-friendly with responsive grid layouts.
 // Includes error handling so it never crashes the parent dashboard.
 

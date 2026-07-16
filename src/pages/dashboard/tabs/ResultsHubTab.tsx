@@ -14,13 +14,13 @@ const ResultsHubTab = ({ onNavigate }: { onNavigate?: (tab: string) => void }) =
       <p className="text-sm text-muted-foreground mt-0.5">Results and roll numbers</p>
     </div>
     <Tabs defaultValue="results" className="w-full">
-      <TabsList className="flex w-full overflow-x-auto gap-1 h-auto p-1 justify-start">
-        <TabsTrigger value="results" className="gap-1.5 text-xs sm:text-sm shrink-0 px-3 py-2">
+      <TabsList className="flex w-full gap-1 h-auto p-1">
+        <TabsTrigger value="results" className="flex-1 gap-1.5 text-xs sm:text-sm px-3 py-2">
           <span className="flex items-center justify-center w-5 h-5 rounded-md bg-blue-100 dark:bg-blue-900/40 shrink-0">
             <BarChart3 className="w-3 h-3 text-blue-500" />
           </span><span>Results</span>
         </TabsTrigger>
-        <TabsTrigger value="rolls" className="gap-1.5 text-xs sm:text-sm shrink-0 px-3 py-2">
+        <TabsTrigger value="rolls" className="flex-1 gap-1.5 text-xs sm:text-sm px-3 py-2">
           <span className="flex items-center justify-center w-5 h-5 rounded-md bg-indigo-100 dark:bg-indigo-900/40 shrink-0">
             <Hash className="w-3 h-3 text-indigo-500" />
           </span><span>Roll Numbers</span>

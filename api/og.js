@@ -1,3 +1,5 @@
+import { createClient } from "@supabase/supabase-js";
+
 // api/og.js
 // Vercel Serverless Function — returns fully-formed static HTML with the
 // correct <title>, <meta description>, Open Graph, Twitter Card, canonical,
@@ -19,6 +21,71 @@ const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
 const DEFAULT_IMAGE_WIDTH = "1730";
 const DEFAULT_IMAGE_HEIGHT = "909";
 const TWITTER_SITE = "@GHSBabiKhel";
+
+// ── Supabase client (serverless, no session) ────────────────────────────────
+// Same pattern as api/sitemap.js — fresh, lightweight, anon, no auth state.
+const supabaseUrl     = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+
+let _supabase = null;
+function getSupabase() {
+  if (_supabase) return _supabase;
+  if (!supabaseUrl || !supabaseAnonKey) return null;
+  _supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+  return _supabase;
+}
+
+// ── Live exam title for /results ────────────────────────────────────────────
+// Mirrors the logic in src/pages/Results.tsx (useLatestPublishedExam /
+// useScheduledPublishes) so crawler previews (WhatsApp, Facebook, etc.) show
+// the same "Result - {Exam} {Year}" title real visitors see, instead of a
+// generic fallback. Returns null on any failure — caller falls back to the
+// static ROUTES entry for /results.
+async function getResultsPageMeta() {
+  const sb = getSupabase();
+  if (!sb) return null;
+  try {
+    const { data: published } = await sb
+      .from("results")
+      .select("exam_type, year, created_at")
+      .eq("is_published", true)
+      .order("year", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (published && published.length > 0) {
+      const { exam_type, year } = published[0];
+      return {
+        title: `Result - ${exam_type} ${year} — GHS Babi Khel`,
+        description: `${exam_type} ${year} result is now published. Search your GHS Babi Khel exam result by roll number — check marks, grade, position and pass status instantly.`,
+      };
+    }
+
+    const now = new Date().toISOString();
+    const { data: scheduled } = await sb
+      .from("results")
+      .select("exam_type, year, publish_at")
+      .eq("is_published", false)
+      .not("publish_at", "is", null)
+      .gt("publish_at", now)
+      .order("publish_at", { ascending: true })
+      .limit(1);
+
+    if (scheduled && scheduled.length > 0) {
+      const { exam_type, year } = scheduled[0];
+      return {
+        title: `Result - ${exam_type} ${year} Coming Soon — GHS Babi Khel`,
+        description: `${exam_type} ${year} result for GHS Babi Khel will be published soon. Check back to search your result by roll number as soon as it's live.`,
+      };
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 // Static route metadata — mirrors RouteSEOInjector.tsx's ROUTES table.
 // Dynamic detail pages (/news/:id, /notices/:id, /notes/:subject/:chapter)
@@ -82,11 +149,25 @@ export default async function handler(req, res) {
   const path = ("/" + String(rawPath).replace(/^\/+/, "")).replace(/\/$/, "") || "/";
 
   const matched = matchRoute(path) || NOT_FOUND;
-  const fullTitle = matched.title.includes(SITE_NAME) ? matched.title : `${matched.title} | ${SITE_NAME}`;
-  const description = matched.description;
+  const isNotFound = matched === NOT_FOUND;
+
+  let title = matched.title;
+  let description = matched.description;
+
+  // /results gets a live title/description reflecting whichever exam is
+  // actually published or counting down right now, instead of the static
+  // fallback copy — same data src/pages/Results.tsx uses for real visitors.
+  if (path === "/results" && !isNotFound) {
+    const live = await getResultsPageMeta();
+    if (live) {
+      title = live.title;
+      description = live.description;
+    }
+  }
+
+  const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
   const url = `${SITE_URL}${path === "/" ? "" : path}`;
   const type = matched.type || "website";
-  const isNotFound = matched === NOT_FOUND;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -138,6 +219,11 @@ export default async function handler(req, res) {
 </html>`;
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
+  res.setHeader(
+    "Cache-Control",
+    path === "/results"
+      ? "public, s-maxage=300, stale-while-revalidate=600"
+      : "public, s-maxage=3600, stale-while-revalidate=86400"
+  );
   return res.status(isNotFound ? 404 : 200).send(html);
-}
+                                              }

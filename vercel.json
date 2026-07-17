@@ -1,5 +1,11 @@
 {
   "regions": ["bom1"],
+  "crons": [
+    {
+      "path": "/api/auto-publish-results",
+      "schedule": "* * * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/sitemap.xml",

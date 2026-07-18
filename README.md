@@ -2,7 +2,7 @@
 
 A full-featured school management website for Government High School Babi Khel, District Mohmand, KPK, Pakistan.
 
-## Tech Stack
+## Tech Stack 
 
 - **Frontend**: React 18, TypeScript, Vite, Tailwind CSS
 - **Backend**: Supabase (Database, Auth, Storage)

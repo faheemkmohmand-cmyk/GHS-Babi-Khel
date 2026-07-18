@@ -43,10 +43,29 @@
 //   3. Redeploy.
 
 export default async function handler(req, res) {
-  // ── Auth: only Vercel Cron (or someone with the secret) may call this ──
+  // ── Auth ─────────────────────────────────────────────────────────────────
+  // Two ways this endpoint is called:
+  //   1. Vercel Cron (scheduled, server-to-server) — sends `Authorization:
+  //      Bearer <CRON_SECRET>`.
+  //   2. Any visitor's browser, the instant their local countdown hits zero
+  //      (see useAutoPublishTrigger() in Home.tsx / Results.tsx). This call
+  //      has NO secret attached.
+  //
+  // We allow #2 without a secret because this endpoint is narrowly safe to
+  // expose publicly: it can ONLY flip `is_published=true` on rows whose
+  // `publish_at` has ALREADY passed (see the `publish_at=lte.<now>` filter
+  // below). Nobody can use it to publish early, alter marks, or do anything
+  // except "reveal a result that was already due to be revealed" — which is
+  // exactly what would happen anyway once the cron next ticks. Calling it
+  // early or repeatedly is a harmless no-op (0 rows match once already
+  // published, since publish_at is cleared in the same update).
+  //
+  // If a secret IS configured and IS sent, it must match — this keeps the
+  // Vercel Cron call authenticated as before. A request with no secret at
+  // all is allowed through as the safe public trigger case.
   const authHeader = req.headers.authorization || "";
   const expected = process.env.CRON_SECRET;
-  if (expected && authHeader !== `Bearer ${expected}`) {
+  if (expected && authHeader && authHeader !== `Bearer ${expected}`) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }

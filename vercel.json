@@ -149,11 +149,5 @@
         }
       ]
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/auto-publish-results",
-      "schedule": "0 */6 * * *"
-    }
   ]
-        }
+}

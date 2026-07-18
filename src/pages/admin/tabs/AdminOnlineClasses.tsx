@@ -1,6 +1,6 @@
 /**
  * AdminOnlineClasses.tsx
- * Admin dashboard tab — full control over all online classes.
+ * Admin dashboard tab — full control over all online classes.   
  */
 import { useState, useMemo } from "react";
 import ClassCard from "@/components/shared/ClassCard";

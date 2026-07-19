@@ -1,7 +1,8 @@
 /**
  * SchoolMap — interactive Leaflet map, no iframe, no API key.
- * Uses react-leaflet with OpenStreetMap tiles (street) and
- * Esri World Imagery (satellite). Supports zoom, pan, layer toggle.
+ * Uses react-leaflet with Esri World Imagery (satellite, default view +
+ * labels overlay), OpenStreetMap tiles (street), and OpenTopoMap (terrain).
+ * Supports zoom, pan, layer toggle.
  */
 import { useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, LayersControl, useMap } from "react-leaflet";
@@ -60,21 +61,31 @@ export default function SchoolMap({
         <Recenter lat={lat} lng={lng} />
 
         <LayersControl position="topright">
-          {/* Street map — default */}
-          <LayersControl.BaseLayer checked name="Street">
+          {/* Street map */}
+          <LayersControl.BaseLayer name="Street">
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
           </LayersControl.BaseLayer>
 
-          {/* Satellite — Esri World Imagery, free, no key */}
-          <LayersControl.BaseLayer name="Satellite">
+          {/* Satellite — Esri World Imagery, free, no key. Default view. */}
+          <LayersControl.BaseLayer checked name="Satellite">
             <TileLayer
               attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              maxNativeZoom={19}
             />
           </LayersControl.BaseLayer>
+
+          {/* Satellite w/ labels overlay — road names, place names on top of imagery */}
+          <LayersControl.Overlay checked name="Labels">
+            <TileLayer
+              attribution="Labels &copy; Esri"
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+              maxNativeZoom={19}
+            />
+          </LayersControl.Overlay>
 
           {/* Topo */}
           <LayersControl.BaseLayer name="Terrain">

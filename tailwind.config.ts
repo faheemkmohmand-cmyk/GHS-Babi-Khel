@@ -16,8 +16,13 @@ export default {
       fontFamily: {
         heading: ['Plus Jakarta Sans', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
+        display: ['Cormorant Garamond', 'Playfair Display', 'ui-serif', 'Georgia', 'serif'],
       },
       colors: {
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          soft: "hsl(var(--gold-soft))",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

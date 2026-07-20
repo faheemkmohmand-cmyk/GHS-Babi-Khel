@@ -35,10 +35,10 @@ const NewsTicker = () => {
   const durationSecs = Math.max(8, baseItems.length * 4);
 
   return (
-    <div className="bg-primary text-primary-foreground py-2.5 overflow-hidden border-y border-primary-dark/40">
+    <div className="bg-gold text-black py-1 overflow-hidden border-y border-black">
       <div className="container mx-auto px-4 flex items-center gap-3">
-        {/* Label — red per request, rest of the bar stays the normal blue */}
-        <div className="flex items-center gap-1.5 shrink-0 bg-red-600 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border border-red-800/40 text-white">
+        {/* Label — black pill, thin black border, matches new yellow bar */}
+        <div className="flex items-center gap-1.5 shrink-0 bg-black px-3 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider border border-black text-white">
           <Megaphone className="w-3 h-3 animate-pulse" />
           Announcements
         </div>
@@ -46,8 +46,8 @@ const NewsTicker = () => {
         {/* Scrolling text */}
         <div className="flex-1 overflow-hidden relative">
           {/* Fade edges */}
-          <div className="absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-primary to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-primary to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-gold to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-gold to-transparent z-10 pointer-events-none" />
 
           <div
             className="flex gap-12 whitespace-nowrap"
@@ -64,9 +64,9 @@ const NewsTicker = () => {
                 <Link
                   key={`${item.id}-${idx}`}
                   to={to}
-                  className="text-sm font-medium inline-flex items-center gap-2 hover:text-white/90 underline-offset-2 hover:underline cursor-pointer transition-colors"
+                  className="text-sm font-medium inline-flex items-center gap-2 hover:text-black/70 underline-offset-2 hover:underline cursor-pointer transition-colors"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-white/60 inline-block shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-black/60 inline-block shrink-0" />
                   {item.title}
                 </Link>
               );

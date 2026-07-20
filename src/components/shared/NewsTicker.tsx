@@ -38,7 +38,10 @@ const NewsTicker = () => {
     <div className="bg-gold text-black py-1 overflow-hidden border-y border-black">
       <div className="container mx-auto px-4 flex items-center gap-3">
         {/* Label — black pill, thin black border, matches new yellow bar */}
-        <div className="flex items-center gap-1.5 shrink-0 bg-black px-3 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider border border-black text-white">
+        <div
+          className="flex items-center gap-1.5 shrink-0 bg-black px-4 py-1 text-xs font-semibold uppercase tracking-wider border border-black text-white"
+          style={{ clipPath: "polygon(10px 0, 100% 0, 100% 100%, calc(100% - 10px) 100%, 0 100%, 0 10px)" }}
+        >
           <Megaphone className="w-3 h-3 animate-pulse" />
           Announcements
         </div>

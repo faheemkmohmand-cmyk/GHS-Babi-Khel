@@ -260,7 +260,7 @@ export default function ReportCardModal({ open, onClose }: Props) {
         <div
           className="flex items-center justify-between px-3 sm:px-5 py-4 border-b border-border bg-primary text-primary-foreground sm:rounded-t-2xl shrink-0 z-10"
           style={{ paddingTop: "max(1rem, env(safe-area-inset-top))" }}
-        >>
+        >
           <div className="flex items-center gap-2.5 min-w-0">
             {/* Back button — small, top-left corner. Returns to the Results
                 page by closing the modal. Provides an obvious escape hatch

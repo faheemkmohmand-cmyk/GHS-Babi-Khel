@@ -47,11 +47,11 @@ const Footer = () => {
 
   return (
     <footer className="bg-primary text-white border-t border-white/10">
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-6">
+      <div className="container mx-auto px-4 py-10 md:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-x-6 gap-y-8 md:gap-8 lg:gap-6">
 
           {/* ── Brand column ── */}
-          <div className="lg:col-span-2">
+          <div className="col-span-2 lg:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
               {settings?.logo_url && !logoFailed ? (
                 <img
@@ -138,10 +138,10 @@ const Footer = () => {
 
           {/* ── Quick Links ── */}
           <div>
-            <h4 className="font-heading font-semibold text-sm uppercase tracking-wider mb-4 text-white/90">
+            <h4 className="font-heading font-semibold text-sm uppercase tracking-wider mb-3 md:mb-4 text-white/90">
               Quick Links
             </h4>
-            <ul className="space-y-2.5">
+            <ul className="space-y-1.5 md:space-y-2.5">
               {footerLinks.quickLinks.map((link) => (
                 <li key={link.to + link.label}>
                   <Link
@@ -158,10 +158,10 @@ const Footer = () => {
 
           {/* ── Classes ── */}
           <div>
-            <h4 className="font-heading font-semibold text-sm uppercase tracking-wider mb-4 text-white/90">
+            <h4 className="font-heading font-semibold text-sm uppercase tracking-wider mb-3 md:mb-4 text-white/90">
               Classes
             </h4>
-            <ul className="space-y-2.5">
+            <ul className="space-y-1.5 md:space-y-2.5">
               {footerLinks.classes.map((c) => (
                 <li key={c.to}>
                   <Link
@@ -178,10 +178,10 @@ const Footer = () => {
 
           {/* ── Resources ── */}
           <div>
-            <h4 className="font-heading font-semibold text-sm uppercase tracking-wider mb-4 text-white/90">
+            <h4 className="font-heading font-semibold text-sm uppercase tracking-wider mb-3 md:mb-4 text-white/90">
               Resources
             </h4>
-            <ul className="space-y-2.5">
+            <ul className="space-y-1.5 md:space-y-2.5">
               {footerLinks.resources.map((link, i) => (
                 <li key={i}>
                   <Link
@@ -198,7 +198,7 @@ const Footer = () => {
         </div>
 
         {/* ── Bottom bar ── */}
-        <div className="border-t border-white/10 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="border-t border-white/10 mt-6 pt-5 md:mt-10 md:pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-white/50">
             &copy; {new Date().getFullYear()}{" "}
             {settings?.school_name || "GHS Babi Khel"}. All rights reserved.

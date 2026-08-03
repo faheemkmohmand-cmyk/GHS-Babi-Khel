@@ -44,6 +44,19 @@ const SearchPage = () => {
   const [input, setInput] = useState(initialQ);
   const q = useDebounce(input.trim(), 250);
 
+  // Keep the input box in sync with the URL's `q` param whenever it changes
+  // from OUTSIDE this component — e.g. the navbar search box calling
+  // navigate(`/search?q=...`) while SearchPage is already mounted (SPA
+  // route, no remount). Without this, `input` only ever reflects the URL
+  // param that existed at first mount, so a second search from the navbar
+  // (or browser back/forward) silently shows nothing until the user
+  // manually retypes into the box.
+  useEffect(() => {
+    const urlQ = params.get("q") ?? "";
+    if (urlQ !== input) setInput(urlQ);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.get("q")]);
+
   useEffect(() => {
     const cur = params.get("q") ?? "";
     if (q !== cur) {
@@ -221,3 +234,4 @@ const SearchPage = () => {
 };
 
 export default SearchPage;
+      

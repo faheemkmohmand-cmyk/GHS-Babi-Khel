@@ -31,7 +31,7 @@ import { computeStats } from "./normalize";
 import { generateResultPDF } from "./generatePDF";
 import { generateResultExcel } from "./generateExcel";
 
-const PASSWORD = "zahir000";
+const PASSWORD = "babikhel#123";
 const SESSION_KEY = "rc_auth_ok";
 const LS_ROLLS_KEY = "rc_roll_entries";
 const LS_SELECTION_KEY = "rc_exam_selection";

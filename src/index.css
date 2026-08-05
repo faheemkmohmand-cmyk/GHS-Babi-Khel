@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap');
 
 /* GPU compositing note: content-visibility removed from img/video —
    causes texture corruption glitch on Android Chrome during scroll/animation */
@@ -90,6 +90,10 @@
     /* Stylish serif display font for hero/heirloom-style headings — additive,
        does not replace --font-heading which the rest of the site still uses. */
     --font-display: 'Cormorant Garamond', 'Playfair Display', ui-serif, Georgia, serif;
+    /* Proper Nastaliq font for Urdu-script headlines & body — fixes the
+       'distracted ع' issue where Latin serif fonts were rendering Urdu
+       letters as isolated glyphs without their proper Nastaliq shaping. */
+    --font-urdu: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif;
 
     /* Antique gold accent — used for small stylish touches (eyebrow labels,
        hexagon logo frame, gradient text) inspired by the reference design.
@@ -512,4 +516,31 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ *  Urdu typography helpers — used by EditorialNewsCard for proper Nastaliq
+ *  rendering of Urdu titles and body text.  Without this, browsers fall
+ *  back to Latin serifs which render Urdu letters as broken isolated
+ *  glyphs (e.g. 'ع' would appear detached from its neighbours).
+ * ─────────────────────────────────────────────────────────────────────── */
+.font-urdu {
+  font-family: var(--font-urdu);
+  font-feature-settings: "calt" 1, "liga" 1;
+  line-height: 1.9;
+}
+.font-urdu-display {
+  font-family: var(--font-urdu);
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+/* Editorial paper-grain texture — used as the masthead background so it
+   reads as printed parchment instead of a flat cream box. */
+.paper-grain {
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(122, 31, 43, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(30, 58, 95, 0.03) 0%, transparent 50%),
+    linear-gradient(160deg, hsl(42 45% 95%) 0%, hsl(40 38% 91%) 55%, hsl(36 32% 86%) 100%);
+}
+
 

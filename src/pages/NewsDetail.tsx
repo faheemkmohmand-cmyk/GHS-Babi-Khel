@@ -48,8 +48,10 @@ const NewsDetail = () => {
   const dateText = (() => { try { return format(new Date(item.created_at), "d MMMM yyyy"); } catch { return ""; } })();
   const description = (item.content || "").replace(/\s+/g, " ").slice(0, 160);
   const publishedISO = (() => { try { return new Date(item.created_at).toISOString(); } catch { return undefined; } })();
-  const titleDir = detectTextLanguage(item.title) === "ur" ? "rtl" : "ltr";
-  const contentDir = detectTextLanguage(item.content || "") === "ur" ? "rtl" : "ltr";
+  const titleLang = detectTextLanguage(item.title);
+  const contentLang = detectTextLanguage(item.content || "");
+  const titleDir = titleLang === "ur" ? "rtl" : "ltr";
+  const contentDir = contentLang === "ur" ? "rtl" : "ltr";
 
   return (
     <PageLayout>
@@ -90,8 +92,10 @@ const NewsDetail = () => {
         </span>
 
         <h1
-          className="text-2xl md:text-4xl font-display font-semibold text-foreground leading-tight mb-4"
-          style={{ fontFamily: "var(--font-display)" }}
+          className={`text-2xl md:text-4xl font-display font-semibold text-foreground leading-tight mb-4 ${
+            titleLang === "ur" ? "font-urdu-display" : ""
+          }`}
+          style={titleLang === "ur" ? undefined : { fontFamily: "var(--font-display)" }}
           dir={titleDir}
         >
           {item.title}
@@ -118,25 +122,54 @@ const NewsDetail = () => {
             className="w-full rounded-2xl border border-border mb-8 object-cover max-h-[420px]"
           />
         ) : (
-          <div className="w-full rounded-2xl border border-border mb-8 overflow-hidden h-52 relative bg-[linear-gradient(160deg,hsl(45_38%_95%)_0%,hsl(43_35%_90%)_55%,hsl(40_30%_86%)_100%)]">
-            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full border border-primary/15" />
-            <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full border border-gold/25" />
-            <div className="absolute inset-3 border border-primary/10 rounded-lg" />
+          <div className="w-full rounded-2xl border border-border mb-8 overflow-hidden h-56 relative paper-grain">
+            <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full border border-gold/25" />
+            <div className="absolute -right-16 -top-16 w-56 h-56 rounded-full border border-gold/15" />
+            <div className="absolute inset-3 border border-gold/15 rounded-lg" />
             <div className="absolute top-4 left-4 w-3 h-3 border-t-2 border-l-2 border-gold" />
+            <div className="absolute top-4 right-4 w-3 h-3 border-t-2 border-r-2 border-gold" />
+            <div className="absolute bottom-4 left-4 w-3 h-3 border-b-2 border-l-2 border-gold" />
             <div className="absolute bottom-4 right-4 w-3 h-3 border-b-2 border-r-2 border-gold" />
-            <div className="w-full h-full flex flex-col items-center justify-center gap-1.5">
-              <span className="font-display italic font-semibold text-primary text-7xl leading-none" style={{ fontFamily: "var(--font-display)" }}>
-                {(item.title?.trim()?.[0] || "G").toUpperCase()}
-              </span>
-              <span className="text-[9px] font-bold uppercase tracking-[0.35em] text-primary/50">Official Dispatch</span>
+            <div className="w-full h-full flex flex-col items-center justify-center gap-2 px-6">
+              <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.3em] text-primary/55">
+                <span>EST. 2018</span>
+                <span className="inline-block w-1.5 h-1.5 rotate-45 bg-gold/70" />
+                <span>GHS BABI KHEL</span>
+              </div>
+              <div
+                className="w-14 h-14 flex items-center justify-center"
+                style={{
+                  clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+                  background: "linear-gradient(135deg, hsl(348 55% 28%) 0%, hsl(348 50% 22%) 100%)",
+                }}
+              >
+                <span className="font-display italic font-bold text-[hsl(45_40%_95%)] text-xl" style={{ fontFamily: "var(--font-display)" }}>
+                  GHS
+                </span>
+              </div>
+              <p className="font-urdu-display text-primary/75 text-sm" dir="rtl">
+                گورنمنٹ ہائی سکول بابی خیل
+              </p>
+              <div className="flex items-center gap-1.5 w-full max-w-[140px]">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-gold/70" />
+                <span className="inline-block w-1.5 h-1.5 rotate-45 bg-gold/80" />
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-gold/70" />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-[hsl(348_55%_28%)]">
+                {titleLang === "ur" ? "اداریہ" : "Editorial Dispatch"}
+              </p>
             </div>
           </div>
         )}
 
         {item.content && (
           <div
-            className="prose prose-sm md:prose-lg max-w-none text-foreground whitespace-pre-wrap leading-relaxed first-letter:text-5xl first-letter:font-display first-letter:font-semibold first-letter:text-primary first-letter:mr-2 first-letter:float-left"
-            style={{ fontFamily: "var(--font-body)" }}
+            className={`prose prose-sm md:prose-lg max-w-none text-foreground whitespace-pre-wrap leading-relaxed ${
+              contentLang === "ur"
+                ? "font-urdu"
+                : "first-letter:text-5xl first-letter:font-display first-letter:font-semibold first-letter:text-[hsl(348_55%_28%)] first-letter:mr-2 first-letter:float-left"
+            }`}
+            style={contentLang === "ur" ? undefined : { fontFamily: "var(--font-body)" }}
             dir={contentDir}
           >
             {item.content}

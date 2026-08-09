@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { examTypeLabel } from "@/utils/examTypeLabel";
 import { useExamSchedule } from "@/hooks/useNewFeatures";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Printer, ChevronRight, CalendarPlus } from "lucide-react";
@@ -78,7 +79,7 @@ const ExamScheduleTab = () => {
         {getExamTypes(cls).map((e) => (
           <button key={e} onClick={() => setExamType(e)}
             className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${examType === e ? "bg-primary/20 text-primary border border-primary/30" : "bg-secondary text-muted-foreground"}`}>
-            {e}
+            {examTypeLabel(e)}
           </button>
         ))}
       </div>

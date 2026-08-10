@@ -8,7 +8,7 @@
  * ═══════════════════════════════════════════════════════════════
  * 
  * This file provides configuration and utilities for implementing
- * secure email verification on your Supabase backend.
+ * secure email verification on your Supabase backend. 
  * 
  * STEPS TO ENABLE (Do these in Supabase Dashboard):
  * 

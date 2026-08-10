@@ -1,6 +1,6 @@
 // hooks/useSecureStorage.ts
 // SECURITY FIX: Problems 30 & 31 - Secure localStorage Handling
-// Prevents localStorage manipulation and protects sensitive data
+// Prevents localStorage manipulation and protects sensitive data 
 
 import { useState, useEffect, useCallback } from 'react';
 

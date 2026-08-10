@@ -2,7 +2,7 @@
 // SECURITY FIX: CSRF Protection Utility
 // Implements CSRF token generation and validation for form protection
 
-/**
+/** 
  * Generate a cryptographically secure random token for CSRF protection
  * Uses Web Crypto API for secure random number generation
  */

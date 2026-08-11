@@ -2,8 +2,6 @@
 // SECURITY FIX: Problems 23 & 24 - Advanced Rate Limiting + Bot Protection
 // Multi-layer defense: Rate limiting, bot detection, IP tracking, behavioral analysis
 
-import { rewrite } from "@vercel/functions";
-
 export const config = {
   runtime: "edge",
   matcher: [
@@ -270,7 +268,10 @@ export default function middleware(request: Request) {
   if (clientInfo.isBot) {
     const ogUrl = new URL("/api/og", url.origin);
     ogUrl.searchParams.set("path", pathname);
-    return rewrite(ogUrl);
+   return new Response(null, {
+  status: 302,
+  headers: { Location: ogUrl.toString() }
+});
   }
   
   // ── Regular User Request ──

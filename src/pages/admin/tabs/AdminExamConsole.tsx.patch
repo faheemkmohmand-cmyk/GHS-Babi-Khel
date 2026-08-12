@@ -1,0 +1,81 @@
+// ============================================================================
+// PATCH FOR AdminExamConsole.tsx - Replace Hard Refresh with Soft Refresh
+// ============================================================================
+//
+// FILE: src/pages/admin/tabs/AdminExamConsole.tsx
+// LINE: ~1121-1127
+//
+// PROBLEM:
+// The "Refresh" button calls window.location.reload() which causes a FULL
+// page reload. This is problematic because:
+// 1. User loses all current state (form inputs, scroll position)
+// 2. On slow connections, this can take 10-30+ seconds
+// 3. During exam operations, this disrupts the live console view
+// 4. Any unsaved changes in other tabs are lost
+//
+// SOLUTION:
+// Replace with a soft refresh that only refetches the data queries without
+// touching the page itself.
+//
+// ============================================================================
+
+// STEP 1: Add these imports near the top of the file (around line 28-53)
+// ADD this import:
+import { useQueryClient } from "@tanstack/react-query";
+
+// STEP 2: Inside the ConsoleView component (around line 400), add:
+// const queryClient = useQueryClient();
+
+// STEP 3: Replace the Refresh button (lines 1121-1127) with:
+
+// OLD CODE (REMOVE THIS):
+/*
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => window.location.reload()}
+        >
+          <RefreshCw className="w-3.5 h-3.5" /> Refresh
+        </Button>
+*/
+
+// NEW CODE (REPLACE WITH THIS):
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            // Soft refresh — refetch only the relevant queries without page reload
+            // This preserves all form state, scroll position, and user context
+            const promises = [];
+            
+            // Refetch seating plan data
+            try {
+              promises.push(queryClient.invalidateQueries({ queryKey: ['seating-plan'] }));
+              promises.push(queryClient.invalidateQueries({ queryKey: ['seating-plans'] }));
+            } catch(e) { /* ignore */ }
+            
+            // Refetch live attendance data
+            try {
+              promises.push(queryClient.invalidateQueries({ queryKey: ['live-attendance'] }));
+              promises.push(queryClient.invalidateQueries({ queryKey: ['exam-attendance'] }));
+            } catch(e) { /* ignore */ }
+            
+            // Refetch exam sessions
+            try {
+              promises.push(queryClient.invalidateQueries({ queryKey: ['exam-sessions'] }));
+            } catch(e) { /* ignore */ }
+            
+            // Wait for all refetches to complete
+            Promise.allSettled(promises).then(() => {
+              toast.success('Data refreshed', { duration: 2000, icon: '✓' });
+            });
+          }}
+          disabled={loadingPlan || loadingAtt}
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${loadingPlan || loadingAtt ? 'animate-spin' : ''}`} /> 
+          Refresh
+        </Button>
+
+// ============================================================================
+// END OF PATCH
+// ============================================================================

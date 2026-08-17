@@ -502,7 +502,7 @@ export default function CodePlayground({ subjectColor = "#8b5cf6" }: { subjectCo
       setShowConsole(true);
       
       // Show a nice display
-      const displayHtml = \`
+      const displayHtml = `
         <!DOCTYPE html>
         <html>
         <head>

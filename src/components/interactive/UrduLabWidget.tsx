@@ -568,7 +568,7 @@ function SentenceTab({
         className={`w-full py-3 rounded-xl text-white font-semibold shadow-md disabled:opacity-50 flex items-center justify-center gap-2`}
         style={{ backgroundColor: subjectColor }}
       >
-        <CheckCircle2 className="w-5 h-5" }
+        <CheckCircle2 className="w-5 h-5" />
         چیک کریں (Check)
       </button>
 

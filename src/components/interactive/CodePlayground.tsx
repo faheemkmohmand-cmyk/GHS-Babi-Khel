@@ -537,7 +537,7 @@ export default function CodePlayground({ subjectColor = "#8b5cf6" }: { subjectCo
           </p>
         </body>
         </html>
-      \`;
+      `;
       setSrcDoc(displayHtml);
     } else {
       // HTML/JavaScript - run in iframe

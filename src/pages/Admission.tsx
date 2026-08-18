@@ -1036,7 +1036,7 @@ const Admission = () => {
                     <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#fef2f2] via-white to-[#fff5f5] text-[#991B1B] border border-[#FCA5A5]/50 text-sm font-semibold tracking-wide px-5 py-2.5 rounded-full shadow-sm">
                       <span className="w-2.5 h-2.5 rounded-full bg-[#DC2626]" />
                       <span style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', serif" }} className="text-base italic normal-case">Admissions Closed</span>
-                      <span className text-[#991B1B]/70 font-light">— Session {displaySessionYear}</span>
+                      <span className="text-[#991B1B]/70 font-light">— Session {displaySessionYear}</span>
                     </div>
                   )}
                 </motion.div>

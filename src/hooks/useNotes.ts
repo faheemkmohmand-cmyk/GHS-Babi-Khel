@@ -364,7 +364,7 @@ export async function checkAndAwardAllBadges(userId: string): Promise<string[]> 
         
         const { count: userCompletedInSubject } = await supabase
           .from("note_progress")
-          .select("*", { count: "exact', head: true })
+          .select("*", { count: 'exact', head: true })
           .eq("user_id", userId)
           .eq("completed", true);
           

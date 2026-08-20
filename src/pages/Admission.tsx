@@ -1247,7 +1247,7 @@ const Admission = () => {
       case "occupation": {
         if (!v) return null; // optional
         if (v.length < 2) return "Enter a valid occupation";
-        if (!NAME_RE.test(v)) && !/^[A-Za-z\u0600-\u06FF0-9\s\-\/]+$/.test(v)) return "Only letters, numbers, spaces and common symbols allowed";
+        if ((!NAME_RE.test(v)) && !/^.../.test(v)) && !/^[A-Za-z\u0600-\u06FF0-9\s\-\/]+$/.test(v)) return "Only letters, numbers, spaces and common symbols allowed";
         return null;
       }
       case "previous_school": {

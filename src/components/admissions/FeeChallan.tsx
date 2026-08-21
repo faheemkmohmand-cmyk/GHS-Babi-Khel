@@ -205,7 +205,7 @@ export default function FeeChallan({
         )
       );
       
-      return oneOff || (data || )[0] || null;
+      return oneOff || (data || [])[0] || null;
     } catch (e) {
       return null;
     }

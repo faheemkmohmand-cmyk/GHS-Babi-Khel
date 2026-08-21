@@ -135,16 +135,16 @@ function ApplyOnlineIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
       {/* Laptop screen outline */}
-      <rect x="2.5" y="3.5" width="19" height="13" rx="2" stroke="#C96B3B" strokeWidth="1.5"/>
-      {/* Screen content - form lines */}
-      <rect x="4.5" y="6" width="7.5" height="1.1" rx="0.4" fill="#C96B3B"/>
-      <rect x="4.5" y="8.3" width="11" height="1" rx="0.35" fill="#C96B3B" opacity="0.55"/>
-      <rect x="4.5" y="10.3" width="9" height="1" rx="0.35" fill="#C96B3B" opacity="0.55"/>
+      <rect x="2.5" y="3.5" width="19" height="13" rx="2" stroke="#C96B3B" strokeWidth="1.8"/>
+      {/* Screen content - form lines (solid, no opacity) */}
+      <rect x="4.5" y="6" width="7.5" height="1.2" rx="0.4" fill="#C96B3B"/>
+      <rect x="4.5" y="8.3" width="11" height="1.1" rx="0.35" fill="#C96B3B"/>
+      <rect x="4.5" y="10.3" width="9" height="1.1" rx="0.35" fill="#C96B3B"/>
       {/* Checkmark circle - success */}
-      <circle cx="17.3" cy="10" r="2.1" fill="#C96B3B"/>
-      <path d="M16.2 10L17.1 10.9L18.5 9.1" stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
-      {/* Laptop base */}
-      <path d="M1.5 16.5H22.5L21.4 19C21.1 19.6 20.5 20 19.8 20H4.2C3.5 20 2.9 19.6 2.6 19L1.5 16.5Z" stroke="#C96B3B" strokeWidth="1.5" strokeLinejoin="round"/>
+      <circle cx="17.3" cy="10" r="2.3" fill="#C96B3B"/>
+      <path d="M16.2 10L17.1 10.9L18.5 9.1" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* Laptop base - solid fill for visual weight */}
+      <path d="M1.5 16.5H22.5L21.4 19C21.1 19.6 20.5 20 19.8 20H4.2C3.5 20 2.9 19.6 2.6 19L1.5 16.5Z" fill="#C96B3B" stroke="#C96B3B" strokeWidth="1.8" strokeLinejoin="round"/>
     </svg>
   );
 }
@@ -157,16 +157,16 @@ function TrackApplicationIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
       {/* Magnifying glass */}
-      <circle cx="10" cy="10" r="7" stroke="#C96B3B" strokeWidth="1.8"/>
+      <circle cx="10" cy="10" r="7" stroke="#C96B3B" strokeWidth="2.2"/>
       {/* Glass handle */}
-      <line x1="15.2" y1="15.2" x2="20.5" y2="20.5" stroke="#C96B3B" strokeWidth="2" strokeLinecap="round"/>
-      {/* Inner document/list representation */}
-      <rect x="6.7" y="7.2" width="6.2" height="1.1" rx="0.3" fill="#C96B3B" opacity="0.85"/>
-      <rect x="6.7" y="9.4" width="4.8" height="1" rx="0.3" fill="#C96B3B" opacity="0.5"/>
-      <rect x="6.7" y="11.5" width="5.3" height="1" rx="0.3" fill="#C96B3B" opacity="0.5"/>
+      <line x1="15.2" y1="15.2" x2="20.5" y2="20.5" stroke="#C96B3B" strokeWidth="2.4" strokeLinecap="round"/>
+      {/* Inner document/list representation (solid, no opacity) */}
+      <rect x="6.7" y="7.2" width="6.2" height="1.2" rx="0.3" fill="#C96B3B"/>
+      <rect x="6.7" y="9.4" width="4.8" height="1.1" rx="0.3" fill="#C96B3B"/>
+      <rect x="6.7" y="11.5" width="5.3" height="1.1" rx="0.3" fill="#C96B3B"/>
       {/* Status indicator - check */}
-      <circle cx="14" cy="6.2" r="2" fill="#C96B3B"/>
-      <path d="M13 6.2L13.7 6.9L15.1 5.4" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="14" cy="6.2" r="2.2" fill="#C96B3B"/>
+      <path d="M13 6.2L13.7 6.9L15.1 5.4" stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
@@ -177,19 +177,19 @@ function TrackApplicationIcon({ className }: { className?: string }) {
  */
 function ApplyNowIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-      {/* Cap top (Diamond) */}
-      <path d="M12 2L1 9L12 16L23 9L12 2Z" stroke="#C96B3B" strokeWidth="1.4" strokeLinejoin="round"/>
-      {/* Cap base/skull part */}
+    <svg viewBox="0 0 24 24" className={className} xmlns="http://www.w3.org/2000/svg">
+      {/* Cap top (Diamond) - solid fill */}
+      <path d="M12 2L1 9L12 16L23 9L12 2Z" fill="#C96B3B" stroke="#C96B3B" strokeWidth="1.4" strokeLinejoin="round"/>
+      {/* Cap base/skull part - solid fill */}
       <path d="M4 10V14.5C4 17 7.5 19 12 19C16.5 19 20 17 20 14.5V10"
-        stroke="#C96B3B" strokeWidth="1.4" strokeLinejoin="round"/>
+        fill="#C96B3B" stroke="#C96B3B" strokeWidth="1.4" strokeLinejoin="round"/>
       {/* Tassel string */}
       <path d="M21 9V14.5C21 15.3 20.2 15.8 19.7 15.8C19.2 15.8 18.5 15.3 18.5 14.5V9.5"
-        stroke="#C96B3B" strokeWidth="1.2" strokeLinecap="round"/>
+        stroke="#C96B3B" strokeWidth="1.4" fill="none" strokeLinecap="round"/>
       {/* Tassel end */}
-      <circle cx="19.7" cy="16.2" r="1.2" fill="#C96B3B"/>
+      <circle cx="19.7" cy="16.2" r="1.3" fill="#C96B3B"/>
       {/* Button on top of cap */}
-      <circle cx="12" cy="8" r="1" fill="#C96B3B"/>
+      <circle cx="12" cy="8" r="1.1" fill="white"/>
     </svg>
   );
 }
@@ -922,12 +922,14 @@ const Admission = () => {
           .doc-title-wrap { text-align: center; margin: 4px 0 8px; }
           .doc-title { display: inline-block; font-size: 17px; font-weight: 800; color: #ffffff; padding: 9px 28px; background: linear-gradient(135deg, #0f4c3a, #16694f); border-radius: 999px; letter-spacing: 0.4px; }
           .doc-sub { font-size: 10.5px; color: #64748b; text-align: center; margin: 8px 0 18px; font-style: italic; }
+          .intro-row { display: flex; align-items: flex-start; justify-content: center; gap: 18px; margin: 8px 0 20px; flex-wrap: wrap; }
+          .intro-text { flex: 1; min-width: 200px; max-width: 420px; }
 
           .section-title { font-size: 12.5px; font-weight: 800; color: #0f4c3a; margin: 20px 0 10px; padding: 6px 12px; background: #f0f5f2; border-left: 4px solid #c96b3b; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
 
           .note { font-size: 10px; color: #475569; background: #fdf8ef; border: 1px dashed #d9b979; border-radius: 6px; padding: 9px 12px; margin-top: 6px; }
 
-          .photo-box { float: right; width: 92px; height: 110px; border: 1.6px dashed #94a3b8; border-radius: 6px; margin: 0 0 12px 14px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #94a3b8; text-align: center; padding: 6px; }
+          .photo-box { flex-shrink: 0; width: 92px; height: 110px; border: 1.6px dashed #94a3b8; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #94a3b8; text-align: center; padding: 6px; }
 
           .footer { text-align: center; border-top: 2px solid #e2e8f0; padding-top: 10px; margin-top: 24px; font-size: 8.5px; color: #94a3b8; }
           .footer span { color: #0f4c3a; font-weight: 700; }
@@ -955,9 +957,10 @@ const Admission = () => {
         </div>
 
         <div class="doc-title-wrap"><span class="doc-title">Admission Application Form</span></div>
-        <div class="doc-sub">Pre-filled with the details you submitted online. Please review, sign, and submit it in person at the school office.</div>
-
-        <div class="photo-box">Attach<br/>Passport<br/>Size Photo<br/>Here</div>
+        <div class="intro-row">
+          <div class="intro-text"><div class="doc-sub" style="margin:0;">Pre-filled with the details you submitted online. Please review, sign, and submit it in person at the school office.</div></div>
+          <div class="photo-box">Attach<br/>Passport<br/>Size Photo<br/>Here</div>
+        </div>
 
         <div class="section-title">1&nbsp; &nbsp;Student Information</div>
         ${line("Full Name", form.full_name, undefined, true)}
@@ -1035,7 +1038,7 @@ const Admission = () => {
       const line = (label: string, value?: string | null, _w?: number, req = false) =>
         `<div style="margin-bottom:10px;">
           <div style="font-size:9px;font-weight:600;color:#0f4c3a;text-transform:uppercase;letter-spacing:0.2px;margin-bottom:3px;">${esc(label)}${req ? ' <span style="color:#c96b3b;">*</span>' : ''}</div>
-          <div style="font-size:10.5px;color:#1e293b;border-bottom:1px solid #94a3b8;padding-bottom:3px;min-height:14px;">${esc(value || "&nbsp;")}</div>
+          <div style="font-size:10.5px;color:#1e293b;border-bottom:1px solid #94a3b8;padding-bottom:3px;min-height:14px;">${esc(value) || "&nbsp;"}</div>
         </div>`;
 
       const lineRow = (fields: string[]) =>
@@ -1062,7 +1065,8 @@ const Admission = () => {
           .page { max-width:210mm; margin:0 auto; border:1px solid #e2e8f0; padding:25mm 18mm 20mm; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
           .topband { height:6px; background:linear-gradient(90deg,#0f4c3a,#10B981); margin:-25mm -18mm 20px; }
           .header { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:16px;flex-wrap:wrap; }
-          .logo-wrap img { height:56px;width:auto;object-fit:contain; }
+          .logo-wrap { width:56px;height:56px;border-radius:50%;border:2.5px solid #d9b979;overflow:hidden;flex-shrink:0;background:#f5f1e6;display:flex;align-items:center;justify-content:center; }
+          .logo-wrap img { width:100%;height:100%;object-fit:cover; }
           .header-text { flex:1;min-width:200px; }
           .school-name { font-size:18px;font-weight:700;color:#0f4c3a;line-height:1.2; }
           .tagline { font-size:11px;color:#64748b;margin-top:2px; }
@@ -1073,8 +1077,10 @@ const Admission = () => {
           .doc-title-wrap { text-align:center;margin:18px 0 12px; }
           .doc-title { display:inline-block;font-size:15px;font-weight:800;color:#fff;background:linear-gradient(135deg,#0f4c3a,#059669);padding:10px 28px;border-radius:8px;letter-spacing:0.5px; }
           .doc-sub { text-align:center;font-size:11px;color:#64748b;margin-top:8px;font-style:italic; }
-          .photo-box { float:right;width:80px;height:100px;border:2px dashed #94a3b8;border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:9px;color:#94a3b8;margin-left:16px;padding:6px;line-height:1.3; }
-          .section-title { clear:both;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(90deg,#0f4c3a,#10B981);padding:7px 14px;border-radius:6px;margin:18px 0 10px;letter-spacing:0.3px; }
+          .intro-row { display:flex;align-items:flex-start;justify-content:center;gap:18px;margin:14px 0 20px;flex-wrap:wrap; }
+          .intro-text { flex:1;min-width:200px;max-width:420px; }
+          .photo-box { flex-shrink:0;width:80px;height:100px;border:2px dashed #94a3b8;border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:9px;color:#94a3b8;padding:6px;line-height:1.3; }
+          .section-title { font-size:12px;font-weight:700;color:#fff;background:linear-gradient(90deg,#0f4c3a,#10B981);padding:7px 14px;border-radius:6px;margin:18px 0 10px;letter-spacing:0.3px; }
           .note { font-size:10px;color:#B45309;background:#FEF3C7;padding:8px 12px;border-radius:6px;border-left:3px solid #F59E0B;margin:8px 0;line-height:1.5; }
           .declaration { font-size:11px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;padding:12px 16px;border-radius:8px;margin-top:20px;line-height:1.6; }
           .signrow { display:flex;gap:40px;margin-top:24px;padding-top:16px;border-top:1px solid #e2e8f0; }
@@ -1098,9 +1104,10 @@ const Admission = () => {
         </div>
 
         <div class="doc-title-wrap"><span class="doc-title">Admission Application Form</span></div>
-        <div class="doc-sub">Blank form — Please print, fill in all fields by hand, attach required documents, and submit at the school office.</div>
-
-        <div class="photo-box">Attach<br/>Passport<br/>Size Photo<br/>Here</div>
+        <div class="intro-row">
+          <div class="intro-text"><div class="doc-sub" style="margin-top:0;">Blank form — Please print, fill in all fields by hand, attach required documents, and submit at the school office.</div></div>
+          <div class="photo-box">Attach<br/>Passport<br/>Size Photo<br/>Here</div>
+        </div>
 
         <div class="section-title">1&nbsp; &nbsp;Student Information</div>
         ${line("Full Name", "", undefined, true)}

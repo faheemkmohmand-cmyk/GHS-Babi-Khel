@@ -105,7 +105,7 @@ const LUGHAT_BANK: LughatEntry[] = [
     partOfSpeechUrdu: "اسم",
     example: "Himat-e-buland rakho.",
     exampleUrdu: "حوصلہ بلند رکھو۔",
-    synonyms: "Bahadiri", "Azm", "Jurrat",
+    synonyms: ["Bahadiri", "Azm", "Jurrat"],
     difficulty: "متوسط"
   },
   {

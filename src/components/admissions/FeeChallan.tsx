@@ -135,7 +135,7 @@ export default function FeeChallan({
       // Find best match - prefer exact reference_no match
       return (data || []).find((v: VoucherData) => 
         v.notes?.includes(referenceNo) || v.notes?.includes(admissionId)
-      ) || (data || )[0] || null;
+      ) || (data || [])[0] || null;
     } catch (e) {
       return null;
     }

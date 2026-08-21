@@ -407,7 +407,7 @@ export default function FeeChallan({
       
       // ── STATUS BADGE (top right of header) ──
       const isPaid = voucher.status === "paid";
-      doc.setFillColor(isPaid ? ...BADGE_PAID : ...BADGE_UNPAID);
+      doc.setFillColor(...(isPaid ? BADGE_PAID : BADGE_UNPAID));
       const badgeText = voucher.status.toUpperCase();
       doc.setFontSize(8);
       doc.setFont("helvetica", "bold");

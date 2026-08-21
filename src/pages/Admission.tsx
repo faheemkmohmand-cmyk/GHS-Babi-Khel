@@ -874,18 +874,16 @@ const Admission = () => {
       const esc = (v: any) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
       // Pre-filled underline field — shows the applicant's entered value instead of a blank line.
-      // Rendered as a fixed-layout table row so the label column and the
-      // underline column always align consistently across every field.
+      // Plain block-level markup (no tables) so the print/PDF renderer can't
+      // double-paint nested table rows — label sits above the underline.
       const line = (labelText: string, value: string, _widthPct?: number, required = false) =>
-        `<table style="width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:9px;"><tr>
-          <td style="font-size:10px;font-weight:600;color:#0f4c3a;white-space:nowrap;padding-right:8px;vertical-align:bottom;padding-bottom:3px;width:1%;">${labelText}${required ? ' <span style="color:#c96b3b;">*</span>' : ''}</td>
-          <td style="font-size:11px;font-weight:600;color:#1e293b;border-bottom:1.5px solid #94a3b8;padding-bottom:3px;vertical-align:bottom;">${esc(value) || "&nbsp;"}</td>
-        </tr></table>`;
+        `<div style="margin-bottom:10px;">
+          <div style="font-size:9.5px;font-weight:600;color:#0f4c3a;text-transform:uppercase;letter-spacing:0.2px;margin-bottom:3px;">${labelText}${required ? ' <span style="color:#c96b3b;">*</span>' : ''}</div>
+          <div style="font-size:11px;font-weight:600;color:#1e293b;border-bottom:1.5px solid #94a3b8;padding-bottom:3px;min-height:15px;">${esc(value) || "&nbsp;"}</div>
+        </div>`;
 
       const lineRow = (fields: string[]) =>
-        `<table style="width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:9px;"><tr>${
-          fields.map((f, idx) => `<td style="width:${100 / fields.length}%;padding-right:${idx < fields.length - 1 ? 16 : 0}px;">${f}</td>`).join("")
-        }</tr></table>`;
+        `<div style="display:flex;gap:16px;">${fields.map(f => `<div style="flex:1;min-width:0;">${f}</div>`).join("")}</div>`;
       // Checkbox that renders filled/checked when it matches the applicant's selection
       const checkbox = (labelText: string, checked = false) => `
         <span style="display:inline-flex;align-items:center;gap:7px;margin:0 20px 10px 0;font-size:12px;color:#1e293b;font-weight:500;">
@@ -1032,20 +1030,16 @@ const Admission = () => {
 
       const esc = (v: any) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-      // Helper functions for PDF layout
-      // Each field is rendered as a fixed-layout table row so the label
-      // column and the underline column always line up consistently,
-      // regardless of label length or how many fields sit in a row.
+      // Helper functions for PDF layout — plain block markup (no tables) so
+      // the print/PDF renderer can't double-paint nested rows.
       const line = (label: string, value?: string | null, _w?: number, req = false) =>
-        `<table style="width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:9px;"><tr>
-          <td style="font-size:10px;font-weight:600;color:#0f4c3a;white-space:nowrap;padding-right:8px;vertical-align:bottom;padding-bottom:3px;width:1%;">${esc(label)}${req ? ' <span style="color:#c96b3b;">*</span>' : ''}</td>
-          <td style="font-size:10.5px;color:#1e293b;border-bottom:1px solid #94a3b8;padding-bottom:3px;vertical-align:bottom;">${esc(value || "&nbsp;")}</td>
-        </tr></table>`;
+        `<div style="margin-bottom:10px;">
+          <div style="font-size:9px;font-weight:600;color:#0f4c3a;text-transform:uppercase;letter-spacing:0.2px;margin-bottom:3px;">${esc(label)}${req ? ' <span style="color:#c96b3b;">*</span>' : ''}</div>
+          <div style="font-size:10.5px;color:#1e293b;border-bottom:1px solid #94a3b8;padding-bottom:3px;min-height:14px;">${esc(value || "&nbsp;")}</div>
+        </div>`;
 
       const lineRow = (fields: string[]) =>
-        `<table style="width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:9px;"><tr>${
-          fields.map((f, idx) => `<td style="width:${100 / fields.length}%;padding-right:${idx < fields.length - 1 ? 16 : 0}px;">${f}</td>`).join("")
-        }</tr></table>`;
+        `<div style="display:flex;gap:16px;">${fields.map(f => `<div style="flex:1;min-width:0;">${f}</div>`).join("")}</div>`;
       
       const checkbox = (label: string, checked: boolean) =>
         `<span style="display:inline-flex;align-items:center;margin-right:14px;font-size:10.5px;color:#334155;"><span style="width:13px;height:13px;border:2px solid #94a3b8;border-radius:3px;margin-right:5px;display:inline-flex;align-items:center;justify-content:center;background:${checked ? '#10B981' : 'transparent'};border-color:${checked ? '#059669' : '#94a3b8'};">${checked ? '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M4 12l5 5L20 6"/></svg>' : ''}</span>${esc(label)}</span>`;

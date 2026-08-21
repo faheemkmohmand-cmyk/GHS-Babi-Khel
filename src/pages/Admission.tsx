@@ -134,28 +134,17 @@ const DOWNLOAD_ITEMS = [
 function ApplyOnlineIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-      {/* Laptop screen background - blue gradient feel */}
-      <rect x="2" y="3" width="20" height="14" rx="2.5" fill="#3B82F6" stroke="#1D4ED8" strokeWidth="1.5"/>
-      {/* Screen inner area - lighter */}
-      <rect x="3.5" y="4.5" width="17" height="11" rx="1" fill="#EFF6FF"/>
+      {/* Laptop screen outline */}
+      <rect x="2.5" y="3.5" width="19" height="13" rx="2" stroke="#C96B3B" strokeWidth="1.5"/>
       {/* Screen content - form lines */}
-      <rect x="5.5" y="6.5" width="8" height="1.2" rx="0.4" fill="#3B82F6" opacity="0.8"/>
-      <rect x="5.5" y="9" width="13" height="1" rx="0.35" fill="#93C5FD"/>
-      <rect x="5.5" y="11" width="10" height="1" rx="0.35" fill="#93C5FD"/>
-      <rect x="5.5" y="13" width="6" height="1" rx="0.35" fill="#93C5FD"/>
-      {/* Checkmark circle - green success */}
-      <circle cx="17" cy="10" r="2.2" fill="#10B981" stroke="#059669" strokeWidth="0.8"/>
-      <path d="M15.9 10L16.8 11L18.3 9" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-      {/* Laptop base - dark gray */}
-      <path d="M1.5 17H22.5L21.5 19.5C21.2 20.1 20.6 20.5 19.9 20.5H4.1C3.4 20.5 2.8 20.1 2.5 19.5L1.5 17Z" fill="#374151" stroke="#1F2937" strokeWidth="1" strokeLinejoin="round"/>
-      {/* Base highlight */}
-      <path d="M3 17H21L20.2 19C20 19.4 19.6 19.7 19.1 19.7H4.9C4.4 19.7 4 19.4 3.8 19L3 17Z" fill="#4B5563"/>
-      {/* Power light - green glow */}
-      <circle cx="12" cy="18.8" r="0.6" fill="#10B981"/>
-      <circle cx="12" cy="18.8" r="0.3" fill="#34D399"/>
-      {/* Webcam */}
-      <circle cx="12" cy="3.8" r="0.6" fill="#6B7280"/>
-      <circle cx="12" cy="3.8" r="0.25" fill="#9CA3AF"/>
+      <rect x="4.5" y="6" width="7.5" height="1.1" rx="0.4" fill="#C96B3B"/>
+      <rect x="4.5" y="8.3" width="11" height="1" rx="0.35" fill="#C96B3B" opacity="0.55"/>
+      <rect x="4.5" y="10.3" width="9" height="1" rx="0.35" fill="#C96B3B" opacity="0.55"/>
+      {/* Checkmark circle - success */}
+      <circle cx="17.3" cy="10" r="2.1" fill="#C96B3B"/>
+      <path d="M16.2 10L17.1 10.9L18.5 9.1" stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
+      {/* Laptop base */}
+      <path d="M1.5 16.5H22.5L21.4 19C21.1 19.6 20.5 20 19.8 20H4.2C3.5 20 2.9 19.6 2.6 19L1.5 16.5Z" stroke="#C96B3B" strokeWidth="1.5" strokeLinejoin="round"/>
     </svg>
   );
 }
@@ -167,23 +156,17 @@ function ApplyOnlineIcon({ className }: { className?: string }) {
 function TrackApplicationIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-      {/* Magnifying glass - orange/amber gradient */}
-      <circle cx="10" cy="10" r="7" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="2"/>
-      {/* Glass reflection */}
-      <path d="M6 7C6 7 7.5 5.5 10 5.5C12.5 5.5 14 7 14 7" stroke="#FCD34D" strokeWidth="1.5" strokeLinecap="round"/>
-      {/* Glass handle - dark brown */}
-      <line x1="15.2" y1="15.2" x2="20.5" y2="20.5" stroke="#78350F" strokeWidth="3" strokeLinecap="round"/>
-      <line x1="15.2" y1="15.2" x2="20.5" y2="20.5" stroke="#92400E" strokeWidth="2" strokeLinecap="round"/>
+      {/* Magnifying glass */}
+      <circle cx="10" cy="10" r="7" stroke="#C96B3B" strokeWidth="1.8"/>
+      {/* Glass handle */}
+      <line x1="15.2" y1="15.2" x2="20.5" y2="20.5" stroke="#C96B3B" strokeWidth="2" strokeLinecap="round"/>
       {/* Inner document/list representation */}
-      <rect x="6.5" y="7" width="6.5" height="1.1" rx="0.3" fill="#F59E0B" opacity="0.9"/>
-      <rect x="6.5" y="9.2" width="5" height="1" rx="0.3" fill="#FBBF24" opacity="0.7"/>
-      <rect x="6.5" y="11.2" width="5.5" height="1" rx="0.3" fill="#FBBF24" opacity="0.7"/>
-      {/* Status indicator - green dot */}
-      <circle cx="14.5" cy="7.5" r="2" fill="#10B981" stroke="#059669" strokeWidth="0.8"/>
-      <path d="M14.5 6.5V7.8L15.3 8.3" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
-      {/* Sparkle effects */}
-      <circle cx="4" cy="13" r="0.8" fill="#FBBF24" opacity="0.6"/>
-      <circle cx="16" cy="13" r="0.6" fill="#F59E0B" opacity="0.5"/>
+      <rect x="6.7" y="7.2" width="6.2" height="1.1" rx="0.3" fill="#C96B3B" opacity="0.85"/>
+      <rect x="6.7" y="9.4" width="4.8" height="1" rx="0.3" fill="#C96B3B" opacity="0.5"/>
+      <rect x="6.7" y="11.5" width="5.3" height="1" rx="0.3" fill="#C96B3B" opacity="0.5"/>
+      {/* Status indicator - check */}
+      <circle cx="14" cy="6.2" r="2" fill="#C96B3B"/>
+      <path d="M13 6.2L13.7 6.9L15.1 5.4" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
@@ -194,25 +177,19 @@ function TrackApplicationIcon({ className }: { className?: string }) {
  */
 function ApplyNowIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} xmlns="http://www.w3.org/2000/svg">
-      {/* Cap top (Diamond) - rich dark color */}
-      <path d="M12 2L1 9L12 16L23 9L12 2Z" fill="#1E40AF" stroke="#1E3A8A" strokeWidth="0.8" strokeLinejoin="round"/>
-      {/* Diamond shine effect */}
-      <path d="M12 2L17 7L12 12L7 7L12 2Z" fill="#3B82F6" opacity="0.4"/>
-      <path d="M12 2L12 16L23 9L12 2Z" fill="#2563EB" opacity="0.3"/>
-      {/* Cap base/skull part - darker shade */}
-      <path d="M4 10V14.5C4 17 7.5 19 12 19C16.5 19 20 17 20 14.5V10" 
-        fill="#1E40AF" stroke="#1E3A8A" strokeWidth="0.8" strokeLinejoin="round"/>
-      {/* Tassel string - gold/brown */}
-      <path d="M21 9V14.5C21 15.3 20.2 15.8 19.7 15.8C19.2 15.8 18.5 15.3 18.5 14.5V9.5" 
-        stroke="#B45309" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
-      {/* Tassel end - golden ball */}
-      <circle cx="19.7" cy="16.2" r="1.3" fill="#F59E0B" stroke="#D97706" strokeWidth="0.6"/>
-      {/* Button on top of cap - metallic gold */}
-      <circle cx="12" cy="8" r="1.2" fill="#FBBF24" stroke="#F59E0B" strokeWidth="0.5"/>
-      <circle cx="11.7" cy="7.7" r="0.4" fill="#FEF3C7" opacity="0.8"/>
-      {/* Highlight line on crown */}
-      <path d="M6 7L12 4.5" stroke="white" strokeWidth="0.7" strokeLinecap="round" opacity="0.5"/>
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+      {/* Cap top (Diamond) */}
+      <path d="M12 2L1 9L12 16L23 9L12 2Z" stroke="#C96B3B" strokeWidth="1.4" strokeLinejoin="round"/>
+      {/* Cap base/skull part */}
+      <path d="M4 10V14.5C4 17 7.5 19 12 19C16.5 19 20 17 20 14.5V10"
+        stroke="#C96B3B" strokeWidth="1.4" strokeLinejoin="round"/>
+      {/* Tassel string */}
+      <path d="M21 9V14.5C21 15.3 20.2 15.8 19.7 15.8C19.2 15.8 18.5 15.3 18.5 14.5V9.5"
+        stroke="#C96B3B" strokeWidth="1.2" strokeLinecap="round"/>
+      {/* Tassel end */}
+      <circle cx="19.7" cy="16.2" r="1.2" fill="#C96B3B"/>
+      {/* Button on top of cap */}
+      <circle cx="12" cy="8" r="1" fill="#C96B3B"/>
     </svg>
   );
 }
@@ -896,15 +873,19 @@ const Admission = () => {
 
       const esc = (v: any) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-      // Pre-filled underline field — shows the applicant's entered value instead of a blank line
-      const line = (labelText: string, value: string, widthPct = 38, required = false) => `
-        <div style="display:flex;margin-bottom:8px;align-items:baseline;">
-          <div style="font-size:10px;font-weight:600;color:#0f4c3a;width:${widthPct}%;min-width:${widthPct}%;flex-shrink:0;padding-right:8px;">${labelText}${required ? ' <span style="color:#c96b3b;">*</span>' : ''}</div>
-          <div style="font-size:11px;font-weight:600;color:#1e293b;border-bottom:1.5px solid #94a3b8;flex-grow:1;padding-bottom:3px;min-height:20px;">${esc(value) || "&nbsp;"}</div>
-        </div>`;
-      
-      const lineRow = (fields: string) =>
-        `<div style="display:flex;gap:16px;margin-bottom:8px;">${fields}</div>`;
+      // Pre-filled underline field — shows the applicant's entered value instead of a blank line.
+      // Rendered as a fixed-layout table row so the label column and the
+      // underline column always align consistently across every field.
+      const line = (labelText: string, value: string, _widthPct?: number, required = false) =>
+        `<table style="width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:9px;"><tr>
+          <td style="font-size:10px;font-weight:600;color:#0f4c3a;white-space:nowrap;padding-right:8px;vertical-align:bottom;padding-bottom:3px;width:1%;">${labelText}${required ? ' <span style="color:#c96b3b;">*</span>' : ''}</td>
+          <td style="font-size:11px;font-weight:600;color:#1e293b;border-bottom:1.5px solid #94a3b8;padding-bottom:3px;vertical-align:bottom;">${esc(value) || "&nbsp;"}</td>
+        </tr></table>`;
+
+      const lineRow = (fields: string[]) =>
+        `<table style="width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:9px;"><tr>${
+          fields.map((f, idx) => `<td style="width:${100 / fields.length}%;padding-right:${idx < fields.length - 1 ? 16 : 0}px;">${f}</td>`).join("")
+        }</tr></table>`;
       // Checkbox that renders filled/checked when it matches the applicant's selection
       const checkbox = (labelText: string, checked = false) => `
         <span style="display:inline-flex;align-items:center;gap:7px;margin:0 20px 10px 0;font-size:12px;color:#1e293b;font-weight:500;">
@@ -981,25 +962,25 @@ const Admission = () => {
         <div class="photo-box">Attach<br/>Passport<br/>Size Photo<br/>Here</div>
 
         <div class="section-title">1&nbsp; &nbsp;Student Information</div>
-        ${line("Full Name", form.full_name, 38, true)}
-        ${line("Father Name", form.father_name, 38, true)}
-        ${lineRow(line("B-Form Number", form.b_form_no, 45, true) + line("Date of Birth", form.date_of_birth, 45))}
-        ${lineRow(line("Contact Number (WhatsApp)", form.contact_number, 45, true) + line("WhatsApp (if different)", form.whatsapp_number, 45))}
-        ${line("Home Address (Village / Mohalla)", form.home_address, 38)}
+        ${line("Full Name", form.full_name, undefined, true)}
+        ${line("Father Name", form.father_name, undefined, true)}
+        ${lineRow([line("B-Form Number", form.b_form_no, undefined, true), line("Date of Birth", form.date_of_birth)])}
+        ${lineRow([line("Contact Number (WhatsApp)", form.contact_number, undefined, true), line("WhatsApp (if different)", form.whatsapp_number)])}
+        ${line("Home Address (Village / Mohalla)", form.home_address)}
         <div style="margin:6px 0 16px;clear:both;"><div style="font-size:10px;font-weight:600;letter-spacing:0.3px;color:#0f4c3a;margin-bottom:8px;text-transform:uppercase;">Gender <span style="color:#c96b3b;">*</span></div>${checkbox("Male", form.gender === "male")}${checkbox("Female", form.gender === "female")}</div>
 
         <div class="section-title">2&nbsp; &nbsp;Academic Information</div>
         <div style="margin:6px 0 14px;"><div style="font-size:10px;font-weight:600;letter-spacing:0.3px;color:#0f4c3a;margin-bottom:8px;text-transform:uppercase;">Applying for Class <span style="color:#c96b3b;">*</span></div>${["6","7","8","9","10"].map(c => checkbox(`Class ${c}`, form.applying_class === c)).join("")}</div>
         <div style="margin:6px 0 16px;"><div style="font-size:10px;font-weight:600;letter-spacing:0.3px;color:#0f4c3a;margin-bottom:8px;text-transform:uppercase;">Admission Type <span style="color:#c96b3b;">*</span></div>${checkbox("Fresh Admission", form.admission_type === "fresh")}${checkbox("Migration / Transfer (Class 9 & 10 only)", form.admission_type === "migration")}</div>
         <div class="note" style="margin-bottom:14px;">Important: At GHS Babi Khel, School Leaving Certificate (SLC) AND previous-school information are required for BOTH Fresh Admission and Migration/Transfer. All four fields below are required for all applicants.</div>
-        ${line("Previous School Name", form.previous_school, 38)}
-        ${lineRow(line("Previous Class", form.previous_class, 45) + line("Previous Marks / Grade (%)", form.previous_marks, 45))}
-        ${line("Year of Passing", form.year_of_passing, 38)}
+        ${line("Previous School Name", form.previous_school)}
+        ${lineRow([line("Previous Class", form.previous_class), line("Previous Marks / Grade (%)", form.previous_marks)])}
+        ${line("Year of Passing", form.year_of_passing)}
 
         <div class="section-title">3&nbsp; &nbsp;Parent / Guardian Information</div>
-        ${line("Parent/Guardian Full Name", form.father_name, 38, true)}
-        ${lineRow(line("Relationship to Student", "Father/Guardian", 45, true) + line("Father's CNIC Number", form.father_cnic, 45, true))}
-        ${lineRow(line("Contact Number", form.contact_number, 45, true) + line("Occupation", form.occupation, 45))}
+        ${line("Parent/Guardian Full Name", form.father_name, undefined, true)}
+        ${lineRow([line("Relationship to Student", "Father/Guardian", undefined, true), line("Father's CNIC Number", form.father_cnic, undefined, true)])}
+        ${lineRow([line("Contact Number", form.contact_number, undefined, true), line("Occupation", form.occupation)])}
 
         <div class="section-title">4&nbsp; &nbsp;Documents to Attach</div>
         <ul style="font-size:11.5px;color:#334155;padding-left:20px;line-height:1.6;">${docChecklist}</ul>
@@ -1016,8 +997,8 @@ const Admission = () => {
 
         <div class="officebox">
           <div class="t">✦ For Office Use Only</div>
-          ${lineRow(line("Reference No.", "", 45) + line("Received By", "", 45))}
-          ${lineRow(line("Date Received", "", 45) + line("Status", "", 45))}
+          ${lineRow([line("Reference No.", ""), line("Received By", "")])}
+          ${lineRow([line("Date Received", ""), line("Status", "")])}
         </div>
 
         <div class="footer"><span>${schoolName}</span> &bull; Generated on ${date} &bull; Submit this form in person at the school office &bull; ${window.location.origin}</div>
@@ -1052,11 +1033,19 @@ const Admission = () => {
       const esc = (v: any) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
       // Helper functions for PDF layout
-      const line = (label: string, value?: string | null, w = 38, req = false) =>
-        `<div style="display:flex;margin-bottom:8px;align-items:baseline;"><div style="font-size:10px;font-weight:600;color:#0f4c3a;width:${w}%;min-width:${w}%;flex-shrink:0;padding-right:8px;">${esc(label)}${req ? ' <span style="color:#c96b3b;">*</span>' : ''}</div><div style="font-size:10.5px;color:#1e293b;border-bottom:1px solid #94a3b8;flex-grow:1;padding-bottom:3px;min-height:16px;">${esc(value || "")}</div></div>`;
-      
-      const lineRow = (fields: string) =>
-        `<div style="display:flex;gap:16px;margin-bottom:8px;">${fields}</div>`;
+      // Each field is rendered as a fixed-layout table row so the label
+      // column and the underline column always line up consistently,
+      // regardless of label length or how many fields sit in a row.
+      const line = (label: string, value?: string | null, _w?: number, req = false) =>
+        `<table style="width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:9px;"><tr>
+          <td style="font-size:10px;font-weight:600;color:#0f4c3a;white-space:nowrap;padding-right:8px;vertical-align:bottom;padding-bottom:3px;width:1%;">${esc(label)}${req ? ' <span style="color:#c96b3b;">*</span>' : ''}</td>
+          <td style="font-size:10.5px;color:#1e293b;border-bottom:1px solid #94a3b8;padding-bottom:3px;vertical-align:bottom;">${esc(value || "&nbsp;")}</td>
+        </tr></table>`;
+
+      const lineRow = (fields: string[]) =>
+        `<table style="width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:9px;"><tr>${
+          fields.map((f, idx) => `<td style="width:${100 / fields.length}%;padding-right:${idx < fields.length - 1 ? 16 : 0}px;">${f}</td>`).join("")
+        }</tr></table>`;
       
       const checkbox = (label: string, checked: boolean) =>
         `<span style="display:inline-flex;align-items:center;margin-right:14px;font-size:10.5px;color:#334155;"><span style="width:13px;height:13px;border:2px solid #94a3b8;border-radius:3px;margin-right:5px;display:inline-flex;align-items:center;justify-content:center;background:${checked ? '#10B981' : 'transparent'};border-color:${checked ? '#059669' : '#94a3b8'};">${checked ? '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M4 12l5 5L20 6"/></svg>' : ''}</span>${esc(label)}</span>`;
@@ -1120,25 +1109,25 @@ const Admission = () => {
         <div class="photo-box">Attach<br/>Passport<br/>Size Photo<br/>Here</div>
 
         <div class="section-title">1&nbsp; &nbsp;Student Information</div>
-        ${line("Full Name", "", 38, true)}
-        ${line("Father Name", "", 38, true)}
-        ${lineRow(line("B-Form Number", "", 45, true) + line("Date of Birth", "", 45))}
-        ${lineRow(line("Contact Number (WhatsApp)", "", 45, true) + line("WhatsApp (if different)", "", 45))}
-        ${line("Home Address (Village / Mohalla)", "", 38)}
+        ${line("Full Name", "", undefined, true)}
+        ${line("Father Name", "", undefined, true)}
+        ${lineRow([line("B-Form Number", "", undefined, true), line("Date of Birth", "")])}
+        ${lineRow([line("Contact Number (WhatsApp)", "", undefined, true), line("WhatsApp (if different)", "")])}
+        ${line("Home Address (Village / Mohalla)", "")}
         <div style="margin:6px 0 16px;clear:both;"><div style="font-size:10px;font-weight:600;letter-spacing:0.3px;color:#0f4c3a;margin-bottom:8px;text-transform:uppercase;">Gender <span style="color:#c96b3b;">*</span></div>${checkbox("Male", false)}${checkbox("Female", false)}</div>
 
         <div class="section-title">2&nbsp; &nbsp;Academic Information</div>
         <div style="margin:6px 0 14px;"><div style="font-size:10px;font-weight:600;letter-spacing:0.3px;color:#0f4c3a;margin-bottom:8px;text-transform:uppercase;">Applying for Class <span style="color:#c96b3b;">*</span></div>${["6","7","8","9","10"].map(c => checkbox(`Class ${c}`, false)).join("")}</div>
         <div style="margin:6px 0 16px;"><div style="font-size:10px;font-weight:600;letter-spacing:0.3px;color:#0f4c3a;margin-bottom:8px;text-transform:uppercase;">Admission Type <span style="color:#c96b3b;">*</span></div>${checkbox("Fresh Admission", false)}${checkbox("Migration / Transfer (Class 9 & 10 only)", false)}</div>
         <div class="note" style="margin-bottom:14px;">Important: At GHS Babi Khel, School Leaving Certificate (SLC) AND previous-school information are required for BOTH Fresh Admission and Migration/Transfer.</div>
-        ${line("Previous School Name", "", 38)}
-        ${lineRow(line("Previous Class", "", 45) + line("Previous Marks / Grade (%)", "", 45))}
-        ${line("Year of Passing", "", 38)}
+        ${line("Previous School Name", "")}
+        ${lineRow([line("Previous Class", ""), line("Previous Marks / Grade (%)", "")])}
+        ${line("Year of Passing", "")}
 
         <div class="section-title">3&nbsp; &nbsp;Parent / Guardian Information</div>
-        ${line("Parent/Guardian Full Name", "", 38, true)}
-        ${lineRow(line("Relationship to Student", "Father/Guardian", 45, true) + line("Father's CNIC Number", "", 45, true))}
-        ${lineRow(line("Contact Number", "", 45, true) + line("Occupation", "", 45))}
+        ${line("Parent/Guardian Full Name", "", undefined, true)}
+        ${lineRow([line("Relationship to Student", "Father/Guardian", undefined, true), line("Father's CNIC Number", "", undefined, true)])}
+        ${lineRow([line("Contact Number", "", undefined, true), line("Occupation", "")])}
 
         <div class="section-title">4&nbsp; &nbsp;Documents to Attach</div>
         <ul style="font-size:11.5px;color:#334155;padding-left:20px;line-height:1.6;">${docChecklist}</ul>
@@ -1155,8 +1144,8 @@ const Admission = () => {
 
         <div class="officebox">
           <div class="t">✦ For Office Use Only</div>
-          ${lineRow(line("Reference No.", "", 45) + line("Received By", "", 45))}
-          ${lineRow(line("Date Received", "", 45) + line("Status", "", 45))}
+          ${lineRow([line("Reference No.", ""), line("Received By", "")])}
+          ${lineRow([line("Date Received", ""), line("Status", "")])}
         </div>
 
         <div class="footer"><span>${schoolName}</span> &bull; Generated on ${date} &bull; Blank Form</div>
@@ -1454,8 +1443,8 @@ const Admission = () => {
                   <motion.button
                     whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
                     onClick={() => startApply()}
-                    className="inline-flex items-center gap-2 text-white font-bold px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all text-sm"
-                    style={{ background: 'linear-gradient(135deg, #C96B3B 0%, #A0522D 100%)' }}
+                    className="inline-flex items-center gap-2 font-bold px-8 py-3 rounded-full border-2 border-[#C96B3B] bg-transparent hover:bg-[#C96B3B]/10 transition-all text-sm"
+                    style={{ color: '#C96B3B' }}
                   >
                     <ApplyNowIcon className="w-5 h-5" /> Apply Now
                     <ArrowRight className="w-4 h-4" />
@@ -1498,16 +1487,12 @@ const Admission = () => {
                   title: "Apply Online",
                   desc: "Check eligibility & submit your application from home",
                   icon: ApplyOnlineIcon,
-                  gradient: "from-[#C9A87C] to-[#A67C52]",
-                  shadowColor: "shadow-[#C9A87C]/25",
                   action: () => startApply(),
                 },
                 {
                   title: "Track Application",
                   desc: "Check your application status anytime",
                   icon: TrackApplicationIcon,
-                  gradient: "from-[#D4A574] to-[#B8956A]",
-                  shadowColor: "shadow-[#D4A574]/25",
                   action: () => {
                     if (!isEffectivelyOpen) {
                       toast.error(nextOpeningNote || "Admissions are currently closed.");
@@ -1530,8 +1515,8 @@ const Admission = () => {
                     }
                     card.action();
                   }}
-                  className={`relative text-left p-5 rounded-2xl border border-border bg-card transition-all group ${
-                    isEffectivelyOpen ? `hover:shadow-xl ${card.shadowColor}` : "opacity-60 cursor-not-allowed grayscale"
+                  className={`relative text-left p-5 rounded-2xl border-2 border-[#C96B3B] bg-transparent transition-all group ${
+                    isEffectivelyOpen ? "hover:bg-[#C96B3B]/10" : "opacity-60 cursor-not-allowed grayscale"
                   }`}
                 >
                   {!isEffectivelyOpen && (
@@ -1539,8 +1524,8 @@ const Admission = () => {
                       <LockIcon className="w-2.5 h-2.5" /> Locked
                     </div>
                   )}
-                  <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center mb-3 ${isEffectivelyOpen ? "group-hover:scale-110" : ""} transition-transform`}>
-                    <card.icon className="w-5 h-5 text-white" />
+                  <div className={`w-11 h-11 rounded-xl bg-transparent border-2 border-[#C96B3B] flex items-center justify-center mb-3 ${isEffectivelyOpen ? "group-hover:scale-110" : ""} transition-transform`}>
+                    <card.icon className="w-5 h-5" />
                   </div>
                   <p className="font-bold text-sm text-foreground">{card.title}</p>
                   <p className="text-xs text-muted-foreground mt-1">{card.desc}</p>

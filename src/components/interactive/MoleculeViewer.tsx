@@ -547,6 +547,3 @@ export default function MoleculeViewer({ subjectColor = "#10b981" }: { subjectCo
     </div>
   );
 }
-
-// End of MoleculeViewer component
-}

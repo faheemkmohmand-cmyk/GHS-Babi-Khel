@@ -498,25 +498,32 @@ export default function FeeChallan({
         startY: yPos,
         head: [["#", "Description", "Type", "Amount"]],
         body: tableBody,
+        styles: {
+          valign: "middle",
+          cellPadding: { top: 3, bottom: 3, left: 3, right: 3 }
+        },
         headStyles: { 
           fillColor: TABLE_HEADER, 
           textColor: [255, 255, 255], 
           fontStyle: "bold", 
           fontSize: 9,
-          font: "helvetica"
+          font: "helvetica",
+          halign: "center",
+          valign: "middle"
         },
         bodyStyles: { 
           fontSize: 9, 
           textColor: DARK_INK,
           font: "helvetica",
           lineColor: LIGHT_LINE,
-          lineWidth: 0.1
+          lineWidth: 0.1,
+          valign: "middle"
         },
         columnStyles: {
           0: { cellWidth: 12, halign: "center", fontStyle: "bold" },
-          1: { cellWidth: 75 },
+          1: { cellWidth: 75, halign: "center" },
           2: { cellWidth: 35, halign: "center" },
-          3: { cellWidth: 40, halign: "right", fontStyle: "bold" }
+          3: { cellWidth: 40, halign: "center", fontStyle: "bold" }
         },
         alternateRowStyles: { fillColor: [252, 248, 240] },
         margin: { left: 14, right: 14 },

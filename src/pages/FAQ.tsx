@@ -69,10 +69,8 @@ const FAQ = () => {
                the banner's own padding so it never looks clipped. ── */}
         {admissionSettings && (
           <div
-            className={`w-full max-w-3xl rounded-2xl shadow-elevated border px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 text-left ${
-              admissionOpen
-                ? "bg-emerald-50 border-emerald-200"
-                : "bg-amber-50 border-amber-200"
+            className={`w-full max-w-3xl rounded-2xl shadow-elevated border bg-white px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 text-left ${
+              admissionOpen ? "border-emerald-200" : "border-amber-200"
             }`}
           >
             <div className="flex items-center gap-3 flex-1">

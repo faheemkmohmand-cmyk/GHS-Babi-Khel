@@ -13,8 +13,11 @@ interface PageBannerProps {
 
 const PageBanner = ({ title, subtitle, children }: PageBannerProps) => (
   <div
-    className={`gradient-hero relative overflow-hidden ${
-      children ? "pt-10 md:pt-12 pb-0" : "py-10 md:py-12"
+    className={`gradient-hero relative overflow-visible ${
+      // Extra bottom padding when there's embedded content (e.g. a status
+      // card) so it has real breathing room ABOVE the banner's bottom edge
+      // instead of sitting flush against the seam with the page background.
+      children ? "pt-10 md:pt-12 pb-14 md:pb-16" : "py-10 md:py-12"
     }`}
   >
     <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/10 pointer-events-none" />
@@ -47,7 +50,9 @@ const PageBanner = ({ title, subtitle, children }: PageBannerProps) => (
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mt-5 flex justify-center"
+          // Card floats half on/half off the banner's bottom edge, centred
+          // on the seam rather than clipped flush against it.
+          className="mt-6 md:mt-7 flex justify-center relative -mb-16 md:-mb-20"
         >
           {children}
         </motion.div>

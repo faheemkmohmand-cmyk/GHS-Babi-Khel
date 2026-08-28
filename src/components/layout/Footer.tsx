@@ -12,7 +12,7 @@ const footerLinks = {
     { to: "/teachers",label: "Our Teachers" },
     { to: "/notices", label: "Notices" },
     { to: "/news",    label: "Latest News" },
-    { to: "/faq",     label: "FAQ" },
+    { to: "/faq",     label: "FAQs" },
   ],
   resources: [
     { to: "/results",       label: "Results" },

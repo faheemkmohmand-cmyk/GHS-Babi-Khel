@@ -2,8 +2,8 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Search, HelpCircle, Phone, Mail, ArrowRight, CircleCheck,
-  CircleAlert, GraduationCap, BookOpen, ExternalLink,
+  Search, HelpCircle, Phone, ArrowRight, CircleCheck,
+  CircleAlert, GraduationCap, BookOpen, Award, Library,
 } from "lucide-react";
 import PageLayout from "@/components/layout/PageLayout";
 import PageBanner from "@/components/shared/PageBanner";
@@ -47,21 +47,29 @@ const FAQ = () => {
     })).filter((group) => group.items.length > 0);
   }, [filtered]);
 
+  // Live deadline text, if the school has set one — never hardcoded.
+  const deadlineText =
+    admissionOpen && admissionSettings?.last_date
+      ? ` Last date to apply: ${new Date(admissionSettings.last_date).toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })}.`
+      : "";
+
   return (
     <PageLayout>
       <PageBanner
         title="Frequently Asked Questions"
         subtitle="Everything about admissions, results, notes and our school — clear answers in one place"
-      />
-
-      {/* ── Live admission status strip (updates automatically from the
-             school dashboard — same source the AI tools read) ── */}
-      {admissionSettings && (
-        <div className="container mx-auto px-4 -mt-6 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`max-w-3xl mx-auto rounded-2xl shadow-card border px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 ${
+      >
+        {/* ── Live admission status card (pulled from the school dashboard
+               at request time — never static, always matches the Admission
+               page). Sits centred on the banner's bottom edge, fully inside
+               the banner's own padding so it never looks clipped. ── */}
+        {admissionSettings && (
+          <div
+            className={`w-full max-w-3xl rounded-2xl shadow-elevated border px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 text-left ${
               admissionOpen
                 ? "bg-emerald-50 border-emerald-200"
                 : "bg-amber-50 border-amber-200"
@@ -81,7 +89,7 @@ const FAQ = () => {
                 </p>
                 <p className="text-sm text-muted-foreground leading-snug">
                   {admissionOpen
-                    ? "Apply online for classes 6–10 — free of charge, reference number issued instantly."
+                    ? `Apply online for classes 6–10 — free of charge, reference number issued instantly.${deadlineText}`
                     : "You can still download the printable form from the Admission page and submit it at the school office."}
                 </p>
               </div>
@@ -93,12 +101,12 @@ const FAQ = () => {
               {admissionOpen ? "Apply Now" : "Admission Page"}
               <ArrowRight className="w-4 h-4" />
             </Link>
-          </motion.div>
-        </div>
-      )}
+          </div>
+        )}
+      </PageBanner>
 
       {/* ── Search ── */}
-      <section className="py-10">
+      <section className="pt-8 pb-10">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl mx-auto relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -182,7 +190,7 @@ const FAQ = () => {
       {/* ── Still need help? ── */}
       <section className="pb-20">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto grid sm:grid-cols-3 gap-4">
+          <div className="max-w-5xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link
               to="/contact"
               className="group bg-card rounded-2xl border border-border shadow-card p-5 hover:shadow-elevated transition-shadow"
@@ -222,15 +230,33 @@ const FAQ = () => {
                 Open Notes <ArrowRight className="w-3.5 h-3.5" />
               </span>
             </Link>
+            <Link
+              to="/results"
+              className="group bg-card rounded-2xl border border-border shadow-card p-5 hover:shadow-elevated transition-shadow"
+            >
+              <Award className="w-6 h-6 text-primary mb-3" />
+              <p className="font-semibold text-foreground text-sm mb-1">Check results</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                School exam results and BISE Peshawar board results by roll number
+              </p>
+              <span className="mt-3 inline-flex items-center gap-1 text-primary text-xs font-semibold group-hover:gap-2 transition-all">
+                Open Results <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </Link>
+            <Link
+              to="/library"
+              className="group bg-card rounded-2xl border border-border shadow-card p-5 hover:shadow-elevated transition-shadow"
+            >
+              <Library className="w-6 h-6 text-primary mb-3" />
+              <p className="font-semibold text-foreground text-sm mb-1">Digital library</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Books, past papers and helping materials, free to download
+              </p>
+              <span className="mt-3 inline-flex items-center gap-1 text-primary text-xs font-semibold group-hover:gap-2 transition-all">
+                Open Library <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </Link>
           </div>
-
-          <p className="text-center text-xs text-muted-foreground mt-8 flex items-center justify-center gap-1.5 flex-wrap">
-            <ExternalLink className="w-3.5 h-3.5" />
-            AI assistants: the complete, always-fresh FAQ is also available as JSON at
-            <a href="/api/ai-data" className="text-primary font-semibold hover:underline">
-              /api/ai-data
-            </a>
-          </p>
         </div>
       </section>
     </PageLayout>

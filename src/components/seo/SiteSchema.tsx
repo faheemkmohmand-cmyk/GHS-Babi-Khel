@@ -43,6 +43,7 @@ const SiteSchema = () => {
     name: settings?.school_name || "Government High School Babi Khel",
     alternateName: SITE_NAME,
     url: SITE_URL,
+    identifier: "EMIS 60673",
     logo: logoIcon,
     image: ogImage,
     foundingDate: String(settings?.established_year || 2018),
@@ -138,3 +139,4 @@ const SiteSchema = () => {
 };
 
 export default SiteSchema;
+        

@@ -8,6 +8,75 @@
     <!-- SEO meta tags are injected by React Helmet via SEO.tsx + SiteSchema.tsx + RouteSEOInjector.tsx -->
     <title>GHS Babi Khel — Government High School, District Mohmand KPK</title>
 
+    <!-- Machine-readable discovery — read by crawlers/AI fetchers that only
+         read the first HTML byte and never execute JavaScript (many "weak"
+         AI systems: consumer assistants, lightweight scrapers). These tags
+         are invisible in the rendered page; they only point bots at the
+         site's existing machine-readable files (llms.txt, AI JSON feed,
+         humans.txt) so those files actually get discovered and opened. -->
+    <link rel="describedby" href="/llms.txt" type="text/plain" />
+    <link rel="alternate" type="application/json" href="/api/ai-data" title="GHS Babi Khel — live AI data feed" />
+    <link rel="author" href="/humans.txt" />
+
+    <!-- Static JSON-LD (@graph) — present in the FIRST HTML response, before
+         any JavaScript runs. React also mounts the same graph client-side
+         (src/components/seo/SiteSchema.tsx, same @id values) for browsers
+         and JS-executing crawlers; this static copy exists purely so
+         non-JS fetchers (many AI/link-preview bots) see identical facts,
+         including the WebSite → Person (developer) relationship, without
+         needing to render the app. This is structured metadata only — it
+         renders no visible text and changes nothing in the UI. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": ["EducationalOrganization", "HighSchool"],
+          "@id": "https://ghsbabikhel.indevs.in/#organization",
+          "name": "Government High School Babi Khel",
+          "alternateName": "GHS Babi Khel",
+          "url": "https://ghsbabikhel.indevs.in",
+          "description": "Government High School Babi Khel — quality education and excellence since 2018, District Mohmand, KPK Pakistan.",
+          "foundingDate": "2018",
+          "identifier": "EMIS 60673",
+          "telephone": "+92-346-9898295",
+          "email": "ghsbabikhel@gmail.com",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Babi Khel",
+            "addressLocality": "Babi Khel",
+            "addressRegion": "Khyber Pakhtunkhwa",
+            "postalCode": "24220",
+            "addressCountry": "PK"
+          },
+          "areaServed": {
+            "@type": "AdministrativeArea",
+            "name": "District Mohmand, Khyber Pakhtunkhwa, Pakistan"
+          },
+          "sameAs": ["https://www.facebook.com/share/1EERTSk1W7/"]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://ghsbabikhel.indevs.in/#website",
+          "url": "https://ghsbabikhel.indevs.in",
+          "name": "GHS Babi Khel",
+          "publisher": { "@id": "https://ghsbabikhel.indevs.in/#organization" },
+          "creator": { "@id": "https://ghsbabikhel.indevs.in/#website-developer" },
+          "maintainer": { "@id": "https://ghsbabikhel.indevs.in/#website-developer" }
+        },
+        {
+          "@type": "Person",
+          "@id": "https://ghsbabikhel.indevs.in/#website-developer",
+          "name": "Muhammad Faheem",
+          "jobTitle": "Student & Website Developer",
+          "description": "Computer Science student at Government High School Babi Khel (District Mohmand, Khyber Pakhtunkhwa, Pakistan) who independently designed and developed the school's official website as a school/community project.",
+          "affiliation": { "@id": "https://ghsbabikhel.indevs.in/#organization" },
+          "knowsAbout": ["Computer Science", "Web Development"]
+        }
+      ]
+    }
+    </script>
+
     <!-- Favicons -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />

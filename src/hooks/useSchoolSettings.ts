@@ -18,6 +18,7 @@ export interface SchoolSettings {
   total_students: number;
   total_teachers: number;
   pass_percentage: number;
+  board_results: string | null;
   location_lat: number | null;
   location_lng: number | null;
   principal_name: string | null;
@@ -47,6 +48,7 @@ export const fallbackSettings: SchoolSettings = {
   total_students: 180,
   total_teachers: 8,
   pass_percentage: 95,
+  board_results: "A+",
   location_lat: 34.4084,
   location_lng: 71.3707,
   principal_name: null,
@@ -163,7 +165,7 @@ async function fetchSettings(client: typeof supabase) {
   const { data, error } = await client
     .from("school_settings")
     .select(
-      "id, school_name, tagline, description, about_text, logo_url, banner_url, emis_code, address, phone, email, established_year, total_students, total_teachers, pass_percentage, location_lat, location_lng, principal_name, principal_message, principal_photo_url"
+      "id, school_name, tagline, description, about_text, logo_url, banner_url, emis_code, address, phone, email, established_year, total_students, total_teachers, pass_percentage, board_results, location_lat, location_lng, principal_name, principal_message, principal_photo_url"
     )
     .eq("id", 1)
     .single();

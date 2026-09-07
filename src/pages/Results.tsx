@@ -3,7 +3,7 @@
 // Fires the INSTANT any visitor's countdown reaches zero — instead of waiting
 // for the Vercel Cron's next scheduled tick. Safe to call from any browser:
 // it can only flip rows whose `publish_at` has ALREADY passed, so calling it
-// early, repeatedly, or from an unauthenticated client does nothing harmful.
+// early, repeatedly, or from an unauthenticated client does nothing harmful. 
 //
 // TWO-PATH PUBLISH (fixes "Publishing now… then nothing happens"):
 //   1. Serverless endpoint — POST /api/auto-publish-results. Uses the

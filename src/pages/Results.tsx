@@ -10,7 +10,7 @@
 //      Supabase service role key if SUPABASE_SERVICE_ROLE_KEY is set on
 //      Vercel, which bypasses RLS and works for anonymous visitors. If that
 //      env var is NOT set, the endpoint falls back to the anon key, which
-//      RLS blocks from UPDATE-ing `results` — so it returns
+//      RLS blocks from UPDATE-ing `results` — so it returns.   
 //      published_count=0 and publishes nothing.
 //   2. Direct supabase UPDATE from the browser — runs whenever path #1
 //      published 0 rows. Uses the current visitor's supabase session, so it

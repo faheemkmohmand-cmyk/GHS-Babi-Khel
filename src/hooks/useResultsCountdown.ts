@@ -10,7 +10,7 @@
  * "flip to LIVE for a short grace period, then hide" behavior.
  *
  * Reads from the same `results` table / publish_at schedule the homepage's
- * auto-publish watcher already uses, just grouped down to "what's the very
+ * auto-publish watcher already uses, just grouped down to "what's the very 
  * next publish moment" for display purposes.
  */
 import { useEffect, useState } from "react";

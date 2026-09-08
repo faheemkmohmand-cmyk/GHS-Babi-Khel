@@ -7,7 +7,7 @@ A full-featured school management website for Government High School Babi Khel, 
 - **Frontend**: React 18, TypeScript, Vite, Tailwind CSS
 - **Backend**: Supabase (Database, Auth, Storage)
 - **UI**: Shadcn/ui, Framer Motion, Lucide Icons
-- **Data**: React Query with caching
+- **Data**: React Query with caching. 
 
 ## Features
 

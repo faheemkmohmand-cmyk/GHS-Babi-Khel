@@ -10,7 +10,7 @@
 //    root covers every link inside it (mega-menu, mobile drawer, Roll No.
 //    Slip countdown chips, admission CTA — even links added later).
 //
-// 2. BACKGROUND PREFETCH (idle warm-up):
+// 2. BACKGROUND PREFETCH (idle warm-up): 
 //    After the homepage fully loads (window load + browser idle), the main
 //    public routes are warmed ONE AT A TIME, in priority order (the pages
 //    visitors tap most: Online Classes, Merit List, Roll No. Slip first).

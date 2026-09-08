@@ -5,7 +5,7 @@
 // the official embed URL so the site renders it natively, with its real
 // thumbnail, inside our own pages (no new tabs, no external navigation).
 //
-// Embedded media is stored in gallery_photos as an ordinary row:
+// Embedded media is stored in gallery_photos as an ordinary row: 
 //   photo_url  = the ORIGINAL pasted link (facebook.com/… / youtu.be/…)
 //   media_type = "video"
 // so NO database migration is needed and every consumer (public gallery,  

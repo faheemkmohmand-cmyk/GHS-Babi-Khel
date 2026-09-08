@@ -8,7 +8,7 @@
 // Embedded media is stored in gallery_photos as an ordinary row:
 //   photo_url  = the ORIGINAL pasted link (facebook.com/… / youtu.be/…)
 //   media_type = "video"
-// so NO database migration is needed and every consumer (public gallery,
+// so NO database migration is needed and every consumer (public gallery,  
 // admin grid, student dashboard) detects the provider from the URL itself.
 
 export type EmbedProvider = "facebook" | "youtube";

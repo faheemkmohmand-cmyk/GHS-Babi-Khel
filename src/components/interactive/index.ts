@@ -8,7 +8,6 @@
 export { default as InteractiveLabs } from "./InteractiveLabs";
 export { default as GraphingCalculator } from "./GraphingCalculator";
 export { default as StepSolver } from "./StepSolver";
-export { default as GeoGebraEmbed } from "./GeoGebraEmbed";
 export { default as PhETEmbed } from "./PhETEmbed";
 export { default as MoleculeViewer } from "./MoleculeViewer";
 export { default as PeriodicTable } from "./PeriodicTable";

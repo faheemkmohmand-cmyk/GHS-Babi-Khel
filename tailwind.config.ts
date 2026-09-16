@@ -23,6 +23,11 @@ export default {
           DEFAULT: "hsl(var(--gold))",
           soft: "hsl(var(--gold-soft))",
         },
+        azure: {
+          DEFAULT: "hsl(var(--azure))",
+          strong: "hsl(var(--azure-strong))",
+          soft: "hsl(var(--azure-soft))",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

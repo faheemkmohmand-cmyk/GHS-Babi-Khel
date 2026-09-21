@@ -1,4 +1,3 @@
-
 // ── Client-side auto-publish trigger ────────────────────────────────────────
 // Fires the INSTANT any visitor's countdown reaches zero — instead of waiting
 // for the Vercel Cron's next scheduled tick. Safe to call from any browser:
@@ -1470,6 +1469,10 @@ const BiseResultSearch = () => {
               className="w-full rounded-xl border border-blue-200 bg-background px-4 py-2.5 text-sm font-mono focus:ring-2 focus:ring-ring outline-none" />
           </div>
           <div className="flex items-stretch gap-2">
+            <button onClick={handleReset}
+              className="shrink-0 px-5 font-medium py-3 rounded-xl border border-border text-foreground hover:bg-secondary transition-all">
+              Reset
+            </button>
             <button onClick={handleSearch} disabled={searching}
               className={`flex-1 min-w-0 font-semibold py-3 rounded-xl flex items-center justify-center gap-2 border transition-all disabled:opacity-60 ${
                 searched && result
@@ -1477,10 +1480,6 @@ const BiseResultSearch = () => {
                   : "bg-background border-blue-200 text-blue-600 hover:bg-blue-50"
               }`}>
               {searching ? <><Loader2 className="w-4 h-4 animate-spin" />Searching...</> : <><Search className="w-4 h-4" />Search Result</>}
-            </button>
-            <button onClick={handleReset}
-              className="shrink-0 px-5 font-medium py-3 rounded-xl border border-border text-foreground hover:bg-secondary transition-all">
-              Reset
             </button>
           </div>
         </div>
@@ -1525,59 +1524,68 @@ const BiseResultSearch = () => {
                   <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#E3B341] to-transparent" />
                   <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none" />
                   <div className="absolute -bottom-16 -left-12 w-44 h-44 rounded-full bg-[#E3B341]/20 blur-2xl pointer-events-none" />
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 relative z-10">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="w-14 h-14 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center text-xl font-black border-2 border-[#E3B341]/80 shadow-lg shrink-0">
-                        {(result.name || "S").charAt(0)}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <span className="inline-flex items-center bg-white/15 backdrop-blur-sm border border-white/25 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase mb-1 max-w-full whitespace-normal break-words leading-tight">
-                          {liveTitle} · BISE Peshawar
-                        </span>
-                        <h3 className="font-heading font-extrabold text-lg sm:text-xl drop-shadow-sm break-words">{result.name || "—"}</h3>
-                      </div>
-                    </div>
-                    <div className="text-right sm:shrink-0 self-start sm:self-auto bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-3.5 py-2">
-                      <p className="text-[10px] uppercase tracking-wider opacity-80 font-semibold">Roll No</p>
+                  {/* BISE Peshawar's own results page header pattern: bold
+                      title on the left, a "ROLL NUMBER" pill on the right —
+                      kept in this site's orange/gold theme instead of BISEP's
+                      green. */}
+                  <div className="flex items-center justify-between gap-3 relative z-10">
+                    <h3 className="font-heading font-extrabold text-lg sm:text-xl drop-shadow-sm">Student Result Details</h3>
+                    <div className="text-right shrink-0 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-3.5 py-2">
+                      <p className="text-[10px] uppercase tracking-wider opacity-80 font-semibold">Roll Number</p>
                       <p className="font-mono font-extrabold text-xl tracking-wider text-[#FDE68A]">{result.roll_no}</p>
                     </div>
                   </div>
+                  <p className="mt-2 relative z-10">
+                    <span className="inline-flex items-center bg-white/15 backdrop-blur-sm border border-white/25 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase max-w-full whitespace-normal break-words leading-tight">
+                      {liveTitle} · BISE Peshawar
+                    </span>
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-2 divide-x divide-border border-b border-border sm:grid-cols-4">
-                  {[
-                    { l: "Marks", v: result.marks || "—", c: "text-blue-600 dark:text-blue-400" },
-                    { l: "Grade", v: result.grade || "—", c: "text-amber-600 dark:text-amber-400" },
-                    { l: "Remarks", v: result.remarks || "—", c: "text-emerald-600 dark:text-emerald-400" },
-                    { l: "Father Name", v: result.father_name || "—", c: "text-foreground" },
-                  ].map(item => (
-                    <div key={item.l} className="p-3 text-center">
-                      <p className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground font-semibold">{item.l}</p>
-                      <p className={`text-sm sm:text-base font-extrabold break-words ${item.c}`}>{item.v}</p>
-                    </div>
-                  ))}
+                {/* ── Candidate Information — BISE Peshawar's own label/value
+                    table pattern (Student Name, Father Name, Roll Number,
+                    Marks, Grade, Remarks, Collect DMC From), same orange
+                    theme as the rest of this card. */}
+                <div className="px-5 py-4 border-b border-border">
+                  <p className="text-xs font-bold uppercase tracking-wide text-orange-700 dark:text-orange-400 mb-2">Candidate Information</p>
+                  <div className="rounded-xl border border-border overflow-hidden">
+                    {[
+                      { l: "Student Name", v: result.name || "—" },
+                      { l: "Father Name", v: result.father_name || "—" },
+                      { l: "Roll Number", v: result.roll_no || "—" },
+                      { l: "Marks", v: result.marks || "—", bold: true },
+                      { l: "Grade", v: result.grade || "—" },
+                      { l: "Remarks", v: result.remarks || "—" },
+                      ...(result.collect_dmc_from ? [{ l: "Collect DMC From", v: result.collect_dmc_from, accent: true }] : []),
+                    ].map((row, i) => (
+                      <div key={row.l} className={`grid grid-cols-[auto,1fr] gap-3 px-3.5 py-2.5 ${i % 2 === 1 ? "bg-secondary/30" : ""} ${i !== 0 ? "border-t border-border" : ""}`}>
+                        <span className={`text-xs sm:text-sm font-semibold shrink-0 ${row.accent ? "text-orange-700 dark:text-orange-400" : "text-muted-foreground"}`}>{row.l}</span>
+                        <span className={`text-sm text-right sm:text-left break-words ${row.bold ? "font-extrabold text-orange-600 dark:text-orange-400 text-base" : row.accent ? "font-bold text-orange-700 dark:text-orange-400" : "font-semibold text-foreground"}`}>{row.v}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {result.subjects.length > 0 ? (
                   <div className="px-5 py-4 space-y-2">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Subject-wise Marks</p>
+                    <p className="text-xs font-bold uppercase tracking-wide text-orange-700 dark:text-orange-400">Subject Wise Marks</p>
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="text-left text-xs text-muted-foreground border-b border-border">
-                            <th className="py-2 pr-3 font-semibold">#</th>
+                          <tr className="text-left text-xs text-white bg-gradient-to-r from-orange-600 to-amber-600">
+                            <th className="py-2 pl-3 pr-3 font-semibold rounded-l-lg">#</th>
                             <th className="py-2 pr-3 font-semibold">Subject</th>
                             <th className="py-2 pr-3 font-semibold text-center">Theory</th>
-                            <th className="py-2 pr-3 font-semibold text-center">Practical</th>
+                            <th className="py-2 pr-3 pl-3 font-semibold text-center rounded-r-lg">Practical</th>
                           </tr>
                         </thead>
                         <tbody>
                           {result.subjects.map((s, i) => (
                             <tr key={i} className="border-b border-border/60 last:border-0">
-                              <td className="py-2 pr-3 text-muted-foreground">{s.sr}</td>
+                              <td className="py-2 pl-3 pr-3 text-muted-foreground">{s.sr}</td>
                               <td className="py-2 pr-3 font-medium text-foreground">{s.subject || "—"}</td>
                               <td className={`py-2 pr-3 text-center font-semibold ${s.theory_fail ? "text-red-600 dark:text-red-400" : "text-foreground"}`}>{s.theory || "—"}</td>
-                              <td className={`py-2 pr-3 text-center font-semibold ${s.practical_fail ? "text-red-600 dark:text-red-400" : "text-foreground"}`}>{s.practical || "—"}</td>
+                              <td className={`py-2 pr-3 pl-3 text-center font-semibold ${s.practical_fail ? "text-red-600 dark:text-red-400" : "text-foreground"}`}>{s.practical || "—"}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -1588,14 +1596,6 @@ const BiseResultSearch = () => {
                   <div className="px-5 py-4 border-b border-border">
                     <p className="text-xs text-muted-foreground text-center bg-secondary/40 rounded-lg py-3">
                       Subject-wise marks not available for this result.
-                    </p>
-                  </div>
-                )}
-
-                {result.collect_dmc_from && (
-                  <div className="px-5 py-3 border-b border-border bg-red-50/60 dark:bg-red-950/10">
-                    <p className="text-xs text-red-700 dark:text-red-400 font-semibold text-center">
-                      Collect DMC From: <span className="font-bold">{result.collect_dmc_from}</span>
                     </p>
                   </div>
                 )}

@@ -470,7 +470,7 @@ import {
 // Shown ONCE after a successful search, always closeable, reduced-motion
 // aware. The full result cards below are untouched.
 import ResultRevealOverlay, { type RevealResultData } from "@/components/results/ResultReveal";
-import { Sparkles, Download, GitCompare } from "lucide-react";
+import { Sparkles, Download, GitCompare, X } from "lucide-react";
 
 // ── BISE Peshawar live title (replaces the old static constant) ─────────────
 // Previously: `const BISEP_EXAM_TITLE = import.meta.env.VITE_BISEP_EXAM_TITLE || "..."`
@@ -1113,43 +1113,224 @@ const ResultCardSearch = () => {
           />
         );
       })()}
-      <ComparisonComingSoonModal open={comparisonOpen} onClose={() => setComparisonOpen(false)} />
+      <ComparisonModal open={comparisonOpen} onClose={() => setComparisonOpen(false)} examTitle={BISEP_EXAM_TITLE} />
     </div>
   );
 };
 
-// ── Comparison — placeholder ──────────────────────────────────────────────
-// The Compare button opens this modal today. The full head-to-head feature
-// (roll number vs roll number, parallel BISE fetch, graphical comparison)
-// is being built next; this holds the button's place with an honest message
-// instead of a dead click.
-const ComparisonComingSoonModal = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
-  <AnimatePresence>
-    {open && (
-      <motion.div
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[95] bg-black/60 flex items-center justify-center p-4"
-        role="dialog" aria-modal="true" aria-label="Result comparison"
-        onClick={onClose}
-      >
+// ── Result Comparison — roll number vs roll number ──────────────────────────
+// Two inputs (Roll No · Vs · Roll No), fetches both from BISE Peshawar in
+// parallel, then renders a clean professional side-by-side: headline
+// percentage + grade for each, a leader badge, and a per-subject table with
+// the higher score in each row highlighted. No canvases, no confetti — just
+// a well-structured comparison table, like a real report.
+type ComparisonSlot = {
+  roll: string;
+  state: "idle" | "loading" | "found" | "not-found" | "error";
+  result: BiseResult | null;
+  message: string | null;
+};
+
+const emptySlot = (): ComparisonSlot => ({ roll: "", state: "idle", result: null, message: null });
+
+const ComparisonModal = ({ open, onClose, examTitle }: { open: boolean; onClose: () => void; examTitle: string }) => {
+  const [a, setA] = useState<ComparisonSlot>(emptySlot());
+  const [b, setB] = useState<ComparisonSlot>(emptySlot());
+
+  // Reset to a clean slate every time the modal opens, so a stale
+  // comparison from a previous open never lingers.
+  useEffect(() => {
+    if (open) { setA(emptySlot()); setB(emptySlot()); }
+  }, [open]);
+
+  const runComparison = async () => {
+    const rollA = a.roll.trim();
+    const rollB = b.roll.trim();
+    if (!/^\d{4,10}$/.test(rollA) || !/^\d{4,10}$/.test(rollB)) {
+      toast.error("Enter both roll numbers (4–10 digits)");
+      return;
+    }
+    setA(s => ({ ...s, state: "loading", result: null, message: null }));
+    setB(s => ({ ...s, state: "loading", result: null, message: null }));
+
+    // Parallel fetch — both roll numbers are looked up at the same time,
+    // not one after another.
+    const [outcomeA, outcomeB] = await Promise.all([fetchBiseResult(rollA), fetchBiseResult(rollB)]);
+
+    setA(s => ({
+      ...s,
+      state: outcomeA.status,
+      result: outcomeA.status === "found" ? outcomeA.result : null,
+      message: outcomeA.status !== "found" ? outcomeA.message : null,
+    }));
+    setB(s => ({
+      ...s,
+      state: outcomeB.status,
+      result: outcomeB.status === "found" ? outcomeB.result : null,
+      message: outcomeB.status !== "found" ? outcomeB.message : null,
+    }));
+  };
+
+  const busy = a.state === "loading" || b.state === "loading";
+  const bothFound = a.state === "found" && b.state === "found" && a.result && b.result;
+  const pctA = bothFound ? biseOverallPercent(a.result!, examTitle) : null;
+  const pctB = bothFound ? biseOverallPercent(b.result!, examTitle) : null;
+  const leader = pctA != null && pctB != null ? (pctA === pctB ? "tie" : pctA > pctB ? "a" : "b") : null;
+
+  // Union of subject names across both results, in the order A lists them
+  // (then any B-only subjects appended) — every row shows both sides even
+  // if one candidate is missing that paper.
+  const subjectRows = bothFound
+    ? (() => {
+        const names: string[] = [];
+        const seen = new Set<string>();
+        for (const s of [...a.result!.subjects, ...b.result!.subjects]) {
+          const key = s.subject.trim().toLowerCase();
+          if (!seen.has(key)) { seen.add(key); names.push(s.subject); }
+        }
+        const level = biseLevel(examTitle, [...a.result!.subjects, ...b.result!.subjects]);
+        return names.map(name => {
+          const sa = a.result!.subjects.find(s => s.subject.trim().toLowerCase() === name.trim().toLowerCase());
+          const sb = b.result!.subjects.find(s => s.subject.trim().toLowerCase() === name.trim().toLowerCase());
+          const obA = sa ? biseSubjectObtained(sa) : null;
+          const obB = sb ? biseSubjectObtained(sb) : null;
+          const max = biseSubjectMax(name, level);
+          return { name, obA, obB, max };
+        });
+      })()
+    : [];
+
+  return (
+    <AnimatePresence>
+      {open && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }}
-          className="bg-card rounded-2xl border border-border shadow-2xl p-6 max-w-sm w-full text-center"
-          onClick={e => e.stopPropagation()}
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[95] bg-black/60 flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto"
+          role="dialog" aria-modal="true" aria-label="Result comparison"
+          onClick={onClose}
         >
-          <GitCompare className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-3" />
-          <h3 className="font-heading font-bold text-lg text-foreground">Result Comparison</h3>
-          <p className="text-sm text-muted-foreground mt-2">
-            Compare two roll numbers side by side is coming soon.
-          </p>
-          <button onClick={onClose} className="mt-4 rounded-xl px-5 py-2.5 font-semibold text-sm bg-secondary hover:bg-secondary/80 transition-colors">
-            Close
-          </button>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97, y: 8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }}
+            className="bg-card rounded-2xl border border-border shadow-2xl w-full max-w-lg my-4 sm:my-0"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+              <div className="flex items-center gap-2">
+                <GitCompare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <h3 className="font-heading font-bold text-base sm:text-lg text-foreground">Compare Results</h3>
+              </div>
+              <button onClick={onClose} aria-label="Close" className="w-8 h-8 rounded-full hover:bg-secondary flex items-center justify-center transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              {/* Roll number inputs — Roll No · Vs · Roll No */}
+              <div className="grid grid-cols-[1fr,auto,1fr] items-center gap-3">
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Roll Number</label>
+                  <input
+                    type="text" inputMode="numeric" value={a.roll}
+                    onChange={e => setA(s => ({ ...s, roll: e.target.value.replace(/\D/g, "") }))}
+                    placeholder="e.g. 123456"
+                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  />
+                </div>
+                <span className="mt-4 text-xs font-bold text-muted-foreground">VS</span>
+                <div>
+                  <label className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Roll Number</label>
+                  <input
+                    type="text" inputMode="numeric" value={b.roll}
+                    onChange={e => setB(s => ({ ...s, roll: e.target.value.replace(/\D/g, "") }))}
+                    placeholder="e.g. 654321"
+                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={runComparison}
+                disabled={busy}
+                className="w-full rounded-xl py-2.5 font-bold text-sm text-white bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 shadow-md shadow-blue-600/25 hover:shadow-blue-600/40 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {busy ? <><Loader2 className="w-4 h-4 animate-spin" /> Fetching both results…</> : <><Search className="w-4 h-4" /> Compare</>}
+              </button>
+
+              {/* Per-slot error/not-found messaging */}
+              {(a.state === "not-found" || a.state === "error") && (
+                <p className="text-xs text-red-600 dark:text-red-400 text-center">Roll {a.roll}: {a.message}</p>
+              )}
+              {(b.state === "not-found" || b.state === "error") && (
+                <p className="text-xs text-red-600 dark:text-red-400 text-center">Roll {b.roll}: {b.message}</p>
+              )}
+
+              {/* ── Comparison results ────────────────────────────────── */}
+              {bothFound && (
+                <div className="space-y-4 pt-1">
+                  {/* Headline cards */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {[{ slot: a, pct: pctA, isLeader: leader === "a" }, { slot: b, pct: pctB, isLeader: leader === "b" }].map((c, i) => (
+                      <div key={i} className={`rounded-xl border p-3 text-center ${c.isLeader ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-950/20" : "border-border bg-background/60"}`}>
+                        {c.isLeader && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-400 mb-1">
+                            <Trophy className="w-3 h-3" /> Leading
+                          </span>
+                        )}
+                        <p className="text-sm font-bold text-foreground truncate">{c.slot.result!.name || `Roll ${c.slot.roll}`}</p>
+                        <p className="text-[11px] text-muted-foreground font-mono">Roll {c.slot.roll}</p>
+                        <p className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">
+                          {c.pct != null ? `${c.pct}%` : c.slot.result!.marks || "—"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{c.slot.result!.grade ? `Grade ${c.slot.result!.grade}` : ""}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Per-subject comparison table */}
+                  {subjectRows.length > 0 && (
+                    <div className="rounded-xl border border-border overflow-hidden">
+                      <table className="w-full text-xs sm:text-sm">
+                        <thead>
+                          <tr className="bg-secondary/50 border-b border-border text-left text-muted-foreground">
+                            <th className="py-2 pl-3 pr-2 font-semibold">Subject</th>
+                            <th className="py-2 px-2 font-semibold text-center">Roll {a.roll}</th>
+                            <th className="py-2 pr-3 pl-2 font-semibold text-center">Roll {b.roll}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {subjectRows.map((row, i) => {
+                            const aHigher = row.obA != null && row.obB != null && row.obA > row.obB;
+                            const bHigher = row.obA != null && row.obB != null && row.obB > row.obA;
+                            return (
+                              <tr key={row.name} className={`${i % 2 === 1 ? "bg-secondary/20" : ""} ${i !== 0 ? "border-t border-border" : ""}`}>
+                                <td className="py-2 pl-3 pr-2 font-medium text-foreground truncate max-w-[110px]">{row.name}</td>
+                                <td className={`py-2 px-2 text-center font-semibold ${aHigher ? "text-emerald-600 dark:text-emerald-400" : "text-foreground"}`}>
+                                  {row.obA != null ? (row.max != null ? `${row.obA}/${row.max}` : row.obA) : "—"}
+                                </td>
+                                <td className={`py-2 pr-3 pl-2 text-center font-semibold ${bHigher ? "text-emerald-600 dark:text-emerald-400" : "text-foreground"}`}>
+                                  {row.obB != null ? (row.max != null ? `${row.obB}/${row.max}` : row.obB) : "—"}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {leader === "tie" && (
+                    <p className="text-center text-xs font-semibold text-muted-foreground">Both candidates are tied overall.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </motion.div>
         </motion.div>
-      </motion.div>
-    )}
-  </AnimatePresence>
-);
+      )}
+    </AnimatePresence>
+  );
+};
 
 // ── Has any school result been published? ───────────────────────────────────
 // Single count(*) on published rows. Used by the main Results page to
@@ -1217,6 +1398,73 @@ function biseSubjectObtained(s: { theory: string; practical: string }): number |
   if (th === null && pr === null) return null;
   return (th ?? 0) + (pr ?? 0);
 }
+// ── Shared BISE Peshawar fetch — used by the search box AND the Comparison
+// modal, so both go through the exact same defensive parsing (never throws
+// on a malformed proxy response) and the same normalized BiseResult shape.
+type BiseFetchOutcome =
+  | { status: "found"; result: BiseResult }
+  | { status: "not-found"; message: string }
+  | { status: "error"; message: string };
+
+async function fetchBiseResult(roll: string): Promise<BiseFetchOutcome> {
+  try {
+    const resp = await fetchWithRetryFn(`/api/bisep-proxy?roll=${encodeURIComponent(roll)}`);
+    let raw: unknown = null;
+    try { raw = await resp.json(); } catch { raw = null; }
+    const safeRaw: BiseProxyResponse | null = (raw && typeof raw === "object") ? (raw as BiseProxyResponse) : null;
+    const data: BiseProxyResponse = safeRaw ?? { found: false, error: "Invalid response from BISE Peshawar proxy." };
+
+    if (data && data.found === true) {
+      const safeSubjects = Array.isArray(data.subjects)
+        ? data.subjects
+            .filter((s): s is BiseSubject => s != null && typeof s === "object")
+            .map((s) => ({
+              sr:       typeof s.sr       === "string" ? s.sr       : String(s.sr ?? ""),
+              subject:  typeof s.subject  === "string" ? s.subject  : String(s.subject  ?? ""),
+              theory:   typeof s.theory   === "string" ? s.theory   : String(s.theory   ?? ""),
+              practical:typeof s.practical=== "string" ? s.practical: String(s.practical?? ""),
+              theory_fail:    s.theory_fail    === true,
+              practical_fail: s.practical_fail === true,
+            }))
+        : [];
+      return {
+        status: "found",
+        result: {
+          roll_no:          typeof data.roll_no          === "string" ? data.roll_no          : roll,
+          name:             typeof data.name             === "string" ? data.name             : "",
+          father_name:      typeof data.father_name      === "string" ? data.father_name      : "",
+          marks:            typeof data.marks            === "string" ? data.marks            : "",
+          grade:            typeof data.grade            === "string" ? data.grade            : "",
+          remarks:          typeof data.remarks          === "string" ? data.remarks          : "",
+          collect_dmc_from: typeof data.collect_dmc_from === "string" ? data.collect_dmc_from : "",
+          subjects:         safeSubjects,
+        },
+      };
+    } else if (data && typeof data.message === "string" && data.message) {
+      return { status: "not-found", message: data.message };
+    }
+    return { status: "error", message: "Couldn't reach BISE Peshawar right now. Please try again." };
+  } catch {
+    return { status: "error", message: "Couldn't reach BISE Peshawar right now. Please try again." };
+  }
+}
+
+// ── Overall percentage for a BISE result — sums obtained/max across every
+// subject that has a known fixed maximum (HSSC/SSC), for the Comparison
+// modal's headline number and winner badge.
+function biseOverallPercent(result: BiseResult, examTitle: string): number | null {
+  const level = biseLevel(examTitle, result.subjects);
+  if (!level) return null;
+  let obtained = 0, max = 0;
+  for (const s of result.subjects) {
+    const ob = biseSubjectObtained(s);
+    const mx = biseSubjectMax(s.subject, level);
+    if (ob === null || mx === null) continue;
+    obtained += ob; max += mx;
+  }
+  return max > 0 ? Math.round((obtained / max) * 1000) / 10 : null;
+}
+
 function SubjectBar({ pct, fail, delay }: { pct: number | null; fail: boolean; delay: number }) {
   const w = pct === null ? 0 : Math.max(0, Math.min(100, pct));
   return (
@@ -1866,7 +2114,7 @@ const BiseResultSearch = () => {
           data={bisepRevealData}
         />
       )}
-      <ComparisonComingSoonModal open={comparisonOpen} onClose={() => setComparisonOpen(false)} />
+      <ComparisonModal open={comparisonOpen} onClose={() => setComparisonOpen(false)} examTitle={liveTitle} />
     </div>
   );
 };

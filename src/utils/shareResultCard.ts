@@ -1305,6 +1305,32 @@ export async function shareBiseResultCard(d: BiseResultShareData): Promise<Share
   });
 }
 
+// ── Save to gallery — same beautiful canvas as Share, but always saves the
+// PNG straight to the device (no share-sheet detour). Mirrors the "downloaded"
+// branch of shareCanvas() above: canvas → PNG File → anchor download.
+export async function saveSchoolResultCard(d: SchoolResultShareData): Promise<ShareOutcome> {
+  const photo = d.photoUrl ? await loadImage(d.photoUrl) : null;
+  const canvas = buildSchoolCanvas(d, photo);
+  try {
+    const file = canvasToPngFile(canvas, `GHS-Babi-Khel-Result-${safeName(d.rollNo)}-${safeName(d.studentName)}.png`);
+    downloadFile(file);
+    return "downloaded";
+  } catch {
+    return "failed";
+  }
+}
+
+export async function saveBiseResultCard(d: BiseResultShareData): Promise<ShareOutcome> {
+  const canvas = buildBiseCanvas(d);
+  try {
+    const file = canvasToPngFile(canvas, `BISE-Result-${safeName(d.rollNo)}-GHS-Babi-Khel.png`);
+    downloadFile(file);
+    return "downloaded";
+  } catch {
+    return "failed";
+  }
+}
+
 export function rollSlipShareText(d: RollSlipShareData): string {
   return [
     `🎫 ${d.studentName} — Class ${d.className}`,

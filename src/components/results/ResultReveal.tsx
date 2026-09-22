@@ -1,44 +1,32 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowLeft, Sparkles, ArrowDown, Wand2, Ticket, MousePointer2, Download, Trophy } from "lucide-react";
+import { X, Sparkles, ArrowDown, Trophy } from "lucide-react";
 // ── Iron Man HUD Assembly 🤖 — digits fly in from the screen corners, spin,
 // spring-lock into place, then a blue/orange energy pulse radiates out and
 // the subject bars complete like digital circuits. See HudAssembly.tsx.
 import { HudDigits, HudPulse, CircuitFill } from "@/components/results/HudAssembly";
-// ── Holographic 3D Tilt 🪄 — the reveal card becomes a physical premium
-// metal card: springs tilt it toward the cursor/finger while a rainbow foil
-// sheen + gold glint ride the pointer. See HoloCard.tsx.
-import HoloCard from "@/components/results/HoloCard";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// RESULT REVEAL THEATER — cinematic result moment for GHS Babi Khel
+// RESULT REVEAL — cinematic result moment for GHS Babi Khel
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Two reveal modes for a freshly searched result (school OR BISE Peshawar),
-// plus a plain skip:
-//   1. THE GRAND REVEAL — an ember-velvet curtain with the honey school
-//      crest lifts (~2.6s, with a tiny tug of anticipation first), a soft
-//      light sweep crosses the card, then the marks stagger in row by row.
-//      Pass → crest glows antique gold. Fail → a soft, respectful teal glow
-//      and one kind sentence. No red.
-//   2. SCRATCH & SHINE — a champagne-silver foil painted on <canvas> with
-//      noise; the student rubs it away with finger/cursor to reveal marks.
+// Opens straight to the result card — no curtain-lift / scratch-card choice
+// screen, no 3D tilt, no gold glow. A gold confetti burst (pass) or calm
+// teal sparkle drift (fail) fires immediately alongside a soft thump + ta-da
+// chime, while the marks and subject bars animate in at normal speed via the
+// Iron Man HUD digit assembly.
 //
 // SMOOTHNESS CONTRACT (why it never hangs on a low-end phone):
 //   • All reveal motion is transform/opacity only — progress bars animate
-//     scaleX (GPU) instead of width (layout), the crest glow is a blurred
-//     div fading opacity instead of an animated drop-shadow filter.
-//   • ONE rAF loop drives both counters (~30fps number ticks), and the
-//     subject rows are memoized so count-up re-renders stay cheap.
-//   • The curtain uses a short 350ms beat + 0.22s tug (anticipation) then a
-//     2.6s lift with an ease that starts moving immediately — no frozen feel.
+//     scaleX (GPU) instead of width (layout).
+//   • Subject rows are memoized so their entrance stays cheap.
 //
 // SAFETY RULES (the "don't distract / don't break anything" contract):
 //   • Appears ONLY after the student actively searches — never on page load.
-//   • Always skippable in one tap; full result cards stay below, untouched.
+//   • Always closeable in one tap; full result cards stay below, untouched.
 //   • Gentle celebration sounds are synthesized on-device (WebAudio, no audio
-//     files, modest volume) — a soft thump + ta-da chime at the payoff, with
-//     a gold confetti burst (pass) or a calm teal sparkle drift (fail).
-//   • prefers-reduced-motion users bypass straight to a calm summary card.
+//     files, modest volume).
+//   • prefers-reduced-motion users see everything appear instantly, with no
+//     confetti/sound and no digit fly-in.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 export interface RevealSubject {
@@ -88,9 +76,8 @@ interface Props {
   data: RevealResultData;
 }
 
-type Stage = "choose" | "theater" | "scratch" | "summary";
 type CelebrationMode = "gold" | "calm";
-type PlayFn = (kind: "roll" | "thump" | "tada") => void;
+type PlayFn = (kind: "thump" | "tada") => void;
 
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
@@ -130,19 +117,7 @@ function useRevealAudio(): { play: PlayFn; prime: () => void } {
       if (!ctx) return;
       const now = ctx.currentTime;
 
-      if (kind === "roll") {
-        // Soft snare-roll shimmer (0.9s, fades out) under the curtain lift
-        const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.9), ctx.sampleRate);
-        const d = buf.getChannelData(0);
-        for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 1.6);
-        const src = ctx.createBufferSource();
-        src.buffer = buf;
-        const f = ctx.createBiquadFilter();
-        f.type = "lowpass"; f.frequency.value = 900;
-        const g = ctx.createGain(); g.gain.value = 0.08;
-        src.connect(f); f.connect(g); g.connect(ctx.destination);
-        src.start(now);
-      } else if (kind === "thump") {
+      if (kind === "thump") {
         // Deep-but-quiet cinematic landing
         const o = ctx.createOscillator();
         const g = ctx.createGain();
@@ -302,7 +277,7 @@ const SubjectRows = memo(function SubjectRows({ subjects, visible, animate }: {
 //                   complete like circuits, light sweep crosses the card
 // mode "static"   → everything plainly visible (scratch payoff / calm mode);
 //                   the scratch payoff re-fires the energy pulse + circuits
-const SummaryCard = ({ data, mode, celebrate, holo = false }: { data: RevealResultData; mode: "hidden" | "animate" | "static"; celebrate?: boolean; holo?: boolean }) => {
+const SummaryCard = ({ data, mode, celebrate }: { data: RevealResultData; mode: "hidden" | "animate" | "static"; celebrate?: boolean }) => {
   const animate = mode === "animate";
   const visible = mode !== "hidden";
   const hasFullMarks = data.obtained != null && data.total != null;
@@ -349,16 +324,7 @@ const SummaryCard = ({ data, mode, celebrate, holo = false }: { data: RevealResu
 
   return (
     <div ref={rootRef} className="relative w-[min(92vw,400px)]">
-      {/* Holographic 3D tilt — the card becomes a physical premium metal
-          object. Disabled under the curtain (hidden) and under the scratch
-          foil (the foil must stay glued to the card it covers). */}
-      <HoloCard
-        className="w-full"
-        surfaceClassName="bg-card rounded-3xl border border-border shadow-2xl overflow-hidden"
-        disabled={!holo || mode === "hidden"}
-      >
-      {/* Gold hairline */}
-      <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#EFA70C] to-transparent" />
+      <div className="relative w-full bg-card rounded-3xl border border-border shadow-2xl overflow-hidden">
       {/* Light sweep on reveal (theater) or finished scratching */}
       {((animate && !celebrate) || (celebrate && mode === "static")) && (
         <motion.div
@@ -502,7 +468,7 @@ const SummaryCard = ({ data, mode, celebrate, holo = false }: { data: RevealResu
         {/* Subject rows — one at a time, 0.045s stagger (circuits during HUD) */}
         <SubjectRows subjects={data.subjects} visible={visible} animate={animate} />
       </div>
-      </HoloCard>
+      </div>
 
       {/* Iron Man energy pulse — blue + orange rings radiate from the card's
           center once every digit has locked into place */}
@@ -511,356 +477,24 @@ const SummaryCard = ({ data, mode, celebrate, holo = false }: { data: RevealResu
   );
 };
 
-// ── Mode chooser — three beautiful tiles + skip (sound toggle removed) ─────
-const ChooseStage = ({ name, onPick, onSkip }: {
-  name: string; onPick: (m: "theater" | "scratch") => void; onSkip: () => void;
-}) => (
-  <div className="w-[min(92vw,460px)]">
-    <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-      className="bg-card rounded-3xl border border-border shadow-2xl overflow-hidden">
-      <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#EFA70C] to-transparent" />
-      <div className="px-6 pt-7 pb-6 text-center">
-        <div className="flex justify-center"><Crest size={58} glow="none" /></div>
-        <h3 className="mt-3 font-heading font-extrabold text-xl text-foreground">
-          {name.split(" ")[0]}, your result is ready
-        </h3>
-        <p className="text-xs text-muted-foreground mt-1">Pick how you want to see it — or skip straight to the card.</p>
-
-        <div className="mt-5 grid grid-cols-2 gap-2.5 max-w-[280px] mx-auto">
-          {/* Theater tile */}
-          <button onClick={() => onPick("theater")}
-            className="group relative rounded-xl border border-border bg-background p-2.5 text-left hover:border-[#EFA70C]/60 hover:shadow-lg transition-all">
-            <div className="h-10 rounded-lg overflow-hidden relative mb-2" style={{ background: "linear-gradient(180deg,#4A2812 0%,#2B160A 100%)" }}>
-              <div className="absolute inset-0 opacity-60" style={{ background: "repeating-linear-gradient(90deg, rgba(255,255,255,0.07) 0 6px, transparent 6px 16px, rgba(0,0,0,0.28) 16px 22px, transparent 22px 30px)" }} />
-              <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#FFD591] to-[#C77D14]" />
-              <motion.div initial={{ y: 10 }} animate={{ y: 0 }} transition={{ repeat: Infinity, repeatType: "reverse", repeatDelay: 1.6, duration: 1.2 }}
-                className="absolute inset-x-3 bottom-0 h-2 rounded-t-md bg-gradient-to-t from-[#FFD591]/70 to-transparent" />
-            </div>
-            <p className="font-heading font-bold text-[11.5px] text-foreground flex items-center gap-1"><Wand2 className="w-3 h-3 text-[#C77D14]" /> The Grand Reveal</p>
-            <p className="text-[9.5px] text-muted-foreground mt-0.5 leading-snug">A cinematic curtain lift with your crest glowing.</p>
-          </button>
-
-          {/* Scratch tile */}
-          <button onClick={() => onPick("scratch")}
-            className="group relative rounded-xl border border-border bg-background p-2.5 text-left hover:border-[#EFA70C]/60 hover:shadow-lg transition-all">
-            <div className="h-10 rounded-lg relative mb-2 overflow-hidden flex items-center justify-center"
-              style={{ background: "linear-gradient(135deg,#eef0f4 0%,#cdd2da 55%,#b9bfca 100%)" }}>
-              <div className="absolute inset-0 opacity-40" style={{ backgroundImage: "radial-gradient(rgba(90,96,110,0.35) 0.6px, transparent 0.7px)", backgroundSize: "5px 5px" }} />
-              <span className="relative text-[7.5px] font-black tracking-[0.2em] text-slate-500">SCRATCH ME</span>
-              <MousePointer2 className="absolute right-2 bottom-1.5 w-3 h-3 text-slate-500" />
-            </div>
-            <p className="font-heading font-bold text-[11.5px] text-foreground flex items-center gap-1"><Ticket className="w-3 h-3 text-[#C77D14]" /> Scratch &amp; Shine</p>
-            <p className="text-[9.5px] text-muted-foreground mt-0.5 leading-snug">Rub the silver foil like a lucky card.</p>
-          </button>
-        </div>
-
-        <p className="mt-3.5 text-[10.5px] text-muted-foreground">Both end with a little celebration 🎉</p>
-
-        <div className="mt-3">
-          <button onClick={onSkip} className="text-xs font-semibold text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors">
-            Skip — show my result directly
-          </button>
-        </div>
-      </div>
-    </motion.div>
-  </div>
-);
-
-// ── THE GRAND REVEAL — velvet curtain lift ──────────────────────────────────
-// Timeline: 350ms beat → 0.22s tug down (anticipation — the curtain "grips")
-// → 2.6s lift with an ease that starts moving right away. Total ≈ 3.2s of
-// pure transform animation. The old version waited 900ms doing nothing and
-// used a 3.9s ease whose first second barely moved — that read as "hanging".
-const TheaterStage = ({ data, play, onCelebrate, onDone }: {
-  data: RevealResultData; play: PlayFn; onCelebrate: (m: CelebrationMode) => void;
-  /** "View Full Result Card" — goes straight to the result, not through an
-      extra "summary" stage click (that extra hop was the bug where the
-      button needed two taps). */
-  onDone: () => void;
-}) => {
-  // idle → curtain closed · tug → anticipation dip · lifting → animating up · revealed → card live
-  const [phase, setPhase] = useState<"idle" | "tug" | "lifting" | "revealed">("idle");
-  const firedRef = useRef(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setPhase("tug"), 350);
-    return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    if (phase === "tug") {
-      const t = setTimeout(() => { setPhase("lifting"); play("roll"); }, 230);
-      return () => clearTimeout(t);
-    }
-    if (phase === "lifting") {
-      const t = setTimeout(() => {
-        setPhase("revealed");
-        if (!firedRef.current) {
-          firedRef.current = true;
-          play("thump");
-          window.setTimeout(() => play("tada"), 150);
-          onCelebrate(data.isPass ? "gold" : "calm");
-        }
-      }, 2600);
-      return () => clearTimeout(t);
-    }
-  }, [phase, play, onCelebrate, data.isPass]);
-
-  const revealed = phase === "revealed";
-
+// ── Summary stage — the one and only reveal view ────────────────────────────
+// Numbers and subject bars animate in at normal speed (HudDigits) unless the
+// user prefers reduced motion, in which case everything appears instantly.
+const SummaryStage = ({ data, onDone }: { data: RevealResultData; onDone: () => void }) => {
+  const reduced = prefersReducedMotion();
   return (
-    <div className="relative w-[min(92vw,430px)] flex flex-col items-center">
-      {/* Summary card underneath (revealed by the curtain) — HUD assembles it */}
-      <SummaryCard data={data} mode={revealed ? "animate" : "hidden"} holo />
-
-      {revealed && (
-        <motion.button onClick={onDone} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }}
-          className="mt-5 inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-bold text-sm text-white shadow-lg transition-transform hover:-translate-y-0.5"
-          style={{ background: "linear-gradient(135deg, hsl(20 40% 18%), hsl(20 45% 28%))" }}>
-          View Full Result Card <ArrowDown className="w-4 h-4" />
-        </motion.button>
-      )}
-
-      {/* ── The curtain ──
-          Anchored across the card, but the curtain itself is sticky with
-          viewport height: on TALL cards (BISE with ~20 rows) the crest,
-          the name and "Presenting your result" stay centred in exactly
-          what the student sees for the whole lift — and if they scroll
-          mid-show, the show stays in view instead of sliding away. */}
-      {!revealed && (
-        <div className="absolute inset-0 z-30">
-          <motion.div
-            initial={{ y: 0 }}
-            animate={{ y: phase === "idle" ? 0 : phase === "tug" ? 8 : "-104%" }}
-            transition={
-              phase === "tug"
-                ? { duration: 0.22, ease: "easeInOut" }
-                : { duration: 2.6, ease: [0.3, 0, 0.16, 1] }
-            }
-            className="sticky top-0 h-screen rounded-3xl overflow-hidden"
-            style={{ height: "100dvh", willChange: "transform", transform: "translateZ(0)", boxShadow: "0 26px 50px -18px rgba(0,0,0,0.5)" }}
-          >
-          {/* Velvet body */}
-          <div className="absolute inset-0" style={{
-            background:
-              "repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0) 18px, rgba(0,0,0,0.20) 36px, rgba(0,0,0,0) 54px)," +
-              "linear-gradient(180deg, #4A2812 0%, #2E1A0C 48%, #1C1007 100%)",
-          }} />
-          {/* Warm center spotlight so the crest pops */}
-          <div className="absolute inset-0" style={{ background: "radial-gradient(circle at 50% 34%, rgba(250,185,71,0.14), transparent 52%)" }} />
-          {/* Gold rod */}
-          <div className="absolute top-0 inset-x-0 h-2.5" style={{ background: "linear-gradient(180deg,#FFD591,#C77D14)" }} />
-          <div className="absolute top-1 -left-1 w-4 h-4 rounded-full" style={{ background: "radial-gradient(circle at 35% 35%, #FFE0A8, #C77D14)" }} />
-          <div className="absolute top-1 -right-1 w-4 h-4 rounded-full" style={{ background: "radial-gradient(circle at 35% 35%, #FFE0A8, #C77D14)" }} />
-          {/* Scalloped hem */}
-          <div className="absolute bottom-0 inset-x-0 h-4" style={{ background: "radial-gradient(circle at 11px 0px, #2B160A 10px, transparent 11px)", backgroundSize: "22px 16px", backgroundRepeat: "repeat-x" }} />
-
-          {/* Crest + presenting text, rides up with the curtain */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
-            <Crest size={92} glow="none" />
-            <p className="mt-4 text-[10px] font-bold tracking-[0.3em] uppercase text-[#EFA70C]/90">GHS Babi Khel</p>
-            <p className="mt-1.5 font-heading font-extrabold text-xl text-[#FFF3DC] leading-snug">{data.studentName}</p>
-            <p className="mt-1 text-[11px] text-white/55">{data.examLabel}{data.className ? ` · Class ${data.className}` : ""}</p>
-            <motion.p initial={{ opacity: 0.4 }} animate={{ opacity: [0.4, 0.9, 0.4] }} transition={{ repeat: Infinity, duration: 1.6 }}
-              className="mt-5 text-[10px] tracking-[0.25em] uppercase text-white/60">
-              Presenting your result
-            </motion.p>
-          </div>
-          </motion.div>
-        </div>
-      )}
+    <div className="w-[min(92vw,430px)] flex flex-col items-center">
+      <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+        <SummaryCard data={data} mode={reduced ? "static" : "animate"} celebrate />
+      </motion.div>
+      <motion.button onClick={onDone} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+        className="mt-5 inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-bold text-sm text-white shadow-lg"
+        style={{ background: "linear-gradient(135deg, hsl(20 40% 18%), hsl(20 45% 28%))" }}>
+        View Full Result Card <ArrowDown className="w-4 h-4" />
+      </motion.button>
     </div>
   );
 };
-
-// ── SCRATCH & SHINE — canvas foil with pointer erase ────────────────────────
-const ScratchStage = ({ data, play, onCelebrate, onDone }: {
-  data: RevealResultData; play: PlayFn; onCelebrate: (m: CelebrationMode) => void; onDone: () => void;
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const wrapRef = useRef<HTMLDivElement | null>(null);
-  const drawing = useRef(false);
-  const lastPt = useRef<{ x: number; y: number } | null>(null);
-  const checkedRef = useRef(false);
-  const lastCheckRef = useRef(0);
-  const [done, setDone] = useState(false);
-
-  const complete = useCallback(() => {
-    if (checkedRef.current) return;
-    checkedRef.current = true;
-    setDone(true);
-    play("thump");
-    window.setTimeout(() => play("tada"), 150);
-    onCelebrate(data.isPass ? "gold" : "calm");
-    // No auto-close here — stay on the revealed card with the "View Full
-    // Result Card" button, same as The Grand Reveal, instead of closing
-    // itself a second after the scratch finishes.
-  }, [play, onCelebrate, data.isPass]);
-
-  // Paint the champagne-silver foil once the canvas has layout
-  useLayoutEffect(() => {
-    const canvas = canvasRef.current, wrap = wrapRef.current;
-    if (!canvas || !wrap) return;
-    const rect = wrap.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.max(1, Math.round(rect.width * dpr));
-    canvas.height = Math.max(1, Math.round(rect.height * dpr));
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.scale(dpr, dpr);
-    const w = rect.width, h = rect.height;
-
-    // Base foil
-    const g = ctx.createLinearGradient(0, 0, w, h);
-    g.addColorStop(0, "#f0f2f6"); g.addColorStop(0.5, "#ccd1da"); g.addColorStop(1, "#b7bdc9");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, w, h);
-    // Noise flakes
-    for (let i = 0; i < (w * h) / 38; i++) {
-      const x = Math.random() * w, y = Math.random() * h, r = Math.random() * 1.3 + 0.3;
-      ctx.fillStyle = `rgba(${90 + Math.random() * 60 | 0},${95 + Math.random() * 60 | 0},${110 + Math.random() * 60 | 0},${Math.random() * 0.16 + 0.04})`;
-      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
-    }
-    // Diagonal sheen bands
-    ctx.save();
-    ctx.translate(w / 2, h / 2); ctx.rotate(-Math.PI / 7);
-    for (const [off, alpha] of [[-w * 0.28, 0.16], [w * 0.18, 0.1]] as const) {
-      const band = ctx.createLinearGradient(off - 40, 0, off + 40, 0);
-      band.addColorStop(0, "rgba(255,255,255,0)"); band.addColorStop(0.5, `rgba(255,255,255,${alpha})`); band.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = band; ctx.fillRect(off - 40, -h, 80, h * 2);
-    }
-    ctx.restore();
-    // Label
-    ctx.fillStyle = "rgba(84,90,104,0.85)";
-    ctx.textAlign = "center";
-    ctx.font = "800 15px 'Plus Jakarta Sans', system-ui, sans-serif";
-    ctx.fillText("S C R A T C H   T O   R E V E A L", w / 2, h / 2 - 4);
-    ctx.font = "600 10.5px 'Inter', system-ui, sans-serif";
-    ctx.fillStyle = "rgba(84,90,104,0.6)";
-    ctx.fillText("use your finger or cursor", w / 2, h / 2 + 16);
-  }, []);
-
-  const eraseAt = (x: number, y: number, r: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.globalCompositeOperation = "destination-out";
-    if (!lastPt.current) {
-      // First touch — a zero-length stroke draws nothing in some browsers,
-      // so punch an explicit hole.
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
-    } else {
-      ctx.beginPath();
-      ctx.moveTo(lastPt.current.x, lastPt.current.y);
-      ctx.lineTo(x, y);
-      ctx.lineWidth = r * 2;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.stroke();
-    }
-    lastPt.current = { x, y };
-  };
-
-  const pos = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-  };
-  const radiusFor = (e: React.PointerEvent<HTMLCanvasElement>) => (e.pointerType === "touch" ? 30 : 22);
-
-  // Sampled against a small OFFSCREEN copy of the canvas (fixed ~64px-wide),
-  // not the full-resolution foil — reading the full canvas via getImageData
-  // on a tall, high-DPR foil (e.g. a 1500px BISE sheet at 2x) blocks the
-  // main thread for a noticeable beat on low-end phones, which is what
-  // produced the "stuck and hanging" freeze while scratching.
-  const sampleCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const checkProgress = () => {
-    const canvas = canvasRef.current;
-    if (!canvas || checkedRef.current) return;
-    const sw = 48;
-    const sh = Math.max(1, Math.round(sw * (canvas.height / canvas.width)));
-    let sample = sampleCanvasRef.current;
-    if (!sample) { sample = document.createElement("canvas"); sampleCanvasRef.current = sample; }
-    if (sample.width !== sw || sample.height !== sh) { sample.width = sw; sample.height = sh; }
-    const sctx = sample.getContext("2d", { willReadFrequently: true });
-    if (!sctx) return;
-    sctx.clearRect(0, 0, sw, sh);
-    sctx.drawImage(canvas, 0, 0, sw, sh);
-    const img = sctx.getImageData(0, 0, sw, sh).data;
-    let clear = 0, total = 0;
-    for (let i = 3; i < img.length; i += 4) { total++; if (img[i] < 24) clear++; }
-    // Threshold scales with foil height: a school card (~600px) needs the
-    // classic 50%; a tall BISE sheet (20 rows ≈ 1500px) needs proportionally
-    // less, so it still pops after a satisfying rub instead of a marathon.
-    const threshold = Math.min(0.5, Math.max(0.14, 0.5 * (620 / Math.max(1, canvas.height / (Math.min(window.devicePixelRatio || 1, 2))))));
-    if (total > 0 && clear / total > threshold) complete();
-  };
-  // Progress is ALSO checked mid-stroke every ~120ms, so the card can pop
-  // while the finger is still down instead of waiting for a perfect release.
-  // The cheap downscaled sample above is what makes this frequency safe.
-  const maybeCheck = () => {
-    const now = performance.now();
-    if (now - lastCheckRef.current > 120) {
-      lastCheckRef.current = now;
-      checkProgress();
-    }
-  };
-
-  return (
-    <div className="relative w-[min(92vw,430px)] flex flex-col items-center">
-      <div ref={wrapRef} className="relative rounded-3xl">
-        {/* holo stays OFF here: the scratch foil must stay glued to the card
-            it covers — but the payoff still gets the energy pulse + circuits. */}
-        <SummaryCard data={data} mode="static" celebrate={done} holo={false} />
-        {/* Foil layer */}
-        <canvas
-          ref={canvasRef}
-          onPointerDown={e => { if (done) return; drawing.current = true; lastPt.current = null; e.currentTarget.setPointerCapture(e.pointerId); const p = pos(e); eraseAt(p.x, p.y, radiusFor(e)); }}
-          onPointerMove={e => { if (!drawing.current || done) return; const p = pos(e); eraseAt(p.x, p.y, radiusFor(e)); maybeCheck(); }}
-          onPointerUp={() => { drawing.current = false; lastPt.current = null; checkProgress(); }}
-          onPointerLeave={() => { if (drawing.current) { drawing.current = false; lastPt.current = null; checkProgress(); } }}
-          onPointerCancel={() => { drawing.current = false; lastPt.current = null; checkProgress(); }}
-          className="absolute inset-0 z-20 rounded-3xl transition-opacity duration-700"
-          style={{ touchAction: "none", cursor: done ? "default" : "grab", opacity: done ? 0 : 1, pointerEvents: done ? "none" : "auto", width: "100%", height: "100%" }}
-        />
-        {!done && (
-          <motion.p animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.8 }}
-            className="absolute -bottom-7 inset-x-0 text-center text-[11px] font-semibold text-white/85 z-10 flex items-center justify-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" /> Rub the foil to reveal your marks
-          </motion.p>
-        )}
-      </div>
-      {done && (
-        <motion.button onClick={onDone} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }}
-          className="mt-5 inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-bold text-sm text-white shadow-lg transition-transform hover:-translate-y-0.5"
-          style={{ background: "linear-gradient(135deg, hsl(20 40% 18%), hsl(20 45% 28%))" }}>
-          View Full Result Card <ArrowDown className="w-4 h-4" />
-        </motion.button>
-      )}
-      {!done && (
-        <button onClick={complete} className="mt-9 text-[10.5px] font-medium text-white/50 hover:text-white/80 underline underline-offset-2">
-          reveal instantly
-        </button>
-      )}
-    </div>
-  );
-};
-
-// ── Calm summary stage (reduced-motion + post-skip) ─────────────────────────
-const SummaryStage = ({ data, onDone }: { data: RevealResultData; onDone: () => void }) => (
-  <div className="w-[min(92vw,430px)] flex flex-col items-center">
-    <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
-      <SummaryCard data={data} mode="static" holo />
-    </motion.div>
-    <motion.button onClick={onDone} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-      className="mt-5 inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-bold text-sm text-white shadow-lg"
-      style={{ background: "linear-gradient(135deg, hsl(20 40% 18%), hsl(20 45% 28%))" }}>
-      View Full Result Card <ArrowDown className="w-4 h-4" />
-    </motion.button>
-  </div>
-);
 
 // ── Celebration canvas — gold confetti burst (pass) / calm teal drift (fail)
 // One <canvas>, one rAF loop, auto-stops and clears itself. No shadows, no
@@ -959,28 +593,39 @@ const CelebrationCanvas = ({ mode }: { mode: CelebrationMode }) => {
 };
 
 // ── Main overlay ────────────────────────────────────────────────────────────
+// Opens straight to the result — no curtain-lift / scratch-card choice
+// screen. Confetti (pass) or a calm sparkle drift (fail) fires immediately,
+// plus the soft thump + ta-da chime, while the numbers and subject bars
+// animate in via HudDigits — cinematic, but with zero extra taps.
 const ResultRevealOverlay = ({ open, onClose, data }: Props) => {
-  const [stage, setStage] = useState<Stage>("choose");
   const [celebration, setCelebration] = useState<{ k: number; mode: CelebrationMode } | null>(null);
   const { play, prime } = useRevealAudio();
   const reduced = useRef(false);
+  const firedRef = useRef(false);
 
-  const fireCelebration = useCallback((mode: CelebrationMode) => {
-    setCelebration(c => ({ k: (c?.k ?? 0) + 1, mode }));
-  }, []);
-
-  // Reset + reduced-motion routing each time the overlay opens
+  // Reset + fire celebration each time the overlay opens
   useEffect(() => {
     if (open) {
       reduced.current = prefersReducedMotion();
-      setStage(reduced.current ? "summary" : "choose");
       setCelebration(null);
-      // Lock page scroll while the theater is up
+      firedRef.current = false;
+      // Lock page scroll while the overlay is up
       const prev = document.body.style.overflow;
       document.body.style.overflow = "hidden";
+
+      if (!reduced.current && !firedRef.current) {
+        firedRef.current = true;
+        prime();
+        const t1 = window.setTimeout(() => play("thump"), 120);
+        const t2 = window.setTimeout(() => {
+          play("tada");
+          setCelebration(c => ({ k: (c?.k ?? 0) + 1, mode: data.isPass ? "gold" : "calm" }));
+        }, 260);
+        return () => { document.body.style.overflow = prev; window.clearTimeout(t1); window.clearTimeout(t2); };
+      }
       return () => { document.body.style.overflow = prev; };
     }
-  }, [open]);
+  }, [open, data.isPass, play, prime]);
 
   // Esc to close — one more escape hatch
   useEffect(() => {
@@ -989,14 +634,6 @@ const ResultRevealOverlay = ({ open, onClose, data }: Props) => {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
-
-  // Top-right button: on the "choose" stage (or reduced-motion straight
-  // summary) it closes the overlay; on "theater"/"scratch" it steps back
-  // one stage to "choose" instead of closing outright.
-  const handleBack = useCallback(() => {
-    if (stage === "choose" || reduced.current) onClose();
-    else setStage("choose");
-  }, [stage, onClose]);
 
   return (
     <AnimatePresence>
@@ -1007,61 +644,30 @@ const ResultRevealOverlay = ({ open, onClose, data }: Props) => {
           style={{ background: "radial-gradient(circle at 50% 38%, rgba(31,18,10,0.90), rgba(15,8,4,0.95))" }}
           role="dialog" aria-modal="true" aria-label="Result reveal"
         >
-          {/* Close — anchored to the viewport root, so it never scrolls away.
-              A dark chip + border so it stays visible over the light
-              Scratch & Shine foil and the light Grand Reveal summary card,
-              not just the dark curtain backdrop. Steps back one stage
-              instead of closing outright — "choose" (or straight to
-              "summary" if reduced motion) → chosen stage back to choose. */}
-          <button onClick={handleBack} aria-label="Back"
+          {/* Close — anchored to the viewport root, so it never scrolls away. */}
+          <button onClick={onClose} aria-label="Close"
             className="absolute top-4 right-4 z-40 w-10 h-10 rounded-full bg-black/55 hover:bg-black/70 border border-white/25 text-white flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors">
-            {stage === "choose" || reduced.current ? <X className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
+            <X className="w-5 h-5" />
           </button>
 
-          {/* Confetti / sparkle celebration (fires at the reveal payoff) */}
+          {/* Confetti / sparkle celebration (fires immediately on open) */}
           {celebration && <CelebrationCanvas key={celebration.k} mode={celebration.mode} />}
 
           {/* ── Scrollable viewport ──
-              SHORT cards (choose / school results) keep the centred modal
-              look via min-h-full + items-center. TALL cards (BISE Peshawar
-              with ~20 subject rows) grow past the viewport and SCROLL —
-              fully, top and bottom, on touch and desktop. Because the
-              centering wrapper is min-h-full (never shorter than its
-              content), flex centering can never clip the card's top.
-              overflow-x-hidden keeps the HUD digits' flight corridor from
-              creating a horizontal scrollbar — they simply enter from the
-              screen edge, exactly as intended. */}
+              TALL cards (BISE Peshawar with ~20 subject rows) grow past the
+              viewport and SCROLL — fully, top and bottom, on touch and
+              desktop. min-h-full + items-center keeps short cards centered
+              without ever clipping tall ones. overflow-x-hidden keeps the
+              HUD digits' flight corridor from creating a horizontal
+              scrollbar — they simply enter from the screen edge. */}
           <div
             className="absolute inset-0 overflow-y-auto overflow-x-hidden overscroll-contain"
             style={{ WebkitOverflowScrolling: "touch" }}
           >
             <div className="flex min-h-full items-center justify-center p-4">
-              <AnimatePresence mode="wait">
-            {stage === "choose" && (
-              <motion.div key="choose" exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.16 }}>
-                <ChooseStage
-                  name={data.studentName}
-                  onPick={m => { prime(); setStage(m); }}
-                  onSkip={onClose}
-                />
-              </motion.div>
-            )}
-            {stage === "theater" && (
-              <motion.div key="theater" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                <TheaterStage data={data} play={play} onCelebrate={fireCelebration} onDone={onClose} />
-              </motion.div>
-            )}
-            {stage === "scratch" && (
-              <motion.div key="scratch" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                <ScratchStage data={data} play={play} onCelebrate={fireCelebration} onDone={onClose} />
-              </motion.div>
-            )}
-            {stage === "summary" && (
-              <motion.div key="summary" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
                 <SummaryStage data={data} onDone={onClose} />
               </motion.div>
-            )}
-              </AnimatePresence>
             </div>
           </div>
         </motion.div>

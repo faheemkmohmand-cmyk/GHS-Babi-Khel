@@ -1,4 +1,3 @@
-
 // ── Client-side auto-publish trigger ────────────────────────────────────────
 // Fires the INSTANT any visitor's countdown reaches zero — instead of waiting
 // for the Vercel Cron's next scheduled tick. Safe to call from any browser:
@@ -457,23 +456,21 @@ import { useBisepCurrentExam, FALLBACK_TITLE } from "@/hooks/useBisepCurrentExam
 import { examTypeLabel } from "@/utils/examTypeLabel";
 // ── Beautiful shareable marks-card generator ────────────────────────────
 // Turns any displayed result (school or BISE Peshawar) into a professional,
-// school-branded PNG and hands it to the OS share sheet (WhatsApp etc.);
-// the caption always carries the homepage Results link.
+// school-branded PNG. Share hands it to the OS share sheet (WhatsApp etc.)
+// with the homepage Results link in the caption; Save downloads the same
+// PNG straight to the device.
 import {
   shareSchoolResultCard,
   shareBiseResultCard,
+  saveSchoolResultCard,
+  saveBiseResultCard,
   toastShareOutcome,
 } from "@/utils/shareResultCard";
-// ── Result Reveal Theater — cinematic curtain-lift / scratch-card moment ────
-// Shown ONCE after a successful search, always skippable, sound muted by
-// default, reduced-motion aware. The full result cards below are untouched.
+// ── Result Reveal — cinematic confetti + sound moment on a fresh search ────
+// Shown ONCE after a successful search, always closeable, reduced-motion
+// aware. The full result cards below are untouched.
 import ResultRevealOverlay, { type RevealResultData } from "@/components/results/ResultReveal";
-// ── Holographic 3D Tilt — wraps the full result cards (school + BISE) so
-// they behave like physical premium metal cards: springs tilt toward the
-// cursor/finger while a rainbow foil sheen + gold glint catch the light.
-// All transform/opacity, rAF-throttled, zero React re-renders per move.
-import HoloCard from "@/components/results/HoloCard";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Download, GitCompare } from "lucide-react";
 
 // ── BISE Peshawar live title (replaces the old static constant) ─────────────
 // Previously: `const BISEP_EXAM_TITLE = import.meta.env.VITE_BISEP_EXAM_TITLE || "..."`
@@ -578,6 +575,8 @@ const ResultCardSearch = () => {
   // and hands it to the OS share sheet (WhatsApp etc.). The caption always
   // carries the website's homepage Results link.
   const [sharingId, setSharingId] = useState<string | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [comparisonOpen, setComparisonOpen] = useState(false);
   // ── Result Reveal Theater — opens after a successful search; `revealKey`
   // remounts the overlay so "Replay reveal" restarts the experience fresh.
   const [revealOpen, setRevealOpen] = useState(false);
@@ -614,6 +613,31 @@ const ResultCardSearch = () => {
     });
     toastShareOutcome(outcome);
     setSharingId(null);
+  };
+
+  // ── Save Result — same beautiful marks-card image as Share, but saves it
+  // straight to the device instead of opening the OS share sheet.
+  const handleSaveResult = async (r: RCResult) => {
+    setSavingId(r.id);
+    const outcome = await saveSchoolResultCard({
+      studentName: r.students?.full_name || "Student",
+      className: String(r.class),
+      examLabel: `${examTypeLabel(r.exam_type)} ${r.year}`,
+      rollNo: r.exam_roll_no || r.students?.roll_number || "—",
+      totalMarks: r.total_marks,
+      obtainedMarks: r.obtained_marks,
+      percentage: r.percentage,
+      grade: r.grade || gradeFromPct(r.percentage),
+      isPass: r.is_pass,
+      schoolRank: r.school_rank ?? null,
+      classPosition: r.position ?? null,
+      subjects: Object.entries(r.subject_marks ?? {})
+        .filter(([, m]) => m && typeof m.obtained === "number" && typeof m.total === "number" && !(m.obtained === 0 && m.total === 0))
+        .map(([name, m]) => ({ name, obtained: m.obtained, total: m.total })),
+      photoUrl: r.students?.photo_url ?? null,
+    });
+    toastShareOutcome(outcome);
+    setSavingId(null);
   };
 
   const handleReset = () => {
@@ -871,14 +895,7 @@ const ResultCardSearch = () => {
                 </p>
                 {rcResults.map(r => (
                   <motion.div key={r.id} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
-                  {/* Holographic 3D Tilt — the full result card as a premium
-                      metal object. The card's look lives on HoloCard's tilting
-                      surface; tilt/foil/glint are transform-only (GPU). */}
-                  <HoloCard
-                    className="w-full"
-                    surfaceClassName="bg-card rounded-2xl shadow-elevated overflow-hidden border border-border"
-                    maxTilt={9}
-                  >
+                  <div className="w-full bg-card rounded-2xl shadow-elevated overflow-hidden border border-border">
 
                     <div className="result-hero-blue px-5 py-5 text-white relative overflow-hidden">
                       {/* premium decorations — gold hairline + dual orbs */}
@@ -1009,27 +1026,50 @@ const ResultCardSearch = () => {
                         Result Card is view-only (non-downloadable). The
                         standalone /result-card page still offers DMC download. */}
 
-                    {/* ── Share bar — premium gradient action ──────────
-                        Generates the school-branded marks-card image and
-                        hands it to the OS share sheet; the caption always
-                        carries the homepage Results link. */}
+                    {/* ── Action row — Share · Save · Comparison ──────────
+                        Three equal-size buttons in one line below the card.
+                        Share and Save both generate the same school-branded
+                        marks-card PNG; Share hands it to the OS share sheet,
+                        Save downloads it. Comparison opens the head-to-head
+                        roll-number comparison popup. */}
                     <div className="px-5 py-4 bg-gradient-to-r from-blue-50/70 via-transparent to-sky-50/70 dark:from-blue-950/20 dark:via-transparent dark:to-sky-950/10">
-                      <button
-                        onClick={() => handleShareResult(r)}
-                        disabled={sharingId === r.id}
-                        className="sheen w-full rounded-2xl py-3.5 px-5 font-bold text-white bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-60 disabled:hover:translate-y-0"
-                      >
-                        <span className="relative z-10 flex items-center justify-center gap-2.5 text-sm sm:text-base">
-                          {sharingId === r.id
-                            ? <><Loader2 className="w-5 h-5 animate-spin" /> Preparing your card…</>
-                            : <><Share2 className="w-5 h-5" /> Share Result<span className="hidden sm:inline text-xs font-semibold text-white/70"> · beautiful marks card + website link</span></>}
-                        </span>
-                      </button>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          onClick={() => handleShareResult(r)}
+                          disabled={sharingId === r.id}
+                          className="sheen rounded-xl py-2.5 px-2 font-bold text-white bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 shadow-md shadow-blue-600/25 hover:shadow-blue-600/40 transition-all disabled:opacity-60"
+                        >
+                          <span className="relative z-10 flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                            {sharingId === r.id
+                              ? <Loader2 className="w-4 h-4 animate-spin" />
+                              : <><Share2 className="w-4 h-4" /> Share</>}
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => handleSaveResult(r)}
+                          disabled={savingId === r.id}
+                          className="rounded-xl py-2.5 px-2 font-bold text-blue-700 dark:text-blue-400 bg-background border border-blue-300 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all disabled:opacity-60"
+                        >
+                          <span className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                            {savingId === r.id
+                              ? <Loader2 className="w-4 h-4 animate-spin" />
+                              : <><Download className="w-4 h-4" /> Save</>}
+                          </span>
+                        </button>
+                        <button
+                          onClick={() => setComparisonOpen(true)}
+                          className="rounded-xl py-2.5 px-2 font-bold text-blue-700 dark:text-blue-400 bg-background border border-blue-300 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all"
+                        >
+                          <span className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                            <GitCompare className="w-4 h-4" /> Compare
+                          </span>
+                        </button>
+                      </div>
                       <p className="text-center text-[11px] text-muted-foreground mt-2">
-                        Shares a professional marks-card image with your name, marks &amp; this website — perfect for WhatsApp.
+                        Share or save a professional marks-card image with your name, marks &amp; this website.
                       </p>
                     </div>
-                  </HoloCard>
+                  </div>
                   </motion.div>
                 ))}
               </>
@@ -1038,9 +1078,9 @@ const ResultCardSearch = () => {
         )}
       </AnimatePresence>
 
-      {/* ── Result Reveal Theater — curtain lift / scratch card ──
-          Pure overlay: one-tap skip, sound muted by default, reduced-motion
-          aware. Closing it lands back on the full result cards below. */}
+      {/* ── Result Reveal — confetti + sound moment ──
+          Pure overlay: one-tap close, reduced-motion aware. Closing it
+          lands back on the full result cards below. */}
       {rcResults.length > 0 && (() => {
         const r0 = rcResults[0];
         const revealData: RevealResultData = {
@@ -1057,7 +1097,7 @@ const ResultCardSearch = () => {
             .filter(([, m]) => m && typeof m === "object" && typeof m.obtained === "number" && typeof m.total === "number" && !(m.obtained === 0 && m.total === 0))
             .map(([name, m]) => ({ name, obtained: m.obtained, total: m.total })),
           photoUrl: r0.students?.photo_url ?? null,
-          // FIX: the reveal card (Grand Reveal + Scratch) showed the same
+          // FIX: the reveal card showed the same
           // marks as the full card but silently dropped Rank and Class
           // Position. Pass BOTH so SummaryCard can badge them — school_rank
           // (whole-school Trophy rank) and position (class rank).
@@ -1073,9 +1113,43 @@ const ResultCardSearch = () => {
           />
         );
       })()}
+      <ComparisonComingSoonModal open={comparisonOpen} onClose={() => setComparisonOpen(false)} />
     </div>
   );
 };
+
+// ── Comparison — placeholder ──────────────────────────────────────────────
+// The Compare button opens this modal today. The full head-to-head feature
+// (roll number vs roll number, parallel BISE fetch, graphical comparison)
+// is being built next; this holds the button's place with an honest message
+// instead of a dead click.
+const ComparisonComingSoonModal = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
+  <AnimatePresence>
+    {open && (
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[95] bg-black/60 flex items-center justify-center p-4"
+        role="dialog" aria-modal="true" aria-label="Result comparison"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }}
+          className="bg-card rounded-2xl border border-border shadow-2xl p-6 max-w-sm w-full text-center"
+          onClick={e => e.stopPropagation()}
+        >
+          <GitCompare className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-3" />
+          <h3 className="font-heading font-bold text-lg text-foreground">Result Comparison</h3>
+          <p className="text-sm text-muted-foreground mt-2">
+            Compare two roll numbers side by side is coming soon.
+          </p>
+          <button onClick={onClose} className="mt-4 rounded-xl px-5 py-2.5 font-semibold text-sm bg-secondary hover:bg-secondary/80 transition-colors">
+            Close
+          </button>
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
 // ── Has any school result been published? ───────────────────────────────────
 // Single count(*) on published rows. Used by the main Results page to
@@ -1278,9 +1352,11 @@ const BiseResultSearch = () => {
   // ── Share Result (BISE Peshawar) — board-styled marks-card image via the
   // OS share sheet; the caption carries the GHS Babi Khel homepage link.
   const [sharingBise, setSharingBise] = useState(false);
-  // ── Result Reveal Theater (BISE Peshawar) — the SAME Grand Reveal /
-  // Scratch experience the school results get. `revealKey` remounts the
-  // overlay so "Replay the reveal" restarts the experience fresh.
+  const [savingBise, setSavingBise] = useState(false);
+  const [comparisonOpen, setComparisonOpen] = useState(false);
+  // ── Result Reveal (BISE Peshawar) — the same confetti + sound moment the
+  // school results get. `revealKey` remounts the overlay so "Replay the
+  // reveal" restarts the experience fresh.
   const [revealOpen, setRevealOpen] = useState(false);
   const [revealKey, setRevealKey] = useState(0);
   // Closing the reveal should land the student ON the board result card
@@ -1325,6 +1401,42 @@ const BiseResultSearch = () => {
     });
     toastShareOutcome(outcome);
     setSharingBise(false);
+  };
+
+  // ── Save Result (BISE Peshawar) — same board-styled marks-card image as
+  // Share, but saves it straight to the device instead of opening the OS
+  // share sheet.
+  const handleSaveBiseResult = async () => {
+    if (!result) return;
+    setSavingBise(true);
+    const outcome = await saveBiseResultCard({
+      examTitle: liveTitle,
+      studentName: result.name || "Student",
+      fatherName: result.father_name || "—",
+      rollNo: result.roll_no,
+      marks: result.marks || "",
+      grade: result.grade || "",
+      remarks: result.remarks || "",
+      subjects: (() => {
+        const level = biseLevel(liveTitle, result.subjects);
+        return result.subjects.map(s => {
+          const ob = biseSubjectObtained(s);
+          const mx = biseSubjectMax(s.subject, level);
+          return {
+            sr: s.sr,
+            subject: s.subject,
+            theory: s.theory,
+            practical: s.practical,
+            theoryFail: s.theory_fail === true,
+            practicalFail: s.practical_fail === true,
+            barPct: ob === null || mx === null ? null : Math.min(100, (ob / mx) * 100),
+            maxMarks: mx,
+          };
+        });
+      })(),
+    });
+    toastShareOutcome(outcome);
+    setSavingBise(false);
   };
 
   const handleReset = () => {
@@ -1408,9 +1520,9 @@ const BiseResultSearch = () => {
           collect_dmc_from: typeof data.collect_dmc_from === "string" ? data.collect_dmc_from : "",
           subjects:         safeSubjects,
         });
-        // Cinematic reveal for the board result too — same Grand Reveal /
-        // Scratch moment the school results get. Full board card stays
-        // below, fully functional, always skippable.
+        // Cinematic reveal for the board result too — same confetti + sound
+        // moment the school results get. Full board card stays below,
+        // fully functional, always closeable.
         setRevealKey(k => k + 1);
         setRevealOpen(true);
       } else if (data && typeof data.message === "string" && data.message) {
@@ -1604,13 +1716,7 @@ const BiseResultSearch = () => {
                   </button>
                 </p>
                 <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
-                {/* Holographic 3D Tilt — same premium metal treatment as the
-                    school cards, now on the BISE Peshawar board result card. */}
-                <HoloCard
-                  className="w-full"
-                  surfaceClassName="bg-card rounded-2xl shadow-elevated overflow-hidden border border-border"
-                  maxTilt={9}
-                >
+                <div className="w-full bg-card rounded-2xl shadow-elevated overflow-hidden border border-border">
 
                 <div className="result-hero-blue px-5 py-5 text-white relative overflow-hidden">
                   {/* premium decorations — gold hairline + dual orbs */}
@@ -1705,23 +1811,43 @@ const BiseResultSearch = () => {
                   </div>
                 )}
 
-                {/* ── Share bar — premium gradient action ──────────────
-                    Generates a board-styled marks-card image with GHS Babi
-                    Khel branding; the caption carries the homepage link. */}
+                {/* ── Action row — Share · Save · Comparison ──────────────
+                    Three equal-size buttons in one line below the card. */}
                 <div className="px-5 py-4 bg-gradient-to-r from-blue-50/70 via-transparent to-sky-50/70 dark:from-blue-950/20 dark:via-transparent dark:to-sky-950/10">
-                  <button
-                    onClick={handleShareBiseResult}
-                    disabled={sharingBise}
-                    className="w-full rounded-xl py-2.5 px-5 font-bold text-blue-600 dark:text-blue-400 bg-background border border-blue-300 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all disabled:opacity-60"
-                  >
-                    <span className="relative z-10 flex items-center justify-center gap-2.5 text-sm sm:text-base">
-                      {sharingBise
-                        ? <><Loader2 className="w-4 h-4 animate-spin" /> Preparing your card…</>
-                        : <><Share2 className="w-4 h-4" /> Share Result<span className="hidden sm:inline text-xs font-semibold text-blue-600/70 dark:text-blue-400/70"> · beautiful marks card + website link</span></>}
-                    </span>
-                  </button>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      onClick={handleShareBiseResult}
+                      disabled={sharingBise}
+                      className="sheen rounded-xl py-2.5 px-2 font-bold text-white bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 shadow-md shadow-blue-600/25 hover:shadow-blue-600/40 transition-all disabled:opacity-60"
+                    >
+                      <span className="relative z-10 flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                        {sharingBise
+                          ? <Loader2 className="w-4 h-4 animate-spin" />
+                          : <><Share2 className="w-4 h-4" /> Share</>}
+                      </span>
+                    </button>
+                    <button
+                      onClick={handleSaveBiseResult}
+                      disabled={savingBise}
+                      className="rounded-xl py-2.5 px-2 font-bold text-blue-600 dark:text-blue-400 bg-background border border-blue-300 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all disabled:opacity-60"
+                    >
+                      <span className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                        {savingBise
+                          ? <Loader2 className="w-4 h-4 animate-spin" />
+                          : <><Download className="w-4 h-4" /> Save</>}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => setComparisonOpen(true)}
+                      className="rounded-xl py-2.5 px-2 font-bold text-blue-600 dark:text-blue-400 bg-background border border-blue-300 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all"
+                    >
+                      <span className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+                        <GitCompare className="w-4 h-4" /> Compare
+                      </span>
+                    </button>
+                  </div>
                 </div>
-                </HoloCard>
+                </div>
                 </motion.div>
               </>
             ) : null}
@@ -1730,8 +1856,7 @@ const BiseResultSearch = () => {
       </AnimatePresence>
 
       {/* ── Result Reveal Theater — BISE Peshawar edition ──
-          Same curtain lift / scratch card as school mode: one-tap skip,
-          celebration sounds + confetti at the payoff, reduced-motion aware.
+          Same confetti + sound moment as school mode, reduced-motion aware.
           Closing it lands back on the full board result card below. */}
       {bisepRevealData && (
         <ResultRevealOverlay
@@ -1741,6 +1866,7 @@ const BiseResultSearch = () => {
           data={bisepRevealData}
         />
       )}
+      <ComparisonComingSoonModal open={comparisonOpen} onClose={() => setComparisonOpen(false)} />
     </div>
   );
 };

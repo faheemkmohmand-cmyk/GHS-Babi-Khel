@@ -525,6 +525,128 @@ function useLatestPublishedExam() {
   });
 }
 
+interface SchoolResultCardProps {
+  result: RCResult;
+  onShare: (result: RCResult) => void;
+  onSave: (result: RCResult) => void;
+  onCompare: (result: RCResult) => void;
+  sharing: boolean;
+  saving: boolean;
+}
+
+function SchoolResultCard({ result: r, onShare, onSave, onCompare, sharing, saving }: SchoolResultCardProps) {
+  const subjectEntries = Object.entries(r.subject_marks ?? {}).filter(
+    ([, mark]) => mark && typeof mark.obtained === "number" && typeof mark.total === "number" && !(mark.obtained === 0 && mark.total === 0)
+  );
+  const grade = r.grade || gradeFromPct(r.percentage);
+  const rollNumber = r.exam_roll_no || r.students?.roll_number || "—";
+  return (
+    <div className="w-full bg-card rounded-2xl shadow-elevated overflow-hidden border border-border">
+      <div className="result-hero-blue px-5 py-5 text-white relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#E3B341] to-transparent" />
+        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-12 w-44 h-44 rounded-full bg-[#E3B341]/20 blur-2xl pointer-events-none" />
+        <div className="flex items-center justify-between gap-3 relative z-10">
+          <h3 className="font-heading font-extrabold text-lg sm:text-xl drop-shadow-sm">Student Result Details</h3>
+          <div className="text-right shrink-0 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-3.5 py-2">
+            <p className="text-[10px] uppercase tracking-wider opacity-80 font-semibold">Roll Number</p>
+            <p className="font-mono font-extrabold text-xl tracking-wider text-[#FDE68A]">{rollNumber}</p>
+          </div>
+        </div>
+        <p className="mt-2 relative z-10">
+          <span className="inline-flex items-center bg-white/15 backdrop-blur-sm border border-white/25 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase max-w-full whitespace-normal break-words leading-tight">
+            {examTypeLabel(r.exam_type)} {r.year} · GHS Babi Khel
+          </span>
+        </p>
+      </div>
+      <div className="px-5 py-4 border-b border-border">
+        <p className="text-xs font-bold uppercase tracking-wide text-orange-700 dark:text-orange-400 mb-2">Candidate Information</p>
+        <div className="rounded-xl border border-border overflow-hidden">
+          {[
+            { l: "Student Name", v: r.students?.full_name || "—" },
+            { l: "Father Name", v: r.students?.father_name || "—" },
+            { l: "Roll Number", v: rollNumber },
+            { l: "Marks", v: `${r.obtained_marks} / ${r.total_marks}`, bold: true },
+            { l: "Grade", v: grade },
+            { l: "Remarks", v: r.remarks || (r.is_pass ? "Passed" : "Needs improvement") },
+          ].map((row, i) => (
+            <div key={row.l} className={`grid grid-cols-[auto,1fr] gap-3 px-3.5 py-2.5 ${i % 2 === 1 ? "bg-secondary/30" : ""} ${i !== 0 ? "border-t border-border" : ""}`}>
+              <span className="text-xs sm:text-sm font-semibold shrink-0 text-muted-foreground">{row.l}</span>
+              <span className={`text-sm text-right sm:text-left break-words ${row.bold ? "font-extrabold text-orange-600 dark:text-orange-400 text-base" : "font-semibold text-foreground"}`}>{row.v}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      {subjectEntries.length > 0 ? (
+        <div className="px-5 py-4 space-y-2">
+          <p className="text-xs font-bold uppercase tracking-wide text-orange-700 dark:text-orange-400">Subject Wise Marks</p>
+          <div className="rounded-xl border border-border overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-muted-foreground bg-secondary/50 border-b border-border">
+                    <th className="py-2.5 pl-3.5 pr-3 font-semibold">#</th>
+                    <th className="py-2.5 pr-3 font-semibold">Subject</th>
+                    <th className="py-2.5 px-3 font-semibold text-center w-[26%] sm:w-[34%]">Bar</th>
+                    <th className="py-2.5 pr-3 font-semibold text-center">Obtained</th>
+                    <th className="py-2.5 pr-3.5 font-semibold text-center">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subjectEntries.map(([subject, mark], i) => {
+                    const pct = mark.total > 0 ? Math.min(100, (mark.obtained / mark.total) * 100) : null;
+                    return (
+                      <tr key={subject} className={`${i % 2 === 1 ? "bg-secondary/30" : ""} ${i !== 0 ? "border-t border-border" : ""}`}>
+                        <td className="py-2.5 pl-3.5 pr-3 text-muted-foreground">{i + 1}</td>
+                        <td className="py-2.5 pr-3 font-semibold text-foreground">{subject || "—"}</td>
+                        <td className="py-2.5 px-3 align-middle"><SubjectBar pct={pct} fail={pct !== null && pct < 33} delay={0.05 * i} /></td>
+                        <td className={`py-2.5 pr-3 text-center font-semibold ${pct !== null && pct < 33 ? "text-red-600 dark:text-red-400" : "text-foreground"}`}>{mark.obtained}</td>
+                        <td className="py-2.5 pr-3.5 text-center font-semibold text-foreground">{mark.total}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="px-5 py-4 border-b border-border">
+          <p className="text-xs text-muted-foreground text-center bg-secondary/40 rounded-lg py-3">Subject-wise marks not available for this result.</p>
+        </div>
+      )}
+      <div className="grid grid-cols-3 divide-x divide-border border-t border-b border-border">
+        <div className="p-3 text-center">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center justify-center gap-1 whitespace-nowrap"><Trophy className="w-3 h-3 text-orange-500" />Rank</p>
+          <p className="text-base sm:text-xl font-extrabold text-orange-600 dark:text-orange-400">{r.school_rank ? `#${r.school_rank}` : "—"}</p>
+        </div>
+        <div className="p-3 text-center">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold whitespace-nowrap">Class Position</p>
+          <p className="text-base sm:text-xl font-extrabold text-orange-600 dark:text-orange-400">{r.position ? `#${r.position}` : "—"}</p>
+        </div>
+        <div className="p-3 text-center">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold whitespace-nowrap">Result</p>
+          <p className={`text-base sm:text-xl font-extrabold ${r.is_pass ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>{r.is_pass ? "PASS" : "FAIL"}</p>
+        </div>
+      </div>
+      <div className="px-5 py-4 bg-gradient-to-r from-blue-50/70 via-transparent to-sky-50/70 dark:from-blue-950/20 dark:via-transparent dark:to-sky-950/10">
+        <div className="grid grid-cols-3 gap-2">
+          <button onClick={() => onShare(r)} disabled={sharing} className="sheen rounded-xl py-2.5 px-2 font-bold text-white bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 shadow-md shadow-blue-600/25 hover:shadow-blue-600/40 transition-all disabled:opacity-60">
+            <span className="relative z-10 flex items-center justify-center gap-1.5 text-xs sm:text-sm">{sharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Share2 className="w-4 h-4" /> Share</>}</span>
+          </button>
+          <button onClick={() => onSave(r)} disabled={saving} className="rounded-xl py-2.5 px-2 font-bold text-blue-700 dark:text-blue-400 bg-background border border-blue-300 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all disabled:opacity-60">
+            <span className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">{saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Download className="w-4 h-4" /> Save</>}</span>
+          </button>
+          <button onClick={() => onCompare(r)} className="rounded-xl py-2.5 px-2 font-bold text-blue-700 dark:text-blue-400 bg-background border border-blue-300 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all">
+            <span className="flex items-center justify-center gap-1.5 text-xs sm:text-sm"><GitCompare className="w-4 h-4" /> Compare</span>
+          </button>
+        </div>
+        <p className="text-center text-[11px] text-muted-foreground mt-2">Share or save a professional marks-card image with your name, marks &amp; this website.</p>
+      </div>
+    </div>
+  );
+}
+
 const ResultCardSearch = () => {
   // useSchoolSettings / school object removed — they were only used by the
   // DMC download button, which has been removed so the public homepage
@@ -862,181 +984,14 @@ const ResultCardSearch = () => {
                 </p>
                 {rcResults.map(r => (
                   <motion.div key={r.id} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
-                  <div className="w-full bg-card rounded-2xl shadow-elevated overflow-hidden border border-border">
-
-                    <div className="result-hero-blue px-5 py-5 text-white relative overflow-hidden">
-                      {/* premium decorations — gold hairline + dual orbs */}
-                      <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-[#E3B341] to-transparent" />
-                      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-                      <div className="absolute -bottom-16 -left-12 w-44 h-44 rounded-full bg-[#E3B341]/20 blur-2xl pointer-events-none" />
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 relative z-10">
-                        <div className="flex items-center gap-4 min-w-0">
-                          {r.students?.photo_url
-                            ? <img src={r.students.photo_url} alt="" className="w-14 h-14 rounded-full object-cover ring-2 ring-[#FDE68A] shadow-lg shrink-0" />
-                            : <div className="w-14 h-14 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center text-xl font-black border-2 border-[#E3B341]/80 shadow-lg shrink-0">{(r.students?.full_name || "S").charAt(0)}</div>
-                          }
-                          <div className="min-w-0 flex-1">
-                            <span className="inline-flex items-center bg-white/15 backdrop-blur-sm border border-white/25 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase mb-1 max-w-full whitespace-normal break-words leading-tight">
-                              {examTypeLabel(r.exam_type)} {r.year} · Class {r.class}
-                            </span>
-                            <h3 className="font-heading font-extrabold text-lg sm:text-xl drop-shadow-sm break-words">{r.students?.full_name}</h3>
-                          </div>
-                        </div>
-                        {r.exam_roll_no && (
-                          <div className="text-right sm:shrink-0 self-start sm:self-auto bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-3.5 py-2">
-                            <p className="text-[10px] uppercase tracking-wider opacity-80 font-semibold">Exam Roll No</p>
-                            <p className="font-mono font-extrabold text-xl tracking-wider text-[#FDE68A]">{r.exam_roll_no}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-4 divide-x divide-border border-b border-border">
-                      {[
-                        { l: "Total", v: r.total_marks, c: "text-foreground" },
-                        { l: "Obtained", v: r.obtained_marks, c: "text-orange-700 dark:text-orange-400" },
-                        { l: "%", v: `${r.percentage}%`, c: "text-orange-600 dark:text-orange-400" },
-                        { l: "Grade", v: r.grade || "—", c: "text-orange-600 dark:text-orange-400" },
-                      ].map(item => (
-                        <div key={item.l} className="p-3 sm:p-4 text-center">
-                          <p className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground font-semibold">{item.l}</p>
-                          <p className={`text-lg sm:text-2xl font-extrabold ${item.c}`}>{item.v}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    {(() => {
-                      // Show subject-wise marks whenever they actually exist
-                      // on the row. Filters out subjects where both obtained
-                      // AND total are 0 (those were not part of this result).
-                      // Matches the User Dashboard ResultCardTab behavior.
-                      const entries = r.subject_marks
-                        ? Object.entries(r.subject_marks).filter(
-                            ([, m]) => m && typeof m === "object" && typeof m.obtained === "number" && typeof m.total === "number" && !(m.obtained === 0 && m.total === 0)
-                          )
-                        : [];
-                      const hasSubjects = entries.length > 0;
-                      return hasSubjects ? (
-                        <div className="px-5 py-4 border-b border-border space-y-2">
-                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Subject-wise Marks</p>
-                          {entries.map(([sub, m], i) => {
-                            const pct = m.total > 0 ? Math.round((m.obtained / m.total) * 100) : 0;
-                            const failed = pct < 33;
-                            return (
-                              <div key={sub} className="flex items-center gap-3">
-                                <span className="text-sm text-foreground w-32 shrink-0 truncate font-medium" title={sub}>{sub}</span>
-                                <div className="flex-1 bg-secondary rounded-full h-1 overflow-hidden">
-                                  {/* scaleX (transform) instead of width — the
-                                      fill never reflows the page, so bars glide
-                                      at full frame rate even on low-end phones */}
-                                  <motion.div
-                                    initial={{ scaleX: 0 }}
-                                    animate={{ scaleX: Math.min(pct, 100) / 100 }}
-                                    transition={{ duration: 0.7, delay: 0.06 * i, ease: "easeOut" }}
-                                    style={{ transformOrigin: "left center", willChange: "transform" }}
-                                    className={`h-full w-full rounded-full ${failed ? "bg-gradient-to-r from-red-500 to-red-400" : "bg-gradient-to-r from-emerald-700 to-[#E3B341]"}`}
-                                  />
-                                </div>
-                                <span className="text-sm font-bold text-foreground w-16 text-right shrink-0 tabular-nums">{m.obtained}/{m.total}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <div className="px-5 py-4 border-b border-border">
-                          <p className="text-xs text-muted-foreground text-center bg-secondary/40 rounded-lg py-3">
-                            Subject-wise marks not entered for this result. See totals above.
-                          </p>
-                        </div>
-                      );
-                    })()}
-
-                    {/* Rank · Class Position · Result — MOBILE FIX.
-                        This strip used three different styles in a
-                        justify-between/flex-wrap row (amber pill left, PASS
-                        pill right, plain "Class Position: #N" text that
-                        wrapped alone onto a second line) — on phones it
-                        rendered scattered and unbalanced. Rebuilt as one
-                        symmetric 3-column strip with divide-x, mirroring the
-                        TOTAL/OBTAINED/%/GRADE row above: every value sits
-                        centered in its own cell on every screen width. */}
-                    <div className="grid grid-cols-3 divide-x divide-border border-b border-border">
-                      <div className="p-3 text-center">
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center justify-center gap-1 whitespace-nowrap">
-                          <Trophy className="w-3 h-3 text-orange-500" />
-                          {/* Trophy = whole-school rank, not class rank. */}
-                          Rank
-                        </p>
-                        <p className="text-base sm:text-xl font-extrabold text-orange-600 dark:text-orange-400">
-                          {r.school_rank ? `#${r.school_rank}` : "—"}
-                        </p>
-                      </div>
-                      <div className="p-3 text-center">
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold whitespace-nowrap">
-                          Class Position
-                        </p>
-                        <p className="text-base sm:text-xl font-extrabold text-orange-600 dark:text-orange-400">
-                          {/* Class position shown as "#N" — no "of M" suffix. */}
-                          {r.position ? `#${r.position}` : "—"}
-                        </p>
-                      </div>
-                      <div className="p-3 text-center">
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold whitespace-nowrap">
-                          Result
-                        </p>
-                        <p className={`text-base sm:text-xl font-extrabold ${r.is_pass ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
-                          {r.is_pass ? "PASS" : "FAIL"}
-                        </p>
-                      </div>
-                    </div>
-                    {/* DMC download button removed — the public homepage
-                        Result Card is view-only (non-downloadable). The
-                        standalone /result-card page still offers DMC download. */}
-
-                    {/* ── Action row — Share · Save · Comparison ──────────
-                        Three equal-size buttons in one line below the card.
-                        Share and Save both generate the same school-branded
-                        marks-card PNG; Share hands it to the OS share sheet,
-                        Save downloads it. Comparison opens the head-to-head
-                        roll-number comparison popup. */}
-                    <div className="px-5 py-4 bg-gradient-to-r from-blue-50/70 via-transparent to-sky-50/70 dark:from-blue-950/20 dark:via-transparent dark:to-sky-950/10">
-                      <div className="grid grid-cols-3 gap-2">
-                        <button
-                          onClick={() => handleShareResult(r)}
-                          disabled={sharingId === r.id}
-                          className="sheen rounded-xl py-2.5 px-2 font-bold text-white bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 shadow-md shadow-blue-600/25 hover:shadow-blue-600/40 transition-all disabled:opacity-60"
-                        >
-                          <span className="relative z-10 flex items-center justify-center gap-1.5 text-xs sm:text-sm">
-                            {sharingId === r.id
-                              ? <Loader2 className="w-4 h-4 animate-spin" />
-                              : <><Share2 className="w-4 h-4" /> Share</>}
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => handleSaveResult(r)}
-                          disabled={savingId === r.id}
-                          className="rounded-xl py-2.5 px-2 font-bold text-blue-700 dark:text-blue-400 bg-background border border-blue-300 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all disabled:opacity-60"
-                        >
-                          <span className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
-                            {savingId === r.id
-                              ? <Loader2 className="w-4 h-4 animate-spin" />
-                              : <><Download className="w-4 h-4" /> Save</>}
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => { setCompareTarget(r); setComparisonOpen(true); }}
-                          className="rounded-xl py-2.5 px-2 font-bold text-blue-700 dark:text-blue-400 bg-background border border-blue-300 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all"
-                        >
-                          <span className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
-                            <GitCompare className="w-4 h-4" /> Compare
-                          </span>
-                        </button>
-                      </div>
-                      <p className="text-center text-[11px] text-muted-foreground mt-2">
-                        Share or save a professional marks-card image with your name, marks &amp; this website.
-                      </p>
-                    </div>
-                  </div>
+                  <SchoolResultCard
+                    result={r}
+                    onShare={handleShareResult}
+                    onSave={handleSaveResult}
+                    onCompare={(result) => { setCompareTarget(result); setComparisonOpen(true); }}
+                    sharing={sharingId === r.id}
+                    saving={savingId === r.id}
+                  />
                   </motion.div>
                 ))}
               </>

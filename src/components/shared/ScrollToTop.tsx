@@ -6,27 +6,19 @@ import { ArrowUp } from "lucide-react";
 //  - Hidden while the page is stationary (no scrolling happening).
 //  - Appears the moment the user scrolls, and auto-hides ~900ms after
 //    scrolling stops.
-//  - While scrolling DOWN, it sits at the BOTTOM of the screen.
-//  - While scrolling UP, it sits at the TOP of the screen instead — so it's
-//    always near where the user's attention/thumb currently is.
+//  - It stays in a reserved bottom-right lane above the AI assistant,
+//    avoiding overlap on both mobile and desktop.
 //  - Clicking it always scrolls all the way back to the top.
 //  - Only shows at all once scrolled past 400px (no point near the top).
 const ScrollToTop = () => {
   const [visible, setVisible] = useState(false);
-  const [position, setPosition] = useState<"top" | "bottom">("bottom");
-  const lastScrollY = useRef(0);
   const hideTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
-    lastScrollY.current = window.scrollY;
-
     const onScroll = () => {
       const y = window.scrollY;
-      const goingDown = y > lastScrollY.current;
-      lastScrollY.current = y;
 
       if (y > 400) {
-        setPosition(goingDown ? "bottom" : "top");
         setVisible(true);
       } else {
         setVisible(false);
@@ -48,14 +40,12 @@ const ScrollToTop = () => {
     <AnimatePresence>
       {visible && (
         <motion.button
-          key={position}
+          key="scroll-to-top"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className={`fixed right-6 z-40 w-11 h-11 rounded-full gradient-accent text-primary-foreground shadow-elevated flex items-center justify-center hover:scale-110 active:scale-95 transition-transform ${
-            position === "bottom" ? "bottom-28 lg:bottom-6" : "top-20"
-          }`}
+          className="fixed right-5 sm:right-6 z-50 w-10 h-10 rounded-full gradient-accent text-primary-foreground shadow-elevated ring-2 ring-background/80 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform bottom-[calc(5.5rem+48px+0.75rem+env(safe-area-inset-bottom,0px))] lg:bottom-[calc(1.5rem+48px+0.75rem)]"
           aria-label="Scroll to top"
         >
           <ArrowUp className="w-5 h-5" />

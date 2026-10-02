@@ -152,40 +152,6 @@ const features = [
 ];
 
 
-/* ─── Toppers query ─── */
-function useSchoolToppers() {
-  return useQuery({
-    queryKey: ["home-school-toppers"],
-    queryFn: async () => {
-      // Only the most recent year's results are ever shown (see the
-      // byClass loop below), so fetch just that year instead of the
-      // whole results history — same output, far less data over the
-      // wire as more years of records pile up.
-      const { data: latest, error: yearErr } = await supabase
-        .from("results")
-        .select("year")
-        .eq("is_published", true)
-        .order("year", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (yearErr) throw yearErr;
-      if (!latest) return [];
-
-      const { data, error } = await supabase
-        .from("results")
-        .select("class, exam_type, year, obtained_marks, total_marks, percentage, grade, position, students(full_name, roll_number, photo_url)")
-        .eq("is_published", true)
-        .eq("year", latest.year)
-        .order("percentage", { ascending: false });
-      if (error) throw error;
-      const byClass: Record<string, any> = {};
-      for (const r of (data ?? [])) { if (!byClass[r.class]) byClass[r.class] = r; }
-      return Object.values(byClass).sort((a, b) => Number(a.class) - Number(b.class));
-    },
-    staleTime: 10 * 60 * 1000, gcTime: 30 * 60 * 1000, placeholderData: [],
-  });
-}
-
 /* ─── Free Dictionary API types ─── */
 interface DictPhonetic { text?: string; audio?: string; }
 interface DictDefinition { definition: string; example?: string; synonyms: string[]; }
@@ -658,61 +624,6 @@ function WordOfDaySection() {
   );
 }
 
-/* ─── Toppers section ─── */
-const TopperSection = () => {
-  const { data: toppers = [], isLoading } = useSchoolToppers();
-  if (!isLoading && toppers.length === 0) return null;
-  const gradients = [
-    "from-[#0c4a6e] via-[#0369a1] to-[#0ea5e9]", "from-[#075985] via-[#0284c7] to-[#38bdf8]",
-    "from-[#0c4a6e] via-[#0e7490] to-[#22d3ee]",  "from-[#1e3a8a] via-[#1d4ed8] to-[#3b82f6]",
-    "from-primary-dark via-primary to-primary-light",
-  ];
-  return (
-    <m.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y cv-auto">
-      <div className="container mx-auto px-4">
-        <ScrollReveal><SectionHeader eyebrow="Hall of Fame" title="School Rank #1 Students" subtitle="Position 1 holders from latest published exam results — per class" /></ScrollReveal>
-        {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
-            {[...Array(5)].map((_, i) => <div key={i} className="h-52 rounded-3xl bg-muted animate-pulse" />)}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
-            {toppers.map((t, i) => {
-              const name = (t.students as any)?.full_name || "Top Student";
-              const photoUrl = (t.students as any)?.photo_url || null;
-              const initials = (name || "?").split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase();
-              return (
-                <m.div key={i} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                  transition={{ delay: i * 0.08, type: "spring", stiffness: 200, damping: 20 }} whileHover={{ y: -5, scale: 1.03 }}>
-                  <div className={`relative rounded-3xl overflow-hidden shadow-xl bg-gradient-to-b ${gradients[i % gradients.length]}`}>
-                    <div className="relative flex flex-col items-center pt-7 pb-3 px-3">
-                      <div className="text-xl mb-1 drop-shadow">👑</div>
-                      {photoUrl
-                        ? <img src={photoUrl} alt={name} className="w-16 h-16 rounded-full object-cover border-4 border-white/50 shadow-lg" />
-                        : <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm border-4 border-white/40 flex items-center justify-center text-2xl font-black text-white shadow-lg">{initials}</div>
-                      }
-                      <div className="absolute top-3 right-3 bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5 text-[9px] font-black text-white border border-white/30">#1</div>
-                    </div>
-                    <div className="bg-black/20 backdrop-blur-sm mx-2 mb-2 rounded-2xl p-2.5 text-center">
-                      <h3 className="text-xs font-black text-white leading-tight line-clamp-1">{name}</h3>
-                      <p className="text-[9px] text-white/70 mt-0.5">Class {t.class}</p>
-                      <div className="flex items-center justify-center gap-1.5 mt-2">
-                        <div className="bg-white/20 rounded-lg px-2 py-0.5"><span className="text-xs font-black text-white">{Number(t.percentage || 0).toFixed(0)}%</span></div>
-                        <div className="bg-white/20 rounded-lg px-2 py-0.5"><span className="text-xs font-black text-white">{t.grade || "A+"}</span></div>
-                      </div>
-                      <p className="text-[8px] text-white/50 mt-1">{t.exam_type} · {t.year}</p>
-                    </div>
-                  </div>
-                </m.div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </m.section>
-  );
-};
-
 // ── Client-side auto-publish trigger ────────────────────────────────────────
 // Fires the instant a homepage visitor's countdown reaches zero, instead of
 // waiting for the Vercel Cron's next scheduled tick. Safe to call from any
@@ -892,7 +803,6 @@ function useHomeAutoPublishWatcher(schedules: ScheduledGroup[]) {
           qc.invalidateQueries({ queryKey: ["has-published-school-results"] });
           qc.invalidateQueries({ queryKey: ["latest-published-exam"] });
           qc.invalidateQueries({ queryKey: ["admin-results"] });
-          qc.invalidateQueries({ queryKey: ["home-school-toppers"] });
           return; // data changed; the refetch above will restart this effect
         }
       }
@@ -1326,8 +1236,6 @@ const Home = () => {
       {/* ══ 8. WORD OF THE DAY ══ */}
       <WordOfDaySection />
 
-      {/* ══ 8c. SCHOOL TOPPERS ══ */}
-      <TopperSection />
 
       {/* ══ 9. LATEST NOTICES ══ */}
       <m.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y bg-background cv-auto">

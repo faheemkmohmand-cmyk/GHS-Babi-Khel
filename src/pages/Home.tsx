@@ -1168,7 +1168,7 @@ const Home = () => {
               <m.div variants={stagger.child} className="mt-10 flex flex-wrap gap-4">
                 <Link to="/results">
                   <m.button whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}
-                    className="inline-flex items-center gap-2 bg-gold text-foreground font-bold px-7 py-3.5 rounded-full border border-transparent shadow-md hover:shadow-lg hover:bg-gold/90 transition-all duration-200">
+                    className="inline-flex items-center gap-2 bg-gold text-gold-ink font-bold px-7 py-3.5 rounded-full border border-transparent shadow-md hover:shadow-lg hover:bg-gold-strong hover:text-white dark:hover:text-gold-ink transition-all duration-200">
                     View Results <ArrowRight className="w-4 h-4" />
                   </m.button>
                 </Link>

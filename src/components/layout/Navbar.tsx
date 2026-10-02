@@ -605,6 +605,15 @@ const MobileAccordionSection = memo(function MobileAccordionSection({
   );
 });
 
+
+/* Brand wordmark — Playfair bold, last word in heritage gold ("GHS Babi <Khel>") */
+function BrandName({ name }: { name: string }) {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length < 2) return <>{name}</>;
+  const last = parts.pop();
+  return <>{parts.join(" ")} <span className="text-gold">{last}</span></>;
+}
+
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   // Desktop mega-menu: which section panel is open (null = none)
@@ -861,8 +870,8 @@ const Navbar = () => {
             )}
           </HexagonLogoFrame>
           <div>
-            <span className="font-display italic font-medium text-xl sm:text-2xl text-foreground leading-tight block tracking-tight">
-              {settings?.school_name || "GHS Babi Khel"}
+            <span className="font-display font-bold text-xl sm:text-2xl text-foreground leading-tight block tracking-tight">
+              <BrandName name={settings?.school_name || "GHS Babi Khel"} />
             </span>
             <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.25em] text-muted-foreground/80 leading-none">
               High School · Mohmand
@@ -931,11 +940,11 @@ const Navbar = () => {
                       >
                         <div className="relative rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-elevated overflow-hidden">
                           {/* thin azure hairline accent */}
-                          <div className="absolute top-0 inset-x-5 h-px bg-gradient-to-r from-transparent via-azure/50 to-transparent" aria-hidden="true" />
+                          <div className="absolute top-0 inset-x-5 h-px bg-gradient-to-r from-transparent via-gold/70 to-transparent" aria-hidden="true" />
                           
                           {/* micro eyebrow — small azure icon + tagline, one whisper line */}
                           <div className="relative flex items-center gap-2 px-4 pt-3 pb-1">
-                            <SectionIcon className="w-3 h-3 text-azure shrink-0" aria-hidden="true" />
+                            <SectionIcon className="w-3 h-3 text-gold shrink-0" aria-hidden="true" />
                             <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/80 leading-none truncate">
                               {section.tagline}
                             </p>
@@ -1324,7 +1333,7 @@ const Navbar = () => {
         pins it to the navbar instead of the viewport. */}
     {!hideGlobalBottomBar && (
       <div
-        className={`lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border transition-transform duration-300 ease-out ${
+        className={`dock-bar lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-sm border-t border-border transition-transform duration-300 ease-out ${
           bottomHidden ? "translate-y-full" : "translate-y-0"
         }`}
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}

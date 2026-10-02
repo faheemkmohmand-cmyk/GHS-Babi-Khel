@@ -29,6 +29,26 @@
 
    Do not re-add the @import here. ─────────────────────────────────────────── */
 
+/* Self-hosted variable fonts (Inter UI/body + Playfair Display headings).
+   Served from our own origin — no third-party request, so text styles
+   correctly even on networks where Google Fonts is slow or blocked.
+   Playfair italic + Noto Nastaliq (Urdu) still come from the async Google
+   stylesheet in index.html. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/inter-var.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('/fonts/playfair-var.woff2') format('woff2');
+}
+
 /* GPU compositing note: content-visibility removed from img/video —
    causes texture corruption glitch on Android Chrome during scroll/animation */
 
@@ -132,6 +152,9 @@
        separation. Does not replace --accent, which is used elsewhere. */
     --gold: 43 89% 38%;
     --gold-soft: 42 71% 86%;
+    --gold-strong: 41 87% 29%;   /* hover / pressed gold */
+    --gold-ink: 144 28% 14%;     /* text ON a solid gold fill (deep green ink) */
+    --primary-strong: 144 62% 14%;
 
     /* Institutional green (kept on the legacy --azure name so every existing
        utility keeps working) — the calm counterpoint used for links, nav
@@ -170,6 +193,9 @@
     --accent-foreground: 138 39% 94%;
     --gold: 43 74% 66%;
     --gold-soft: 43 49% 15%;
+    --gold-strong: 43 84% 74%;
+    --gold-ink: 147 48% 8%;
+    --primary-strong: 142 71% 45%;
     --azure: 142 69% 58%;
     --azure-strong: 142 71% 45%;
     --azure-soft: 147 34% 15%;
@@ -914,3 +940,72 @@
     opacity: 0.75;
   }
 }
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+ *  GREEN & GOLD POLISH — premium finishing layer (style-only, both themes)
+ * ───────────────────────────────────────────────────────────────────────── */
+@layer base {
+  /* Instant taps on phones (no 300ms delay / double-tap-zoom on controls) */
+  a, button, [role="button"], summary, label[for], select {
+    touch-action: manipulation;
+  }
+  html { -webkit-tap-highlight-color: transparent; text-size-adjust: 100%; -webkit-text-size-adjust: 100%; }
+  body { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+  /* Balanced, tidy multi-line headings (graceful no-op where unsupported) */
+  h1, h2, h3 { text-wrap: balance; }
+  /* WCAG 2.2 visible heritage-gold keyboard focus ring */
+  :focus-visible { outline: 2px solid hsl(var(--gold)); outline-offset: 2px; }
+  input:focus-visible, textarea:focus-visible, select:focus-visible { outline-offset: 0; }
+}
+
+@layer utilities {
+  /* Gold underline flourish under a heading */
+  .gold-underline { position: relative; display: inline-block; }
+  .gold-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -0.35em;
+    width: 3.5rem;
+    height: 0.25rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, hsl(var(--gold)), hsl(var(--gold) / 0.45));
+  }
+  /* Small gold section kicker */
+  .kicker {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: hsl(var(--gold));
+  }
+  /* Solid gold call-to-action: gold fill, deep-green ink, stronger gold on hover */
+  .btn-gold {
+    background: hsl(var(--gold));
+    color: hsl(var(--gold-ink));
+    box-shadow: 0 6px 16px -8px hsl(var(--gold) / 0.7);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .btn-gold:hover {
+    background: hsl(var(--gold-strong));
+    box-shadow: 0 10px 22px -10px hsl(var(--gold) / 0.8);
+  }
+  :root:not(.dark) .btn-gold:hover { color: #fff; }
+}
+
+/* Mobile bottom dock — gold indicator tab above the active icon */
+.dock-bar a[data-active] { position: relative; }
+.dock-bar a[data-active]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 28px;
+  height: 3px;
+  margin-left: -14px;
+  border-radius: 0 0 4px 4px;
+  background: hsl(var(--gold));
+  pointer-events: none;
+}
+.dock-bar { box-shadow: 0 -8px 24px -16px hsl(var(--primary) / 0.28); }

@@ -242,7 +242,7 @@ const FAQ = () => {
             <div className="mt-5 flex flex-wrap justify-center gap-3">
               <a
                 href="/contact"
-                className="inline-flex items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-2 rounded-full bg-gold px-5 py-2.5 text-sm font-semibold text-gold-ink hover:bg-gold-strong hover:text-white dark:hover:text-gold-ink transition-colors"
               >
                 <MessageCircle className="w-4 h-4" />
                 Contact the School

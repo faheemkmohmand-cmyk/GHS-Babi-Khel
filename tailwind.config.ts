@@ -24,6 +24,8 @@ export default {
         gold: {
           DEFAULT: "hsl(var(--gold))",
           soft: "hsl(var(--gold-soft))",
+          strong: "hsl(var(--gold-strong))",
+          ink: "hsl(var(--gold-ink))",
         },
         azure: {
           DEFAULT: "hsl(var(--azure))",
@@ -41,6 +43,7 @@ export default {
           dark: "hsl(var(--primary-dark))",
           light: "hsl(var(--primary-light))",
           glow: "hsl(var(--primary-glow))",
+          strong: "hsl(var(--primary-strong))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",

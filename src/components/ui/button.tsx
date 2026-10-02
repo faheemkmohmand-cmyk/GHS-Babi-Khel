@@ -12,7 +12,7 @@ const buttonVariants = cva(
         default: "bg-primary text-primary-foreground hover:bg-primary/95 shadow-sm hover:shadow-md",
         // Gold honour CTA — the hero "Apply / primary action" tone of the
         // Green & Gold system (gold fill, deep-green text).
-        gold: "bg-gold text-foreground hover:bg-gold/90 shadow-sm hover:shadow-md",
+        gold: "bg-gold text-gold-ink hover:bg-gold-strong dark:hover:text-gold-ink hover:text-white shadow-sm hover:shadow-md",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline: "border border-input bg-card text-foreground hover:bg-secondary",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",

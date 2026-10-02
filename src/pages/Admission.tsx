@@ -1,6 +1,5 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { lazy, Suspense, useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Upload, CheckCircle2, Search, Laptop,
   ChevronRight, ChevronLeft, Loader2, AlertCircle,
@@ -25,10 +24,10 @@ import { AdmissionType } from "@/hooks/useAdmission";
 import { useSchoolSettings } from "@/hooks/useSchoolSettings";
 import { supabasePublic } from "@/lib/supabase";
 import toast from "react-hot-toast";
-import ApplicationTracker from "@/components/admissions/ApplicationTracker";
-import InterviewSlotBooking from "@/components/admissions/InterviewSlotBooking";
-import AdmitCard from "@/components/admissions/AdmitCard";
-import FeeChallan from "@/components/admissions/FeeChallan";
+const ApplicationTracker = lazy(() => import("@/components/admissions/ApplicationTracker"));
+const InterviewSlotBooking = lazy(() => import("@/components/admissions/InterviewSlotBooking"));
+const AdmitCard = lazy(() => import("@/components/admissions/AdmitCard"));
+const FeeChallan = lazy(() => import("@/components/admissions/FeeChallan"));
 
 type View = "home" | "apply" | "track" | "success" | "eligibility";
 
@@ -152,28 +151,11 @@ const ApplyNowIcon = GraduationCap;
    feeling stuck on lower-end phones. This gates them behind the
    OS-level "reduce motion" setting; the glows stay visible, just
    static instead of endlessly animating, when that's on. */
-function usePrefersMotion() {
-  const [ok, setOk] = useState(true);
-  useEffect(() => {
-    const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-    if (!mq) return;
-    setOk(!mq.matches);
-    const handler = () => setOk(!mq.matches);
-    mq.addEventListener?.("change", handler);
-    return () => mq.removeEventListener?.("change", handler);
-  }, []);
-  return ok;
-}
-
-/**
- * Printable Admission Form Icon - Colorful Realistic Document
- * Vibrant document icon with download arrow
- */
 function PrintableFormIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
       {/* Paper sheet - white with subtle shadow */}
-      <path d="M6 2H14.5L19 6.5V20.5C19 21.05 18.55 21.5 18 21.5H6C5.45 21.5 5 21.05 5 20.5V3C5 2.95 5.45 2.5 6 2Z" 
+      <path d="M6 2H14.5L19 6.5V20.5C19 21.05 18.55 21.5 18 21.5H6C5.45 21.5 5 21.05 5 20.5V3C5 2.95 5.45 2.5 6 2Z"
         fill="white" stroke="#DC2626" strokeWidth="1.5" strokeLinejoin="round"/>
       {/* Folded corner - red accent */}
       <path d="M14.5 2V6.5H19" fill="#FEE2E2" stroke="#DC2626" strokeWidth="1.5" strokeLinejoin="round"/>
@@ -331,7 +313,7 @@ function EligibilityChecker({ onApply }: { onApply: (cls: string, type: Admissio
       </div>
 
       {result && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+        <div
           className={`mt-3 rounded-xl p-3 border ${
             result.eligible
               ? "bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-900"
@@ -368,7 +350,7 @@ function EligibilityChecker({ onApply }: { onApply: (cls: string, type: Admissio
               </p>
             </>
           )}
-        </motion.div>
+        </div>
       )}
     </div>
   );
@@ -385,9 +367,7 @@ function StepStepper({ step, totalSteps }: { step: number; totalSteps: number })
         const isDone = stepNum < step;
         return (
           <div key={i} className="flex items-center">
-            <motion.div
-              animate={isActive ? { scale: [1, 1.08, 1] } : {}}
-              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            <div
               className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full text-xs font-bold transition-all ${
                 isActive ? "bg-primary text-white shadow-lg shadow-primary/30" :
                 isDone  ? "bg-green-500 text-white" :
@@ -400,7 +380,7 @@ function StepStepper({ step, totalSteps }: { step: number; totalSteps: number })
                 {isDone ? <CheckCircle2 className="w-3.5 h-3.5" /> : stepNum}
               </div>
               <span className="hidden sm:inline">{s}</span>
-            </motion.div>
+            </div>
             {i < totalSteps - 1 && (
               <div className={`h-0.5 w-4 sm:w-8 mx-1 rounded transition-colors ${isDone ? "bg-green-400" : "bg-muted"}`} />
             )}
@@ -492,7 +472,7 @@ function TrackResult({ result }: { result: any }) {
   const canDownloadAdmitCard = ["interview_scheduled", "admitted", "admit_card_issued"].includes(status);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+    <div className="space-y-4">
       <Card className="border-2 border-primary/20">
         <CardContent className="p-5 space-y-4">
           <div className="flex items-start justify-between flex-wrap gap-3">
@@ -532,13 +512,13 @@ function TrackResult({ result }: { result: any }) {
 
       {/* Fee Challan - Show when approved or admitted */}
       {(status === "approved" || status === "admitted") && (
-        <FeeChallan
+        <Suspense fallback={<div className="h-24 rounded-2xl bg-muted" aria-label="Loading fee details" />}><FeeChallan
           admissionId={result.id}
           admissionType={result.admission_type || "fresh"}
           studentName={result.full_name}
           applyingClass={result.applying_class}
           referenceNo={result.reference_no}
-        />
+        /></Suspense>
       )}
 
       {isMigration && (
@@ -576,15 +556,15 @@ function TrackResult({ result }: { result: any }) {
       )}
 
       {!timelineLoading && timeline.length > 0 && (
-        <ApplicationTracker timeline={timeline} currentStatus={status} />
+        <Suspense fallback={<div className="h-28 rounded-2xl bg-muted" aria-label="Loading application timeline" />}><ApplicationTracker timeline={timeline} currentStatus={status} /></Suspense>
       )}
 
       {canBookInterview && bookingChecked && (
-        <InterviewSlotBooking
+        <Suspense fallback={<div className="h-24 rounded-2xl bg-muted" aria-label="Loading interview slots" />}><InterviewSlotBooking
           admissionId={result.id}
           currentBooking={realBooking?.label || null}
           onBooked={async () => { await loadTimeline(); await loadBooking(); }}
-        />
+        /></Suspense>
       )}
 
       {status === "waitlisted" && (
@@ -597,8 +577,8 @@ function TrackResult({ result }: { result: any }) {
         </div>
       )}
 
-      {canDownloadAdmitCard && <AdmitCard admission={result} />}
-    </motion.div>
+      {canDownloadAdmitCard && <Suspense fallback={<div className="h-16 rounded-2xl bg-muted" aria-label="Loading admit card" />}><AdmitCard admission={result} /></Suspense>}
+    </div>
   );
 }
 
@@ -622,7 +602,6 @@ function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch {} }
 const Admission = () => {
   const { data: settings } = useAdmissionSettings();
   const { data: school }   = useSchoolSettings();
-  const motionOk = usePrefersMotion();
 
   const isEffectivelyOpen = (() => {
     if (!settings?.is_open) return false;
@@ -1035,7 +1014,7 @@ const Admission = () => {
 
       const lineRow = (fields: string[]) =>
         `<div style="display:flex;gap:16px;">${fields.map(f => `<div style="flex:1;min-width:0;">${f}</div>`).join("")}</div>`;
-      
+
       const checkbox = (label: string, checked: boolean) =>
         `<span style="display:inline-flex;align-items:center;margin-right:14px;font-size:10.5px;color:#334155;"><span style="width:13px;height:13px;border:2px solid #94a3b8;border-radius:3px;margin-right:5px;display:inline-flex;align-items:center;justify-content:center;background:${checked ? '#10B981' : 'transparent'};border-color:${checked ? '#059669' : '#94a3b8'};">${checked ? '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M4 12l5 5L20 6"/></svg>' : ''}</span>${esc(label)}</span>`;
 
@@ -1383,97 +1362,75 @@ const Admission = () => {
           <div className="container mx-auto px-4 pt-0 max-w-3xl">
 
             {/* ── EDITORIAL HERO BANNER ── */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-              className="relative rounded-2xl overflow-hidden mb-6 -mx-4 sm:-mx-8 px-4 sm:px-8 py-8 sm:py-10 border border-[#D4A574]/40"
+            <div
+
+              className="relative rounded-2xl overflow-hidden mb-6 -mx-4 sm:-mx-8 px-4 sm:px-8 py-8 sm:py-10 border border-gold/40"
               style={{
-                background: "linear-gradient(160deg, #faf6f1 0%, #f5ebe0 25%, #fef3e8 50%, #fdf8f3 75%, #f9f1e8 100%)",
+                background: "linear-gradient(145deg, hsl(var(--primary-strong)) 0%, hsl(var(--primary)) 62%, hsl(var(--primary-dark)) 100%)",
               }}
             >
-              {/* Animated ambient background — slow drifting warm glows for a
-                  premium, alive feel instead of a static gradient panel. */}
-              <motion.div
-                aria-hidden
-                className="absolute -top-16 -right-10 w-72 h-72 rounded-full bg-[#D4A574]/12 blur-3xl"
-                animate={motionOk ? { x: [0, 20, 0], y: [0, 15, 0], scale: [1, 1.08, 1] } : {}}
-                transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }}
-              />
-              <motion.div
-                aria-hidden
-                className="absolute -bottom-14 -left-10 w-60 h-60 rounded-full bg-[#C96B3B]/10 blur-3xl"
-                animate={motionOk ? { x: [0, -15, 0], y: [0, -10, 0], scale: [1, 1.1, 1] } : {}}
-                transition={{ repeat: Infinity, duration: 12, ease: "easeInOut", delay: 1 }}
-              />
-              <motion.div
-                aria-hidden
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[300px] bg-gradient-to-r from-[#E8D5C4]/25 to-transparent rounded-full blur-3xl"
-                animate={motionOk ? { opacity: [0.5, 0.9, 0.5] } : {}}
-                transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-              />
+              {/* Lightweight editorial hero — no animated decorative layers. */}
               {/* Subtle editorial line accent */}
-              <div className="absolute top-6 left-1/2 -translate-x-1/2 w-16 h-[2px] bg-gradient-to-r from-transparent via-[#C96B3B]/40 to-transparent" />
+              <div className="absolute top-6 left-1/2 -translate-x-1/2 w-16 h-[2px] bg-gradient-to-r from-transparent via-gold/70 to-transparent" />
 
               <div className="relative text-center">
-                {/* Animated pulsing badge */}
-                <motion.div
-                  animate={motionOk ? { scale: [1, 1.05, 1] } : {}}
-                  transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+                {/* Admissions status badge */}
+                <div
                   className="inline-flex items-center gap-2 mb-4"
                 >
                   {isEffectivelyOpen ? (
-                    <div className="inline-flex items-center gap-2.5 bg-gradient-to-r from-[#f8f4f0] via-white to-[#fef7f2] text-[#8B4513] border border-[#D4A574]/50 text-sm font-semibold tracking-wide px-5 py-2.5 rounded-full shadow-sm backdrop-blur-sm">
+                    <div className="inline-flex items-center gap-2.5 bg-gold-soft text-[hsl(var(--gold-ink))] border border-gold/50 text-sm font-semibold tracking-wide px-5 py-2.5 rounded-full shadow-sm backdrop-blur-sm">
                       <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C96B3B] opacity-60"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#C96B3B]"></span>
+                        <span className="absolute inline-flex h-full w-full rounded-full bg-gold opacity-30"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gold"></span>
                       </span>
-                      <span style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', serif" }} className="text-base italic normal-case">Admissions Open</span>
-                      <span className="text-[#A0522D]/70 font-light">— Session {displaySessionYear}</span>
+                      <span style={{ fontFamily: "var(--font-display)" }} className="text-base italic normal-case">Admissions Open</span>
+                      <span className="text-[hsl(var(--gold-ink)/0.7)] font-light">— Session {displaySessionYear}</span>
                     </div>
                   ) : (
-                    <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#fef2f2] via-white to-[#fff5f5] text-[#991B1B] border border-[#FCA5A5]/50 text-sm font-semibold tracking-wide px-5 py-2.5 rounded-full shadow-sm">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#DC2626]" />
-                      <span style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', serif" }} className="text-base italic normal-case">Admissions Closed</span>
-                      <span className="text-[#991B1B]/70 font-light">— Session {displaySessionYear}</span>
+                    <div className="inline-flex items-center gap-2 bg-muted text-muted-foreground border border-border text-sm font-semibold tracking-wide px-5 py-2.5 rounded-full shadow-sm">
+                      <span className="w-2.5 h-2.5 rounded-full bg-destructive" />
+                      <span style={{ fontFamily: "var(--font-display)" }} className="text-base italic normal-case">Admissions Closed</span>
+                      <span className="text-muted-foreground font-light">— Session {displaySessionYear}</span>
                     </div>
                   )}
-                </motion.div>
+                </div>
 
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', serif", color: '#4A3728' }}>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-3 leading-tight" style={{ fontFamily: "var(--font-display)", color: 'hsl(var(--primary-foreground))' }}>
                   Admission Portal
                 </h1>
-                <p className="text-sm sm:text-base max-w-lg mx-auto mb-6 leading-relaxed" style={{ color: '#6B5344' }}>
+                <p className="text-sm sm:text-base max-w-lg mx-auto mb-6 leading-relaxed" style={{ color: 'hsl(var(--primary-foreground) / 0.78)' }}>
                   Apply online to check your eligibility. If approved, download forms and visit the school office to complete admission.
                 </p>
 
                 {isEffectivelyOpen && (
-                  <motion.button
-                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                  <button
                     onClick={() => startApply()}
-                    className="inline-flex items-center gap-2 font-bold px-8 py-3 rounded-full border border-[#C96B3B] bg-transparent hover:bg-[#C96B3B]/10 transition-all text-sm"
-                    style={{ color: '#C96B3B' }}
+                    className="inline-flex items-center gap-2 font-bold px-8 py-3 rounded-full border border-gold bg-transparent hover:bg-gold/10 transition-all text-sm"
+                    style={{ color: 'hsl(var(--gold))' }}
                   >
                     <ApplyNowIcon className="w-5 h-5" /> Apply Now
                     <ArrowRight className="w-4 h-4" />
-                  </motion.button>
+                  </button>
                 )}
 
                 {settings?.last_date && isEffectivelyOpen && (
-                  <p className="text-xs mt-4" style={{ color: '#8B7355' }}>
-                    Last Date: <span className="font-bold" style={{ color: '#5D4037' }}>{new Date(settings.last_date).toLocaleDateString("en-PK", { day: "numeric", month: "long", year: "numeric" })}</span>
+                  <p className="text-xs mt-4" style={{ color: 'hsl(var(--primary-foreground) / 0.72)' }}>
+                    Last Date: <span className="font-bold" style={{ color: 'hsl(var(--gold-soft))' }}>{new Date(settings.last_date).toLocaleDateString("en-PK", { day: "numeric", month: "long", year: "numeric" })}</span>
                   </p>
                 )}
                 {settings?.banner_message && isEffectivelyOpen && (
-                  <p className="text-xs mt-1 italic" style={{ color: '#9C8575', fontFamily: "'Cormorant Garamond', serif" }}>"{settings.banner_message}"</p>
+                  <p className="text-xs mt-1 italic" style={{ color: 'hsl(var(--primary-foreground) / 0.7)', fontFamily: "var(--font-display)", }}>"{settings.banner_message}"</p>
                 )}
               </div>
 
               {/* School Stats — removed static fake counters; real stats shown on HomePage */}
-            </motion.div>
+            </div>
 
             {/* ── CLOSED NOTICE — shown when admissions are not open ── */}
             {!isEffectivelyOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
+              <div
+
                 className="mb-6 p-5 rounded-2xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 flex items-start gap-3"
               >
                 <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
@@ -1483,7 +1440,7 @@ const Admission = () => {
                     {nextOpeningNote} Online application, tracking, eligibility check, and downloads will be available again once admissions reopen.
                   </p>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {/* ── ACTION CARDS (Apply / Track) ── */}
@@ -1508,11 +1465,9 @@ const Admission = () => {
                   },
                 },
               ].map((card, i) => (
-                <motion.button key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0, transition: { delay: 0.1 + i * 0.1 } }}
-                  whileHover={isEffectivelyOpen ? { scale: 1.03, y: -2 } : {}}
-                  whileTap={isEffectivelyOpen ? { scale: 0.97 } : {}}
+                <button key={i}
+
+
                   disabled={!isEffectivelyOpen}
                   onClick={() => {
                     if (!isEffectivelyOpen) {
@@ -1521,8 +1476,8 @@ const Admission = () => {
                     }
                     card.action();
                   }}
-                  className={`relative text-left p-5 rounded-2xl border border-[#C96B3B] bg-transparent transition-all group ${
-                    isEffectivelyOpen ? "hover:bg-[#C96B3B]/10" : "opacity-60 cursor-not-allowed grayscale"
+                  className={`relative text-left p-5 rounded-2xl border border-gold bg-transparent transition-all group ${
+                    isEffectivelyOpen ? "hover:bg-gold/10" : "opacity-60 cursor-not-allowed grayscale"
                   }`}
                 >
                   {!isEffectivelyOpen && (
@@ -1530,20 +1485,20 @@ const Admission = () => {
                       <LockIcon className="w-2.5 h-2.5" /> Locked
                     </div>
                   )}
-                  <div className={`w-11 h-11 rounded-xl bg-transparent border border-[#C96B3B] flex items-center justify-center mb-3 ${isEffectivelyOpen ? "group-hover:scale-110" : ""} transition-transform`}>
+                  <div className={`w-11 h-11 rounded-xl bg-transparent border border-gold flex items-center justify-center mb-3 ${isEffectivelyOpen ? "group-hover:scale-110" : ""} transition-transform`}>
                     <card.icon className="w-5 h-5" />
                   </div>
                   <p className="font-bold text-sm text-foreground">{card.title}</p>
                   <p className="text-xs text-muted-foreground mt-1">{card.desc}</p>
-                </motion.button>
+                </button>
               ))}
             </div>
 
 
 
             {/* ── DOWNLOAD SECTION ── */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.4 } }}
+            <div
+
               className="p-4 bg-card border border-border rounded-2xl mb-6 relative"
             >
               <div className="flex items-center justify-between mb-3">
@@ -1571,24 +1526,24 @@ const Admission = () => {
                 <button
                   onClick={() => isEffectivelyOpen && !downloading && generateEmptyForm()}
                   disabled={!!downloading || !isEffectivelyOpen}
-                  className="text-left p-3 rounded-xl border border-[#C96B3B] bg-transparent hover:bg-[#C96B3B]/10 transition-all group relative overflow-hidden disabled:opacity-60 sm:col-span-2"
+                  className="text-left p-3 rounded-xl border border-gold bg-transparent hover:bg-gold/10 transition-all group relative overflow-hidden disabled:opacity-60 sm:col-span-2"
                 >
                   {downloading === "empty_form" && (
-                    <div className="absolute inset-0 bg-[#C96B3B]/10 flex items-center justify-center rounded-xl">
-                      <Loader2 className="w-5 h-5 animate-spin text-[#C96B3B]" />
+                    <div className="absolute inset-0 bg-gold/10 flex items-center justify-center rounded-xl">
+                      <Loader2 className="w-5 h-5 animate-spin text-gold" />
                     </div>
                   )}
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-transparent border border-[#3B82F6] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                      <Download className="w-5 h-5 text-[#3B82F6]" />
+                    <div className="w-10 h-10 rounded-lg bg-transparent border border-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <Download className="w-5 h-5 text-primary" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold text-sm text-[#3B82F6] flex items-center gap-1.5">
+                      <p className="font-bold text-sm text-primary flex items-center gap-1.5">
                         <span>Download Admission Form</span>
                       </p>
                       <p className="text-xs text-muted-foreground mt-1 leading-tight">Blank form — print, fill by hand & submit at school office</p>
                       <p className="text-[9px] text-muted-foreground font-medium mt-1 flex items-center gap-1">
-                        <FileDown className="w-3 h-3 text-[#3B82F6]" /> No pre-filling required
+                        <FileDown className="w-3 h-3 text-primary" /> No pre-filling required
                       </p>
                     </div>
                   </div>
@@ -1628,11 +1583,11 @@ const Admission = () => {
               <p className="text-[10px] text-muted-foreground mt-2 text-center">
                 {isEffectivelyOpen ? "Tap to download • Admin-uploaded files used when available" : "Downloads unlock automatically when admissions reopen"}
               </p>
-            </motion.div>
+            </div>
 
             {/* ── ELIGIBILITY CHECKER (moved below Downloads, compacted) ── */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.5 } }}
+            <div
+
               className="mb-6 relative"
             >
               {isEffectivelyOpen ? (
@@ -1648,7 +1603,7 @@ const Admission = () => {
                   </div>
                 </div>
               )}
-            </motion.div>
+            </div>
 
             {/* ── SEO content block (sr-only) ── */}
             <section aria-label="Admission information" className="sr-only">
@@ -1704,10 +1659,8 @@ const Admission = () => {
 
             <StepStepper step={step} totalSteps={3} />
 
-            <AnimatePresence mode="wait">
-              <motion.div key={step}
-                initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.25 }}>
+            <div>
+              <div key={step}>
 
                 <Card className="border-border">
                   <CardContent className="p-5 space-y-4">
@@ -2016,15 +1969,15 @@ const Admission = () => {
                     </button>
                   </div>
                 )}
-              </motion.div>
-            </AnimatePresence>
+              </div>
+            </div>
           </div>
         )}
 
         {/* ══════════ SUCCESS VIEW ══════════ */}
         {view === "success" && (
           <div className="container mx-auto px-4 pt-10 max-w-md text-center">
-            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+            <div>
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
               </div>
@@ -2054,7 +2007,7 @@ const Admission = () => {
                   Submit Another Application
                 </Button>
               </div>
-            </motion.div>
+            </div>
           </div>
         )}
 

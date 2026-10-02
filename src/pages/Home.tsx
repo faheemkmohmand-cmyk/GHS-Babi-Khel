@@ -1509,8 +1509,6 @@ const Home = () => {
       {/* ══ 15. ADMISSION / FINAL CTA ══ */}
       <m.section initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }} variants={sectionFadeUp} className="section-y cv-auto relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <m.div animate={motionOk ? { scale: [1, 1.2, 1] } : {}} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
-          <m.div animate={motionOk ? { scale: [1.2, 1, 1.2] } : {}} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-0 right-0 w-96 h-96 bg-accent/5 rounded-full translate-x-1/2 translate-y-1/2" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="bg-card border border-border rounded-3xl p-10 md:p-16 text-center relative overflow-hidden shadow-card">
@@ -1520,17 +1518,17 @@ const Home = () => {
                 {isAdmissionEffectivelyOpen ? (
                   <>
                     {/* Admissions OPEN — Editorial Style */}
-                    <div className="inline-flex items-center gap-2.5 bg-gradient-to-r from-[#FFFDFA] via-white to-[#FFF3E4] text-[#7C2D12] border border-[#F5C89A]/50 text-sm font-semibold tracking-wide uppercase px-5 py-2.5 rounded-full mb-5 shadow-sm">
+                    <div className="inline-flex items-center gap-2.5 bg-gradient-to-r from-gold-soft via-card to-gold-soft text-[hsl(var(--gold-ink))] border border-gold/50 text-sm font-semibold tracking-wide uppercase px-5 py-2.5 rounded-full mb-5 shadow-sm">
                       <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B8860B] opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#B8860B]"></span>
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gold"></span>
                       </span>
                       <span className="font-display text-base italic normal-case tracking-normal">Admissions Open</span>
-                      <span className="text-[#9A3412]/70 font-light">— Session {admSettings.session_year}</span>
+                      <span className="text-[hsl(var(--gold-ink)/0.7)] font-light">— Session {admSettings.session_year}</span>
                     </div>
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-bold text-foreground mb-4 leading-tight">
                       Apply for Admission{" "}
-                      <span className="text-[#8A6508]">Today</span>
+                      <span className="text-gold">Today</span>
                     </h2>
                     {admSettings.last_date && (
                       <p className="text-muted-foreground text-base mb-3">
@@ -1546,7 +1544,7 @@ const Home = () => {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Link to="/admission">
                         <m.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                          className="w-full sm:w-auto px-10 py-5 bg-transparent text-[#8A6508] border-2 border-[#C2410C] rounded-2xl font-semibold hover:bg-[#C2410C]/10 transition-all flex items-center justify-center gap-2 text-lg">
+                          className="w-full sm:w-auto px-10 py-5 bg-transparent text-gold border-2 border-gold rounded-2xl font-semibold hover:bg-gold/10 transition-all flex items-center justify-center gap-2 text-lg">
                           <Send className="w-5 h-5" /> Apply Online
                         </m.button>
                       </Link>
@@ -1557,7 +1555,7 @@ const Home = () => {
                           reload), NOT the old window.location full reload. */}
                       <Link to="/admission" onClick={(e) => { e.preventDefault(); const el = document.querySelector('[data-track-section]'); if (el) { el.scrollIntoView({ behavior: 'smooth' }); } else { navigate("/admission", { state: { view: "track" } }); }}}>
                         <m.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                          className="w-full sm:w-auto px-10 py-5 bg-transparent text-[#8A6508] border-2 border-[#C2410C] rounded-2xl font-semibold hover:bg-[#C2410C]/10 transition-all flex items-center justify-center gap-2 text-lg">
+                          className="w-full sm:w-auto px-10 py-5 bg-transparent text-gold border-2 border-gold rounded-2xl font-semibold hover:bg-gold/10 transition-all flex items-center justify-center gap-2 text-lg">
                           <Search className="w-5 h-5" /> My Tracking
                         </m.button>
                       </Link>

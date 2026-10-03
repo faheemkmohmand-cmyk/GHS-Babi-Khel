@@ -26,11 +26,10 @@
 //
 //
 // CLAUDE-STYLE POLISH (per site-owner request, 2026-08-31):
-//   1. ANIMATED SPARKLE — while the assistant is working (before the first
-//      token and while it's busy overall, including the header avatar), the
-//      sparkle glyph now actually "sparkles": a slow continuous rotation
-//      plus a heartbeat scale pulse and an orange glow, exactly like
-//      Claude's thinking state. Previously it was a flat static glyph.
+//   1. ANIMATED SPARKLE — while the assistant is working before the first
+//      token and while it's busy overall, the in-message sparkle glyph
+//      "sparkles": a slow continuous rotation plus a heartbeat scale pulse
+//      and an orange glow, exactly like Claude's thinking state.
 //   2. EDIT + COPY ON YOUR OWN MESSAGES — hovering (desktop) or tapping
 //      (mobile) a user bubble reveals two small actions, Copy and Edit,
 //      just like Claude. Copy puts the message text on the clipboard and
@@ -84,8 +83,7 @@ const STARTER_SUGGESTIONS = [
 // rotation on the outer wrapper and a heartbeat scale pulse on the inner
 // one (two separate wrappers because CSS/transform animations on the same
 // element would overwrite each other). `active=false` eases everything back
-// to rest, so it can sit in the header and only come alive while the AI
-// is working.
+// to rest when the assistant is idle.
 const AnimatedSparkle = ({
   size = 20,
   active = true,
@@ -644,8 +642,6 @@ const AIAssistantWidget = () => {
     );
   }, [messages]);
 
-  const busy = loading || waitingFirstToken;
-
   return (
     <>
       {/* Floating toggle button.
@@ -703,22 +699,18 @@ const AIAssistantWidget = () => {
             transition={{ duration: 0.18, ease: "easeOut" }}
             className="fixed right-3 sm:right-6 z-[60] w-[calc(100vw-1.5rem)] max-w-md h-[34rem] max-h-[78vh] bg-[#FAFAF8] dark:bg-[#1A1918] border border-black/[0.08] dark:border-white/[0.08] rounded-2xl shadow-2xl flex flex-col overflow-hidden bottom-[calc(7.75rem+env(safe-area-inset-bottom,0px))] lg:bottom-24"
           >
-            {/* Header — neutral paper tone. The sparkle avatar now comes
-                alive (rotate + pulse + glow) while the assistant is busy. */}
+            {/* Header — neutral paper tone. Keep the title avatar static;
+                only the in-message loading indicator animates while busy. */}
             <div className="flex items-center gap-2.5 px-4 py-3.5 bg-[#FAFAF8] dark:bg-[#1A1918] border-b border-black/[0.06] dark:border-white/[0.06] shrink-0">
               <span className="shrink-0 inline-flex">
-                <AnimatedSparkle size={22} active={busy} className="text-amber-700" />
+                <AiSparkleIcon size={22} className="text-amber-700" />
               </span>
               <div className="min-w-0">
                 <p className="text-sm font-semibold leading-tight truncate text-[#1F1E1D] dark:text-[#F2F1EE]">
                   AI Assistant
                 </p>
                 <p className="text-[11px] text-[#6B6963] dark:text-[#A8A69F] leading-tight">
-                  {waitingFirstToken
-                    ? "Thinking…"
-                    : loading
-                      ? "Typing…"
-                      : "GHS Babi Khel · Ask about results, admissions, notices & more"}
+                  GHS Babi Khel · Ask about results, admissions, notices & more
                 </p>
               </div>
             </div>

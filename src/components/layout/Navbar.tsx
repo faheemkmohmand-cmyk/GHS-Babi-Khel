@@ -1272,11 +1272,11 @@ const Navbar = () => {
               aria-label="Home"
               data-active={location.pathname === "/" || undefined}
               onClick={closeAllMenus}
-              className={`flex-1 flex flex-col items-center justify-center py-3.5 ${
+              className={`dock-item flex-1 flex flex-col items-center justify-center py-3 ${
                 location.pathname === "/" ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              <Home className="w-6 h-6" fill={location.pathname === "/" ? "currentColor" : "none"} />
+              <Home className="w-7 h-7" fill={location.pathname === "/" ? "currentColor" : "none"} />
             </Link>
 
             {/* Search — opens the ⌘K command palette (the working mobile
@@ -1286,9 +1286,9 @@ const Navbar = () => {
               type="button"
               aria-label="Search"
               onClick={() => { closeAllMenus(); openCommandPalette(); }}
-              className="flex-1 flex flex-col items-center justify-center py-3.5 text-muted-foreground"
+              className="dock-item flex-1 flex flex-col items-center justify-center py-3 text-muted-foreground"
             >
-              <Search className="w-6 h-6" />
+              <Search className="w-7 h-7" />
             </button>
 
             {/* Results */}
@@ -1297,11 +1297,11 @@ const Navbar = () => {
               aria-label="Results"
               data-active={location.pathname === "/results" || undefined}
               onClick={closeAllMenus}
-              className={`flex-1 flex flex-col items-center justify-center py-3.5 ${
+              className={`dock-item flex-1 flex flex-col items-center justify-center py-3 ${
                 location.pathname === "/results" ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              <Trophy className="w-6 h-6" fill={location.pathname === "/results" ? "currentColor" : "none"} />
+              <Trophy className="w-7 h-7" fill={location.pathname === "/results" ? "currentColor" : "none"} />
             </Link>
 
             {/* Notifications — opens the existing NotificationBell panel */}
@@ -1313,11 +1313,11 @@ const Navbar = () => {
               aria-label="Admission"
               data-active={location.pathname === "/admission" || undefined}
               onClick={closeAllMenus}
-              className={`flex-1 flex flex-col items-center justify-center py-3.5 ${
+              className={`dock-item flex-1 flex flex-col items-center justify-center py-3 ${
                 location.pathname === "/admission" ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              <FileSignature className="w-6 h-6" fill={location.pathname === "/admission" ? "currentColor" : "none"} />
+              <FileSignature className="w-7 h-7" fill={location.pathname === "/admission" ? "currentColor" : "none"} />
             </Link>
           </div>
       </div>

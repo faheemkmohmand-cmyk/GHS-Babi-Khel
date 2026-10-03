@@ -266,7 +266,21 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
   const [desktopQuery, setDesktopQuery] = useState("");
   const [mobileQuery, setMobileQuery] = useState("");
   const mobileNavRef = useRef<HTMLElement>(null);
+  const [bottomHidden, setBottomHidden] = useState(false);
+  const bottomLastScrollYRef = useRef(0);
   const navigate = useNavigate();
+  useEffect(() => {
+    bottomLastScrollYRef.current = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - bottomLastScrollYRef.current;
+      if (y <= 64 || delta < -4) setBottomHidden(false);
+      else if (delta > 4) setBottomHidden(true);
+      bottomLastScrollYRef.current = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   const { isDark, toggle } = useDarkMode();
 
   useEffect(() => {
@@ -376,26 +390,26 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
       </div>
 
       {/* Mobile bottom bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card border-t border-border">
-        <div className="flex items-center justify-around py-1">
+      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-sm border-t border-border shadow-[0_-8px_24px_-16px_hsl(var(--primary)/0.28)] transition-transform duration-300 ease-out ${bottomHidden ? "translate-y-full" : "translate-y-0"}`} style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+        <div className="flex items-center justify-around py-1.5">
           {bottomBarItems.map(item => {
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
-                className={`flex flex-col items-center gap-0.5 p-2 min-w-[3rem] ${isActive ? "text-accent" : "text-muted-foreground"}`}
+                className={`admin-dock-item flex flex-col items-center gap-0.5 p-2 min-w-[3.5rem] ${isActive ? "text-accent" : "text-muted-foreground"}`}
               >
                 {item.lucideIcon ? (
-                  <item.lucideIcon className={`w-5 h-5 ${isActive ? "text-accent" : item.lucideColor ?? "text-muted-foreground"}`} />
+                  <item.lucideIcon className={`w-7 h-7 ${isActive ? "text-accent" : item.lucideColor ?? "text-muted-foreground"}`} />
                 ) : (
-                  <span className="text-lg leading-none">{item.emoji}</span>
+                  <span className="text-2xl leading-none">{item.emoji}</span>
                 )}
               </button>
             );
           })}
-          <button onClick={() => setSidebarOpen(true)} className="flex flex-col items-center gap-0.5 p-2 min-w-[3rem] text-muted-foreground">
-            <Menu className="w-5 h-5" />
+          <button onClick={() => setSidebarOpen(true)} className="admin-dock-item flex flex-col items-center gap-0.5 p-2 min-w-[3.5rem] text-muted-foreground">
+            <Menu className="w-7 h-7" />
           </button>
         </div>
       </div>

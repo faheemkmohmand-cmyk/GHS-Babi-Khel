@@ -1009,3 +1009,5 @@
   pointer-events: none;
 }
 .dock-bar { box-shadow: 0 -8px 24px -16px hsl(var(--primary) / 0.28); }
+.dock-item, .admin-dock-item { transition: color 0.2s ease, transform 0.2s ease; }
+.dock-item:active, .admin-dock-item:active { transform: scale(0.94); }

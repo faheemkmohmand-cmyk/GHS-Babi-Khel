@@ -398,18 +398,18 @@ const AdminLayout = ({ activeTab, onTabChange, children }: AdminLayoutProps) => 
               <button
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
-                className={`admin-dock-item flex flex-col items-center gap-0.5 p-2 min-w-[3.5rem] ${isActive ? "text-accent" : "text-muted-foreground"}`}
+                className={`admin-dock-item flex flex-col items-center gap-0.5 p-2 min-w-[3.25rem] ${isActive ? "text-accent" : "text-muted-foreground"}`}
               >
                 {item.lucideIcon ? (
-                  <item.lucideIcon className={`w-7 h-7 ${isActive ? "text-accent" : item.lucideColor ?? "text-muted-foreground"}`} />
+                  <item.lucideIcon className={`w-6 h-6 ${isActive ? "text-accent" : item.lucideColor ?? "text-muted-foreground"}`} />
                 ) : (
-                  <span className="text-2xl leading-none">{item.emoji}</span>
+                  <span className="text-xl leading-none">{item.emoji}</span>
                 )}
               </button>
             );
           })}
-          <button onClick={() => setSidebarOpen(true)} className="admin-dock-item flex flex-col items-center gap-0.5 p-2 min-w-[3.5rem] text-muted-foreground">
-            <Menu className="w-7 h-7" />
+          <button onClick={() => setSidebarOpen(true)} className="admin-dock-item flex flex-col items-center gap-0.5 p-2 min-w-[3.25rem] text-muted-foreground">
+            <Menu className="w-6 h-6" />
           </button>
         </div>
       </div>

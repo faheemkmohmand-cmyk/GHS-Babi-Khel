@@ -1276,7 +1276,7 @@ const Navbar = () => {
                 location.pathname === "/" ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              <Home className="w-7 h-7" fill={location.pathname === "/" ? "currentColor" : "none"} />
+              <Home className="w-6 h-6" fill={location.pathname === "/" ? "currentColor" : "none"} />
             </Link>
 
             {/* Search — opens the ⌘K command palette (the working mobile
@@ -1288,7 +1288,7 @@ const Navbar = () => {
               onClick={() => { closeAllMenus(); openCommandPalette(); }}
               className="dock-item flex-1 flex flex-col items-center justify-center py-3 text-muted-foreground"
             >
-              <Search className="w-7 h-7" />
+              <Search className="w-6 h-6" />
             </button>
 
             {/* Results */}
@@ -1301,7 +1301,7 @@ const Navbar = () => {
                 location.pathname === "/results" ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              <Trophy className="w-7 h-7" fill={location.pathname === "/results" ? "currentColor" : "none"} />
+              <Trophy className="w-6 h-6" fill={location.pathname === "/results" ? "currentColor" : "none"} />
             </Link>
 
             {/* Notifications — opens the existing NotificationBell panel */}
@@ -1317,7 +1317,7 @@ const Navbar = () => {
                 location.pathname === "/admission" ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              <FileSignature className="w-7 h-7" fill={location.pathname === "/admission" ? "currentColor" : "none"} />
+              <FileSignature className="w-6 h-6" fill={location.pathname === "/admission" ? "currentColor" : "none"} />
             </Link>
           </div>
       </div>

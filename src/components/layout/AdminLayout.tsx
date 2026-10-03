@@ -63,7 +63,6 @@ const navSections: NavSection[] = [
       { id: "events",        label: "Event Calendar",    emoji: "🗓️" },
       { id: "announcements", label: "Announcements",     emoji: "📢" },
       { id: "library",       label: "Library",           emoji: "📚" },
-      { id: "online-classes",label: "Online Classes",    emoji: "💻" },
     ],
   },
   {

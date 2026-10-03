@@ -31,7 +31,7 @@
 export const FAQ_CATEGORIES = [
   "Admissions",
   "Results & Exams",
-  "Notes, Library & Online Classes",
+  "Notes & Library",
   "School Information",
   "Website & Contact",
 ];
@@ -153,31 +153,24 @@ export const FAQ_ITEMS = [
       "For a school-conducted exam (semester or Annual-I/II), contact the school office or your subject teacher directly so the marks can be verified against the answer sheet. For a BISE Peshawar board result (SSC-I or SSC-II), rechecking and reappraisal requests must be submitted to BISE Peshawar itself within the board's notified rechecking window — the school website only displays the board's published result and cannot change it.",
   },
 
-  // ── Notes, Library & Online Classes ───────────────────────────────────────
+  // ── Notes & Library ───────────────────────────────────────────────────────
   {
     id: "nts-subjects",
-    category: "Notes, Library & Online Classes",
+    category: "Notes & Library",
     question: "Which subjects have free study notes on the website?",
     answer:
       "Free chapter-wise notes are available for nine subjects taught in classes 6 to 10: Mathematics, Physics, Chemistry, Biology, English, Urdu, Islamiat, Pakistan Studies and Computer Science. Every subject page is organised by class and chapter and includes explanations, solved examples, diagrams, practice quizzes and flashcards. The notes are written and maintained by the school's own teachers and are free for everyone.",
   },
   {
     id: "nts-library",
-    category: "Notes, Library & Online Classes",
+    category: "Notes & Library",
     question: "What can I download from the digital library?",
     answer:
       "The digital library (ghsbabikhel.indevs.in/library) hosts downloadable study materials for classes 6 to 10: books, chapter notes, past papers and helping materials, organised by subject and class with descriptions and file sizes. Everything is free to download. Students preparing for school exams or the BISE Peshawar board examinations can keep the files on their phone and read them offline after installing the website as an app.",
   },
   {
-    id: "nts-online",
-    category: "Notes, Library & Online Classes",
-    question: "How do online classes work on the website?",
-    answer:
-      "Open the Online Classes page (ghsbabikhel.indevs.in/online-classes). Classes are listed under Today, Upcoming and Completed tabs, and you can search by title, subject or teacher and filter by class and subject. When a class is live, a red live indicator appears — tap the class card and the live session opens right in your browser with video, live polls, a hand-raise queue and emoji reactions; no extra software is needed. Signing in lets you participate in polls, raise your hand and react; without an account you can still watch. Recorded and completed lessons stay available on the same page, so students can catch up on any class they missed.",
-  },
-  {
     id: "nts-search",
-    category: "Notes, Library & Online Classes",
+    category: "Notes & Library",
     question: "How do I quickly find a specific note, notice or past paper?",
     answer:
       "Use the search icon in the navigation bar, or go directly to the Search page (ghsbabikhel.indevs.in/search), and type a subject, chapter name, class or keyword. It searches across notes, notices, news, library files and other pages at once, so you don't have to browse each section separately.",

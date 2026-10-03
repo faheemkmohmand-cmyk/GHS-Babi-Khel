@@ -8,7 +8,7 @@
 import { useMemo } from "react";
 import {
   Bell, Newspaper, Users, Home, Info, Phone, Calendar,
-  BarChart3, BookOpen, Image, GraduationCap, Medal, Hash, Video,
+  BarChart3, BookOpen, Image, GraduationCap, Medal, Hash,
 } from "lucide-react";
 import { useNotices } from "@/hooks/useNotices";
 import { useNews } from "@/hooks/useNews";
@@ -34,7 +34,6 @@ export const PAGE_INDEX: { to: string; label: string; icon: any; keywords: strin
   { to: "/results",   label: "Results",    icon: BarChart3,     keywords: ["results", "exams", "grades", "marks", "report", "scorecard"] },
   { to: "/merit-list", label: "Merit List", icon: Medal,         keywords: ["merit", "merit list", "toppers", "position holders", "rank", "ranking", "champions"] },
   { to: "/roll-no-slip", label: "Roll No. Slip", icon: Hash,     keywords: ["roll", "roll no", "roll number", "exam roll numbers", "admit card", "slip"] },
-  { to: "/online-classes", label: "Online Classes", icon: Video, keywords: ["online classes", "live class", "google meet", "e-learning", "lectures"] },
   { to: "/notes",     label: "Notes",      icon: BookOpen,      keywords: ["notes", "study", "material", "chapters", "lessons", "subjects"] },
   { to: "/gallery",   label: "Gallery",    icon: Image,         keywords: ["gallery", "photos", "pictures", "images", "media"] },
   { to: "/admission", label: "Admission",  icon: GraduationCap, keywords: ["admission", "admissions", "apply", "enroll", "register", "form"] },

@@ -273,7 +273,7 @@ function buildLlmsTxt(s, admissionFiles = []) {
     : "";
   return `# ${s.school_name} — Government High School, District Mohmand
 
-> Official website of Government High School (GHS) Babi Khel, District Mohmand, Khyber Pakhtunkhwa (KPK), Pakistan — a government school offering classes 6 to 10 (matriculation), affiliated with BISE Peshawar for board exams. The site provides online admission applications, exam results searchable by roll number, official merit lists of top position holders, downloadable exam roll number slips, live online classes, official notices, school news, free study notes, past papers, an academic calendar, teacher directory and a photo gallery.
+> Official website of Government High School (GHS) Babi Khel, District Mohmand, Khyber Pakhtunkhwa (KPK), Pakistan — a government school offering classes 6 to 10 (matriculation), affiliated with BISE Peshawar for board exams. The site provides online admission applications, exam results searchable by roll number, official merit lists of top position holders, downloadable exam roll number slips, official notices, school news, free study notes, past papers, an academic calendar, teacher directory and a photo gallery.
 
 ## School facts
 
@@ -324,7 +324,6 @@ function buildLlmsTxt(s, admissionFiles = []) {
 - [Contact](${SITE_URL}/contact): Contact details, embedded map, WhatsApp and contact form
 - [About](${SITE_URL}/about): School history, mission, vision and staff overview
 - [FAQ](${SITE_URL}/faq): Complete frequently-asked-questions page — admissions, documents, tracking, results, grading, notes, contact and website usage
-- [Online Classes](${SITE_URL}/online-classes): Live interactive online classes students join right in the browser (video, live polls, hand-raise), plus scheduled and completed lessons listed by subject, class and teacher
 - [Duty Roster](${SITE_URL}/duty): Teacher duty roster and examination duties
 
 ## Results
@@ -345,7 +344,7 @@ function buildLlmsTxt(s, admissionFiles = []) {
 ${filesSection ? filesSection + "\n" : ""}
 ## Machine-readable data (recommended for AI tools)
 
-- [Live data feed (JSON)](${SITE_URL}/api/ai-data): the COMPLETE current state of this website in one request — school profile with live statistics, admission status and deadlines (live from the school dashboard), full admission procedure and documents, results info and grading scale, published merit lists, roll-number-slip sessions, the 20 latest notices and news with content, upcoming calendar events, teacher directory, library files, study notes subjects and chapters, photo gallery albums, duty roster, online classes and the full FAQ. Updated within a minute of any change; always prefer this over cached page snapshots when precision matters.
+- [Live data feed (JSON)](${SITE_URL}/api/ai-data): the COMPLETE current state of this website in one request — school profile with live statistics, admission status and deadlines (live from the school dashboard), full admission procedure and documents, results info and grading scale, published merit lists, roll-number-slip sessions, the 20 latest notices and news with content, upcoming calendar events, teacher directory, library files, study notes subjects and chapters, photo gallery albums, duty roster and the full FAQ. Updated within a minute of any change; always prefer this over cached page snapshots when precision matters.
 - [RSS feed](${SITE_URL}/rss.xml): Latest news and notices as they are published
 - [Sitemap](${SITE_URL}/sitemap.xml): XML sitemap of all public pages
 - [Academic calendar (ICS)](${SITE_URL}/calendar.ics): Subscribe to school events on any phone calendar
@@ -399,7 +398,6 @@ const STATIC_PAGES = [
   { path: "/contact", changefreq: "monthly", priority: "0.8" },
   { path: "/about", changefreq: "monthly", priority: "0.8" },
   { path: "/teachers", changefreq: "monthly", priority: "0.8", dbSource: { table: "teachers",      column: "created_at" } },
-  { path: "/online-classes", changefreq: "weekly",  priority: "0.8", dbSource: { table: "online_classes", column: "created_at" } },
   { path: "/notes", changefreq: "weekly",  priority: "0.8", dbSource: { table: "note_chapters",  column: "created_at" } },
   { path: "/library", changefreq: "weekly",  priority: "0.8", dbSource: { table: "library_files",  column: "created_at" } },
   { path: "/duty", changefreq: "weekly",  priority: "0.7", dbSource: { table: "duty_board",     column: "updated_at" } },

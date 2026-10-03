@@ -83,7 +83,6 @@ as a school/community project — see [Credits](#-credits).
 | **Teachers** (`/teachers`) | Staff directory |
 | **Gallery** (`/gallery`) | Photo albums + Facebook/YouTube video embeds (share-link auto-resolving) |
 | **Library** (`/library`) | Downloadable study material, videos, archive.org embeds |
-| **Online Classes** (`/online-classes`) | Live classes via embedded **Jitsi Meet** rooms |
 | **Roll No Slip** (`/roll-no-slip`) | Exam roll-number slips with **QR verification** and countdowns |
 | **Admission** (`/admission`) | Online application form, live **application tracker**, interview slot booking, admit card, fee challan |
 | **Duty** (`/duty`) | Public duty board |
@@ -135,7 +134,7 @@ The admin suite at `/admin` (role-gated) covers the entire school operation:
 - **Exams** — exam console, schedules, date sheets, **seating planner** (rooms + assignments),
   exam roll numbers, exam attendance (QR scanning), monitor pass, teacher scan console
 - **Content** — notices, news, announcements, events, gallery, videos, library, achievements,
-  online classes, duty board, daily quotes
+  duty board, daily quotes
 - **Fees** — fee structures, vouchers, payments, custom fee modal
 - **Admissions** — application review, documents, status timeline, interview slots
 - **Online tests** — MCQ test builder with timed attempts
@@ -357,7 +356,7 @@ The project uses **60+ Supabase (Postgres) tables**, grouped by domain:
 | Group | Tables |
 |---|---|
 | **Core** | `school_settings` (single row), `profiles` (roles + approval status), `students`, `teachers`, `rooms`, `notifications`, `notification_dismissals`, `site_visits` |
-| **Content** | `notices`, `news`, `gallery_albums`, `gallery_photos`, `videos`, `library_files`, `achievements`, `daily_quotes`, `school_events`, `online_classes`, `duty_board` |
+| **Content** | `notices`, `news`, `gallery_albums`, `gallery_photos`, `videos`, `library_files`, `achievements`, `daily_quotes`, `school_events`, `duty_board` |
 | **Academics** | `results`, `grading_schemes`, `merit_lists`, `honor_roll`, `houses`, `house_members`, `timetables`, `timetable_settings`, `timetable_overrides` |
 | **Attendance** | `attendance`, `attendance_daily_stats`, `attendance_thresholds` |
 | **Exams** | `exam_schedule`, `exam_roll_numbers`, `exam_roll_sessions`, `exam_attendance`, `exam_seating_plans`, `exam_seating_rooms`, `exam_seating_assignments`, `v_student_seating` (view), `tests`, `test_questions`, `test_attempts` |

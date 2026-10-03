@@ -15,7 +15,7 @@ import { useEvents, EVENT_TYPE_META, type SchoolEvent, type EventType } from "@/
 import ExamCountdown from "@/components/Calendar/ExamCountdown";
 import CalendarSubscribe from "@/components/Calendar/CalendarSubscribe";
 
-// Filter chips: Exams / Holidays / Sports / Fees / Online classes + All + PTMs + Results
+// Filter chips: Exams / Holidays / Sports + All + PTMs + Results
 const FILTERS: Array<{ value: EventType | "all"; label: string; emoji: string }> = [
   { value: "all",     label: "All",           emoji: "📅" },
   { value: "exam",    label: "Exams",         emoji: "📝" },
@@ -23,7 +23,6 @@ const FILTERS: Array<{ value: EventType | "all"; label: string; emoji: string }>
   { value: "ptm",     label: "PTMs",          emoji: "👨‍👩‍👧" },
   { value: "sports",  label: "Sports",        emoji: "⚽" },
   { value: "results", label: "Results",       emoji: "📊" },
-  { value: "general", label: "Online Classes",emoji: "💻" },
 ];
 
 const Calendar = () => {

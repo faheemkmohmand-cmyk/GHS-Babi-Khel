@@ -8,7 +8,7 @@ import {
   Users, GraduationCap, Bell, Newspaper, BookOpen, Image,
   Trophy, UserCog, TrendingUp, ClipboardList, Calendar,
   CheckCircle, Clock, AlertCircle, Activity, ArrowUpRight,
-  FileText, Video, DollarSign, BookMarked, Shield,
+  FileText, DollarSign, BookMarked, Shield,
   RefreshCw,
 } from "lucide-react";
 
@@ -20,7 +20,7 @@ const useAdminStats = () =>
       const [
         students, teachers, notices, news, library, albums,
         users, achievements, results, pendingUsers,
-        admissions, pendingAdmissions, onlineClasses, notes,
+        admissions, pendingAdmissions, notes,
       ] = await Promise.all([
         supabase.from("students").select("id", { count: "exact", head: true }),
         supabase.from("teachers").select("id", { count: "exact", head: true }),
@@ -34,7 +34,6 @@ const useAdminStats = () =>
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("admissions").select("id", { count: "exact", head: true }),
         supabase.from("admissions").select("id", { count: "exact", head: true }).eq("status", "pending"),
-        supabase.from("online_classes").select("id", { count: "exact", head: true }),
         supabase.from("notes").select("id", { count: "exact", head: true }),
       ]);
       return {
@@ -50,7 +49,6 @@ const useAdminStats = () =>
         pendingUsers: pendingUsers.count ?? 0,
         admissions: admissions.count ?? 0,
         pendingAdmissions: pendingAdmissions.count ?? 0,
-        onlineClasses: onlineClasses.count ?? 0,
         notes: notes.count ?? 0,
       };
     },
@@ -216,7 +214,6 @@ const AdminOverview = () => {
     { key: "notes" as const,        label: "Study Notes",    icon: BookMarked, color: "text-teal-600 dark:text-teal-400",    bgColor: "bg-teal-100 dark:bg-teal-500/20" },
     { key: "library" as const,      label: "Library Files",  icon: BookOpen,   color: "text-cyan-600 dark:text-cyan-400",    bgColor: "bg-cyan-100 dark:bg-cyan-500/20" },
     { key: "albums" as const,       label: "Gallery Albums", icon: Image,      color: "text-pink-600 dark:text-pink-400",    bgColor: "bg-pink-100 dark:bg-pink-500/20" },
-    { key: "onlineClasses" as const,label: "Online Classes", icon: Video,      color: "text-indigo-600 dark:text-indigo-400",bgColor: "bg-indigo-100 dark:bg-indigo-500/20" },
     { key: "achievements" as const, label: "Achievements",   icon: Trophy,     color: "text-yellow-600 dark:text-yellow-400",bgColor: "bg-yellow-100 dark:bg-yellow-500/20" },
     { key: "users" as const,        label: "Registered Users",icon: UserCog,   color: "text-rose-600 dark:text-rose-400",    bgColor: "bg-rose-100 dark:bg-rose-500/20",
       badge: stats?.pendingUsers ? { text: `${stats.pendingUsers} pending`, urgent: true } : undefined },

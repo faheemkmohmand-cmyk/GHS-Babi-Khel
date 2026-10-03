@@ -391,7 +391,6 @@ const NotesPage        = lazyWithRetry(() => import("./pages/notes/NotesPage"));
 const SubjectPage      = lazyWithRetry(() => import("./pages/notes/SubjectPage"));
 const ChapterPage      = lazyWithRetry(() => import("./pages/notes/ChapterPage"));
 const AdminDashboard   = lazyWithRetry(() => import("./pages/admin/AdminDashboard"));
-const OnlineClasses    = lazyWithRetry(() => import("./pages/OnlineClasses"));
 const RollNoSlip       = lazyWithRetry(() => import("./pages/ExamRollNumbers"));
 const NotFound         = lazyWithRetry(() => import("./pages/NotFound"));
 const Admission        = lazyWithRetry(() => import("./pages/Admission"));
@@ -544,7 +543,6 @@ const App = () => (
                     </AdminProtectedRoute>
                   }
                 />
-                <Route path="/online-classes"          element={<OnlineClasses />} />
                 <Route path="/roll-no-slip"            element={<RollNoSlip />} />
                 <Route path="/admission"               element={<Admission />} />
                 <Route path="/faq"                    element={<FAQ />} />

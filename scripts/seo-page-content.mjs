@@ -62,7 +62,6 @@ export const NAV_LINKS = [
   ["Notes", "/notes"],
   ["Library", "/library"],
   ["Gallery", "/gallery"],
-  ["Online Classes", "/online-classes"],
   ["Duty Roster", "/duty"],
   ["FAQ", "/faq"],
 ];
@@ -106,7 +105,6 @@ const PAGES = {
           "Search BISE Peshawar board results (SSC 9th/10th) live from the official board portal",
           "View the official Merit List — top position holders of each class and school-wide rankings with pass statistics",
           "Find, download and share your exam Roll No. Slip with its QR code and the exam date sheet",
-          "Join live online classes in the browser and catch up on recorded lessons",
           "Read official notices — holidays, exam schedules, fee deadlines and parent-teacher meetings",
           "Read school news — events, achievements, sports and competitions",
           "Download free study notes for classes 6–10 in nine subjects",
@@ -380,19 +378,7 @@ const PAGES = {
     ],
   },
 
-  "/online-classes": {
-    title: "Online Classes — GHS Babi Khel",
-    description:
-      "Online classes of GHS Babi Khel for classes 6–10 — live interactive sessions students join right in the browser, plus scheduled and completed lessons listed by subject, class and teacher.",
-    h1: "Online Classes",
-    blocks: [
-      {
-        p: [
-          "The Online Classes page lists every scheduled class of Government High School Babi Khel under Today, Upcoming and Completed tabs, searchable by title, subject or teacher and filterable by class and subject. When a class is live, students tap the class card and the session opens right in the browser with video, live polls, a hand-raise queue and emoji reactions — no extra software needed. Signing in lets a student participate in polls and reactions; without an account a student can still watch. Recorded and completed lessons stay available on the same page so students can catch up on anything they missed.",
-        ],
-      },
-    ],
-  },
+
 
   "/merit-list": {
     title: "Merit List — Toppers & Position Holders | GHS Babi Khel",

@@ -90,7 +90,6 @@ export const STATIC_ROUTES = [
   "/teachers",
   "/gallery",
   "/library",
-  "/online-classes",
   "/duty",
   "/notes",
   "/notes/math",

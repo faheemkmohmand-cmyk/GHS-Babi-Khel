@@ -40,9 +40,9 @@ const CATEGORY_META: Record<
     icon: ClipboardList,
     blurb: "Checking results by roll number, merit lists, exam roll number slips, grading scale, date sheets and BISE Peshawar board exams",
   },
-  "Notes, Library & Online Classes": {
+  "Notes & Library": {
     icon: BookOpen,
-    blurb: "Free chapter-wise notes, the digital library, past papers and live & recorded online classes",
+    blurb: "Free chapter-wise notes, the digital library and past papers",
   },
   "School Information": {
     icon: School,

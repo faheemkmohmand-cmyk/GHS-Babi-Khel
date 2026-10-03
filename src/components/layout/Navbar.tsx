@@ -6,7 +6,7 @@ import {
   LayoutDashboard, LogOut, Shield, Search, ChevronDown, ChevronRight,
   Home, Landmark, Mail, Newspaper, Megaphone, CalendarDays,
   Trophy, Medal, BookOpen, Library, Images, ClipboardList, HelpCircle,
-  Hash, Video, Timer, Command as CommandIcon,
+  Hash, Timer, Command as CommandIcon,
   Bell, FileSignature, type LucideIcon,
 } from "lucide-react";
 import { useRollSlipCountdown, compactCountdown } from "@/hooks/useRollSlipCountdown";
@@ -97,7 +97,6 @@ const NAV_SECTIONS: NavSection[] = [
     tagline: "Learn anywhere, anytime",
     tint: "bg-secondary text-primary dark:bg-primary/15 dark:text-primary-light",
     links: [
-      { to: "/online-classes", label: "Online Classes", icon: Video,   desc: "Live & recorded lectures",         tint: "bg-secondary text-primary dark:bg-primary/15 dark:text-primary-light" },
       { to: "/notes",          label: "Notes",          icon: BookOpen, desc: "Study notes by class & subject",   tint: "bg-secondary text-primary dark:bg-primary/15 dark:text-primary-light" },
       { to: "/library",        label: "Library",        icon: Library,  desc: "Books & reading resources",        tint: "bg-secondary text-primary dark:bg-primary/15 dark:text-primary-light" },
     ],

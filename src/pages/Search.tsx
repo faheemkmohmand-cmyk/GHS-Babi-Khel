@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import {
   Search as SearchIcon, Bell, Newspaper, Users, FileText, Compass,
   Home, Info, Phone, Calendar, BarChart3, BookOpen, Image, GraduationCap,
-  Hash, Video,
+  Hash,
 } from "lucide-react";
 import PageLayout from "@/components/layout/PageLayout";
 import PageBanner from "@/components/shared/PageBanner";
@@ -33,7 +33,6 @@ const PAGE_INDEX: { to: string; label: string; icon: any; keywords: string[] }[]
   { to: "/calendar",  label: "Calendar",            icon: Calendar,     keywords: ["calendar", "events", "dates", "schedule", "holidays", "exams"] },
   { to: "/results",   label: "Results",             icon: BarChart3,    keywords: ["results", "exams", "grades", "marks", "report", "scorecard"] },
   { to: "/roll-no-slip", label: "Roll No. Slip",    icon: Hash,         keywords: ["roll", "roll no", "roll number", "exam roll numbers", "admit card", "slip"] },
-  { to: "/online-classes", label: "Online Classes", icon: Video,        keywords: ["online classes", "live class", "google meet", "e-learning", "lectures"] },
   { to: "/notes",     label: "Notes",               icon: BookOpen,     keywords: ["notes", "study", "material", "chapters", "lessons", "subjects"] },
   { to: "/gallery",   label: "Gallery",             icon: Image,        keywords: ["gallery", "photos", "pictures", "images", "media"] },
   { to: "/admission", label: "Admission",           icon: GraduationCap,keywords: ["admission", "admissions", "apply", "enroll", "register", "form"] },

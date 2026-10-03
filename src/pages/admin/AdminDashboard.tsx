@@ -22,7 +22,6 @@ const AdminVideos            = lazy(() => import("./tabs/AdminVideos"));
 const AdminUsers             = lazy(() => import("./tabs/AdminUsers"));
 const AdminNotes             = lazy(() => import("../notes/AdminNotes"));
 // ── New feature admin tabs ──
-const AdminOnlineClasses     = lazy(() => import("./tabs/AdminOnlineClasses") as any);
 const AdminAdmissions        = lazy(() => import("./tabs/AdminAdmissions"));
 const AdminStudentRecords    = lazy(() => import("./tabs/AdminStudentRecords"));
 // ── Fee Management ──
@@ -52,7 +51,6 @@ const tabMap: Record<string, React.LazyExoticComponent<React.ComponentType<any>>
   notes:              AdminNotes,
   videos:             AdminVideos,
   users:              AdminUsers,
-  "online-classes":   AdminOnlineClasses,
   admissions:         AdminAdmissions,
   "student-records":  AdminStudentRecords,
   "fees":             AdminFees,

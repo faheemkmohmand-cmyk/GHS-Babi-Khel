@@ -13,7 +13,7 @@
 // 2. BACKGROUND PREFETCH (idle warm-up): 
 //    After the homepage fully loads (window load + browser idle), the main
 //    public routes are warmed ONE AT A TIME, in priority order (the pages
-//    visitors tap most: Online Classes, Merit List, Roll No. Slip first).
+//    visitors tap most: Merit List and Roll No. Slip first).
 //    Sequential downloading never competes with the homepage's own data —
 //    that's what made the old all-at-once prefetch sluggish on slow links.
 //
@@ -26,7 +26,6 @@ type Loader = () => Promise<unknown>;
 /** Route path → the exact same dynamic import App.tsx lazy-loads. */
 export const ROUTE_LOADERS: Record<string, Loader> = {
   // Top visitor targets (user-reported slow pages first)
-  "/online-classes": () => import("@/pages/OnlineClasses"),
   "/merit-list":     () => import("@/pages/MeritList"),
   "/roll-no-slip":   () => import("@/pages/ExamRollNumbers"),
   // Results family
@@ -53,7 +52,7 @@ export const ROUTE_LOADERS: Record<string, Loader> = {
 
 /** Background order — most-tapped pages first (see module docstring). */
 const BACKGROUND_ORDER = [
-  "/online-classes", "/merit-list", "/roll-no-slip",
+  "/merit-list", "/roll-no-slip",
   "/results", "/result-card", "/gallery",
   "/admission", "/notes", "/library",
   "/news", "/notices", "/calendar", "/about", "/contact",

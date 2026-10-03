@@ -90,30 +90,6 @@ const admissionFAQSchema = {
   ],
 };
 
-/** Course schema used for online-classes page */
-const onlineClassesCourseSchema = {
-  "@context": "https://schema.org",
-  "@type": "Course",
-  name: "GHS Babi Khel Online Classes",
-  description:
-    "Live and recorded online classes for all subjects — Mathematics, Physics, Chemistry, Biology, English, Urdu, Islamiyat, Pakistan Studies and Computer Science.",
-  provider: {
-    "@type": "HighSchool",
-    "@id": `${SITE_URL}#organization`,
-    name: "Government High School Babi Khel",
-  },
-  url: `${SITE_URL}/online-classes`,
-  inLanguage: ["ur", "en"],
-  educationalLevel: "Secondary",
-  isAccessibleForFree: true,
-  hasCourseInstance: {
-    "@type": "CourseInstance",
-    courseMode: "online",
-    inLanguage: "ur",
-    courseWorkload: "PT1H",
-  },
-};
-
 /** Course schema for the Notes section */
 const notesCourseSchema = {
   "@context": "https://schema.org",
@@ -150,9 +126,9 @@ const ROUTES: RouteSEO[] = [
     pattern: "/",
     title: "GHS Babi Khel — Government High School, District Mohmand KPK",
     description:
-      "Government High School Babi Khel, District Mohmand, KPK Pakistan. Quality education, notices, news, results, online classes, library and admissions.",
+      "Government High School Babi Khel, District Mohmand, KPK Pakistan. Quality education, notices, news, results, library and admissions.",
     keywords:
-      "GHS Babi Khel, Government High School Babi Khel, Mohmand school, KPK school, school admission, school notices, school results, online classes Pakistan",
+      "GHS Babi Khel, Government High School Babi Khel, Mohmand school, KPK school, school admission, school notices, school results Pakistan",
     hasUrdu: true,
   },
   {
@@ -470,16 +446,7 @@ const ROUTES: RouteSEO[] = [
       },
     }),
   },
-  {
-    pattern: "/online-classes",
-    title: "Online Classes — GHS Babi Khel | Live & Recorded Lectures",
-    description:
-      "Join live online classes and access recorded lectures from GHS Babi Khel — flexible learning anytime, anywhere.",
-    keywords: "online classes, live lectures, e-learning, online school Pakistan, GHS Babi Khel online",
-    breadcrumbs: () => [baseBreadcrumb, { name: "Online Classes", path: "/online-classes" }],
-    // ✅ Course schema — helps Google show this as an educational resource
-    jsonLd: () => onlineClassesCourseSchema,
-  },
+
   {
     pattern: "/roll-no-slip",
     title: "Roll No. Slip — GHS Babi Khel | Exam Roll Numbers & Admit Card",

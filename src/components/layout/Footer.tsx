@@ -19,7 +19,6 @@ const footerLinks = {
     { to: "/library",       label: "Digital Library" },
     { to: "/notes",         label: "Study Notes" },
     { to: "/gallery",       label: "Photo Gallery" },
-    { to: "/online-classes",label: "Online Classes" },
   ],
 };
 

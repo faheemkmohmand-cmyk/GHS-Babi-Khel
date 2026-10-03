@@ -430,7 +430,7 @@ function getResultsExtraSchemas(url) {
 // link, so the destination is always correct even though the preview
 // text is generic for those specific pages.
 const ROUTES = [
-  { pattern: "/", title: "GHS Babi Khel — Government High School, District Mohmand KPK", description: "Government High School Babi Khel, District Mohmand, KPK Pakistan. Quality education, notices, news, results, online classes, library and admissions." },
+  { pattern: "/", title: "GHS Babi Khel — Government High School, District Mohmand KPK", description: "Government High School Babi Khel, District Mohmand, KPK Pakistan. Quality education, notices, news, results, library and admissions." },
   { pattern: "/about", title: "About GHS Babi Khel — History, Mission & Vision | District Mohmand KPK", description: "Learn about Government High School Babi Khel — our history since 2018, mission, vision, faculty and commitment to quality education in District Mohmand." },
   { pattern: "/teachers", title: "Teachers & Faculty — GHS Babi Khel | District Mohmand KPK", description: "Meet the qualified teachers and faculty of GHS Babi Khel — dedicated educators shaping the future of students in District Mohmand, KPK." },
   { pattern: "/notices", title: "School Notices & Announcements — GHS Babi Khel", description: "Browse the latest school notices, urgent announcements, academic updates and event information from Government High School Babi Khel." },
@@ -443,7 +443,6 @@ const ROUTES = [
   { pattern: "/weather", title: "Weather — District Mohmand KPK | GHS Babi Khel", description: "Live weather forecast for Babi Khel and District Mohmand, KPK — temperature, conditions and outlook for the school community." },
   { pattern: "/calendar", title: "School Event Calendar — GHS Babi Khel | Exams, Holidays & PTMs", description: "View the official school calendar of GHS Babi Khel — exam dates, holidays, PTMs, sports days, results day and important events. Subscribe via .ics feed for automatic sync to Google Calendar or iPhone." },
   { pattern: "/contact", title: "Contact GHS Babi Khel — Address, Phone & Email | District Mohmand", description: "Contact Government High School Babi Khel, District Mohmand, KPK. Find our address, phone number, email, WhatsApp and location map. Reach out for admissions, queries and feedback." },
-  { pattern: "/online-classes", title: "Online Classes — GHS Babi Khel | Live & Recorded Lectures", description: "Join live online classes and access recorded lectures from GHS Babi Khel — flexible learning anytime, anywhere." },
   { pattern: "/admission", title: "Admissions Open — GHS Babi Khel | Apply Online District Mohmand", description: "Apply for admission at Government High School Babi Khel — eligibility, fee structure, required documents and online application form." },
   { pattern: "/notes", title: "Study Notes — GHS Babi Khel | Subject-wise Notes & Resources", description: "Access subject-wise study notes, summaries and chapter resources for all classes at GHS Babi Khel — interactive learning made easy." },
   { pattern: "/duty", title: "School Duty Board — GHS Babi Khel | Class Monitors & Proctors", description: "View official duty assignments for GHS Babi Khel — class monitors, proctors, social workers, head boys and nazira for Classes 6 to 10." },

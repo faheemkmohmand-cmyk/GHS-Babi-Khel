@@ -97,7 +97,7 @@ export const maxDuration = 10;
 //     section, never the whole endpoint.
 //   • NEVER LEAKS PRIVATE DATA: only genuinely public tables are read
 //     (school_settings, admission_settings, published notices/news/events,
-//     active teachers, library files, published online classes). The
+//     active teachers and library files). The
 //     `admissions` and `results` tables contain personal data and are NOT
 //     dumped here — the endpoints only explain how to search them.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -389,53 +389,6 @@ async function fetchAdmissionFiles(limit = 20) {
     });
 }
 
-async function fetchOnlineClasses(limit = 15) {
-  // ⚠ SCHEMA DRIFT FIX (2026-08): this query previously selected teacher_name,
-  // scheduled_date, duration_minutes and filtered on status — columns that do
-  // NOT exist on the live online_classes table (only id, title, subject,
-  // class_name, start_time, created_at are present). PostgREST rejected every
-  // call (42703), safeQuery swallowed it, and AI tools always read "no online
-  // classes" even when sessions were scheduled. The full-column shape is tried
-  // FIRST (so a future migration is picked up automatically), with the
-  // confirmed-minimal shape as the fallback — the section never errors out.
-  const sb = getSupabase();
-  if (!sb) return [];
-  const shape = (rows) =>
-    (rows || []).map((c) => ({
-      title: c.title,
-      subject: c.subject || null,
-      class: c.class_name || null,
-      teacher: c.teacher_name || null,
-      date: c.scheduled_date || c.start_time || null,
-      start_time: c.scheduled_date ? c.start_time || null : null,
-      duration_minutes: c.duration_minutes ?? null,
-      status: c.status || "scheduled",
-    }));
-  try {
-    const full = await Promise.race([
-      sb
-        .from("online_classes")
-        .select("id, title, subject, class_name, teacher_name, scheduled_date, start_time, duration_minutes, status")
-        .in("status", ["upcoming", "live"])
-        .order("scheduled_date", { ascending: true })
-        .limit(limit),
-      new Promise((_, reject) => setTimeout(() => reject(new Error("online_classes timeout")), 4500)),
-    ]);
-    if (full.error) throw full.error;
-    return shape(full.data);
-  } catch {
-    // Minimal confirmed-columns fallback (table exists, richer schema not
-    // migrated yet). Rows are ordered newest-first; every row is shown.
-    const rows = await safeQuery("online_classes_min", (client) =>
-      client
-        .from("online_classes")
-        .select("id, title, subject, class_name, start_time, created_at")
-        .order("created_at", { ascending: false })
-        .limit(limit)
-    );
-    return shape(rows);
-  }
-}
 
 // ── Merit lists (public rankings — the /merit-list page data) ──────────────
 // Previously /merit-list had NO fetcher: AI tools could never see which merit
@@ -732,7 +685,6 @@ const SECTION_FETCHERS = {
   events: () => fetchEvents(30),
   teachers: () => fetchTeachers(50),
   library: () => fetchLibraryFiles(20),
-  onlineClasses: () => fetchOnlineClasses(15),
   meritLists: () => fetchMeritLists(10),
   rollSlips: () => fetchRollSlipSessions(10),
   exams: fetchExamInfo,
@@ -759,7 +711,6 @@ const ROUTE_SECTIONS = {
   "/teachers":        ["school", "teachers"],
   "/gallery":         ["school", "gallery"],
   "/library":         ["school", "library"],
-  "/online-classes":  ["school", "onlineClasses"],
   "/duty":            ["school", "duty"],
   "/notes":           ["school", "notes"],
   "/faq":             ["school"],
@@ -825,7 +776,6 @@ async function getLiveSiteData(sections) {
   data.events = data.events || { upcoming: [], recent: [] };
   data.teachers = data.teachers || [];
   data.library = data.library || [];
-  data.onlineClasses = data.onlineClasses || [];
   data.meritLists = data.meritLists || [];
   data.rollSlips = data.rollSlips || [];
   data.exams = data.exams || { published_exams: [], grading: {} };
@@ -890,7 +840,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const STATIC_ROUTES = new Set([
   "/", "/about", "/contact", "/admission", "/notices", "/news", "/results",
   "/merit-list", "/roll-no-slip", "/result-card", "/calendar", "/teachers", "/gallery", "/library",
-  "/online-classes", "/duty", "/notes", "/notes/math", "/notes/physics",
+  "/duty", "/notes", "/notes/math", "/notes/physics",
   "/notes/chemistry", "/notes/biology", "/notes/english", "/notes/urdu",
   "/notes/islamiat", "/notes/pakistan-studies", "/notes/computer", "/faq",
 ]);
@@ -1007,7 +957,7 @@ function admissionFilesHtml(admissionFiles) {
 /** Route-specific LIVE sections appended after the static blocks. */
 function liveSections(route, data) {
   const parts = [];
-  const { admission, admissionFiles, notices, news, events, exams, teachers, library, onlineClasses, meritLists, rollSlips, gallery, notes, duty, school } = data;
+  const { admission, admissionFiles, notices, news, events, exams, teachers, library, meritLists, rollSlips, gallery, notes, duty, school } = data;
 
   // Notes subject / chapter pages are handled by their own builders below.
   const isNotesSubject = route.startsWith("/notes/") && route.split("/").filter(Boolean).length === 2;
@@ -1278,23 +1228,6 @@ ${captions}
         );
       } else {
         parts.push(`<p class="meta">No photo albums have been published yet. Albums added by the school administration (sports days, science fairs, study tours, national days) will appear here.</p>`);
-      }
-      break;
-    }
-    case route === "/online-classes": {
-      if (onlineClasses.length) {
-        parts.push("<h2>Scheduled online classes (live)</h2>");
-        parts.push(
-          `<ul>${onlineClasses
-            .map(
-              (c) =>
-                `<li>${esc(c.title)} — ${esc(c.subject)}, Class ${esc(c.class)} · ${esc(prettyDate(c.date))} ${esc(c.start_time || "")} (${esc(c.status)})</li>`
-            )
-            .join("")}</ul>`
-        );
-        parts.push(`<p>When a class is live, students tap the class card and the session opens right in the browser with video, live polls, a hand-raise queue and emoji reactions — no extra software needed. Signing in lets a student participate; without an account they can still watch. Completed lessons stay available on the page for catch-up.</p>`);
-      } else {
-        parts.push(`<p class="meta">No online classes are scheduled right now. Scheduled sessions appear here as soon as teachers arrange them.</p>`);
       }
       break;
     }
@@ -1699,7 +1632,6 @@ const PAGES_GUIDE = [
   { path: "/notes", purpose: "Free study notes for 9 subjects, classes 6–10, with quizzes and flashcards. Subject pages at /notes/<subject-slug> and individual chapters at /notes/<subject-slug>/<chapter-slug>" },
   { path: "/library", purpose: "Downloadable books, notes and past papers (each item links to its file)" },
   { path: "/gallery", purpose: "Photo albums of school events — sports day, science fair, study tours, national days" },
-  { path: "/online-classes", purpose: "Online classes — live interactive sessions students join right in the browser (video, polls, hand-raise), plus scheduled and completed lessons by subject and class" },
   { path: "/duty", purpose: "Student duty roster — class monitors, proctors and chief proctor" },
   { path: "/contact", purpose: "Contact details, map, WhatsApp and contact form" },
   { path: "/about", purpose: "School history, mission and vision" },
@@ -1751,7 +1683,7 @@ async function aiDataHandler(req, res) {
     meta: {
       name: "GHS Babi Khel — AI data feed",
       description:
-        "Live, machine-readable snapshot of Government High School Babi Khel (District Mohmand, KPK, Pakistan): school profile with real statistics, admission status and procedure, results info, published merit lists, roll-number-slip sessions, latest notices, news, events, teachers, library files, study notes subjects and chapters, photo gallery albums, duty roster, online classes and the full FAQ. Generated on request from the school's own database — safe to quote.",
+        "Live, machine-readable snapshot of Government High School Babi Khel (District Mohmand, KPK, Pakistan): school profile with real statistics, admission status and procedure, results info, published merit lists, roll-number-slip sessions, latest notices, news, events, teachers, library files, study notes subjects and chapters, photo gallery albums, duty roster, and the full FAQ. Generated on request from the school's own database — safe to quote.",
       generated_at: new Date().toISOString(),
       generated_at_display: `${nowInSchoolTz()} (PKT)`,
       timezone: "Asia/Karachi",
@@ -1854,7 +1786,6 @@ async function aiDataHandler(req, res) {
     },
     teachers: data.teachers,
     library: data.library,
-    online_classes: data.onlineClasses,
 
     // ── Merit lists (public rankings — the /merit-list page data) ───────────
     merit_lists: {

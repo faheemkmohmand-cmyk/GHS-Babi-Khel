@@ -103,24 +103,30 @@ const mediaBadge = (photo: GalleryPhoto): string | null => {
   return null;
 };
 
-/** Album card with a live item counter (per-card hook, avoids N+1 in the list). */
+/** Album card with a live item counter (per-card hook, avoids N+1 in the list).
+ *  Premium editorial tile: full-bleed cover, title + meta overlaid on a soft
+ *  gradient, hairline gold accent, thin "View" pill. Titles wrap (never cut). */
 const AlbumCard = ({
   album,
   index,
   onOpen,
+  featured = false,
 }: {
   album: GalleryAlbum;
   index: number;
   onOpen: () => void;
+  featured?: boolean;
 }) => {
   const { data: count } = useAlbumPhotoCount(album.id);
   const { data: fallbackCover } = useAlbumFallbackCover(album.id, !album.cover_url);
+  const mediaCls =
+    "absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105";
   return (
     <motion.div
-      initial={{ opacity: 0, y: 22 }}
+      initial={{ opacity: 0, y: 18 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ delay: Math.min(index * 0.06, 0.4), duration: 0.45 }}
+      transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.45 }}
       onClick={onOpen}
       role="button"
       tabIndex={0}
@@ -131,63 +137,53 @@ const AlbumCard = ({
           onOpen();
         }
       }}
-      className="group bg-card rounded-2xl overflow-hidden shadow-card hover:shadow-elevated ring-1 ring-border hover:ring-gold/60 transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+      className={`group relative overflow-hidden rounded-2xl bg-secondary shadow-card hover:shadow-elevated ring-1 ring-border hover:ring-gold/50 transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
+        featured
+          ? "aspect-[4/3] sm:aspect-[16/9] sm:col-span-2 lg:row-span-2 lg:aspect-auto lg:min-h-[26rem]"
+          : "aspect-[4/3]"
+      }`}
     >
-      <div className="aspect-video overflow-hidden relative bg-secondary">
-        {album.cover_url ? (
-          <img
-            src={album.cover_url}
-            alt={album.title}
-            loading="lazy"
-            decoding="async"
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          />
-        ) : fallbackCover?.isVideo ? (
-          <video
-            src={fallbackCover.url}
-            preload="metadata"
-            playsInline
-            muted
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          />
-        ) : fallbackCover?.url ? (
-          <img
-            src={fallbackCover.url}
-            alt={album.title}
-            loading="lazy"
-            decoding="async"
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          />
-        ) : (
-          <div className="w-full h-full bg-secondary flex items-center justify-center">
-            <Camera className="w-12 h-12 text-muted-foreground/50" />
-          </div>
-        )}
-        {/* emerald wash + hover spotlight */}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/75 via-primary-dark/10 to-transparent" />
-        <div className="absolute inset-0 bg-primary-dark/0 group-hover:bg-primary-dark/20 transition-colors duration-300 flex items-center justify-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/95 text-primary text-xs font-heading font-bold px-4 py-2 shadow-elevated opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            Explore Album <ArrowRight className="w-3.5 h-3.5" />
-          </span>
+      {album.cover_url ? (
+        <img src={album.cover_url} alt={album.title} loading="lazy" decoding="async" className={mediaCls} />
+      ) : fallbackCover?.isVideo ? (
+        <video src={fallbackCover.url} preload="metadata" playsInline muted className={mediaCls} />
+      ) : fallbackCover?.url ? (
+        <img src={fallbackCover.url} alt={album.title} loading="lazy" decoding="async" className={mediaCls} />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Camera className="w-10 h-10 text-muted-foreground/40" />
         </div>
-        {/* item counter */}
-        {typeof count === "number" && (
-          <div className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/45 text-white text-[11px] font-semibold px-2.5 py-1 border border-white/15">
-            <Images className="w-3.5 h-3.5" />
-            {count}
-          </div>
-        )}
-      </div>
-      <div className="p-5">
-        <h3 className="font-heading font-semibold text-foreground group-hover:text-primary transition-colors">
+      )}
+
+      {/* readability gradient */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+      <div className="absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-gold/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+      {/* item counter */}
+      {typeof count === "number" && (
+        <div className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-black/45 backdrop-blur-sm text-white text-[11px] font-medium px-2.5 py-0.5 border border-white/15">
+          <Images className="w-3 h-3" />
+          {count} {count === 1 ? "item" : "items"}
+        </div>
+      )}
+
+      {/* caption block */}
+      <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+        <h3
+          className={`font-heading font-semibold text-white leading-snug break-words line-clamp-2 ${
+            featured ? "text-lg sm:text-2xl" : "text-base sm:text-lg"
+          }`}
+        >
           {album.title}
         </h3>
         {album.description && (
-          <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+          <p className="mt-1 text-xs sm:text-[13px] text-white/75 line-clamp-2 leading-relaxed">
             {album.description}
           </p>
         )}
-        <div className="mt-3 h-px bg-gradient-to-r from-gold/60 via-gold/20 to-transparent" />
+        <span className="mt-3 inline-flex h-7 items-center gap-1 rounded-full border border-white/30 bg-white/10 backdrop-blur-sm px-3 text-[11px] font-medium text-white transition-colors group-hover:bg-gold group-hover:border-gold group-hover:text-gold-ink">
+          View album <ArrowRight className="w-3 h-3" />
+        </span>
       </div>
     </motion.div>
   );
@@ -259,45 +255,63 @@ const Gallery = () => {
         subtitle="Photos, videos & memorable moments at GHS Babi Khel"
       />
 
-      <section className="py-14 md:py-16">
+      <section className="py-10 md:py-16">
         <div className="container mx-auto px-4">
-          {selectedAlbumId && (
-            <div className="flex flex-wrap items-center gap-3 mb-5">
-              <button
-                onClick={() => setSelectedAlbumId(null)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:border-gold/60 hover:text-primary transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" /> All Albums
-              </button>
-              {selectedAlbum && (
-                <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground">
-                  {selectedAlbum.title}
-                </h2>
-              )}
-              {!photosLoading && (
-                <Badge variant="secondary" className="font-semibold">
-                  {photos.length} {photos.length === 1 ? "item" : "items"}
-                </Badge>
+          {!selectedAlbumId && (
+            <div className="mb-8 md:mb-10 text-center">
+              <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-strong dark:text-gold">
+                <span className="w-1.5 h-1.5 rotate-45 bg-gold" /> Moments &amp; Memories
+              </span>
+              <h2 className="mt-3 font-heading text-2xl sm:text-3xl font-bold text-foreground">
+                Life at GHS Babi Khel
+              </h2>
+              <div className="mt-3 flex items-center justify-center gap-2">
+                <span className="h-px w-10 bg-gradient-to-r from-transparent to-gold/70" />
+                <span className="w-1.5 h-1.5 rotate-45 bg-gold" />
+                <span className="h-px w-10 bg-gradient-to-l from-transparent to-gold/70" />
+              </div>
+              {!isLoading && albums.length > 0 && (
+                <p className="mt-3 text-sm text-muted-foreground">
+                  {albums.length} {albums.length === 1 ? "album" : "albums"} · tap any album to explore
+                </p>
               )}
             </div>
           )}
           {selectedAlbumId && (
-            <div className="h-px bg-gradient-to-r from-gold/50 via-border to-transparent mb-6" />
+            <div className="mb-6 border-b border-border pb-4">
+              <button
+                onClick={() => setSelectedAlbumId(null)}
+                className="inline-flex h-8 items-center gap-1 rounded-full border border-border bg-card pl-2.5 pr-3.5 text-xs font-medium text-foreground hover:border-gold/60 hover:text-primary transition-colors"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" /> All Albums
+              </button>
+              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                {selectedAlbum && (
+                  <h2 className="text-xl md:text-2xl font-heading font-bold text-foreground leading-snug break-words">
+                    {selectedAlbum.title}
+                  </h2>
+                )}
+                {!photosLoading && (
+                  <Badge variant="secondary" className="text-[11px] font-medium px-2.5 py-0.5">
+                    {photos.length} {photos.length === 1 ? "item" : "items"}
+                  </Badge>
+                )}
+              </div>
+              {selectedAlbum?.description && (
+                <p className="mt-1.5 text-sm text-muted-foreground max-w-2xl">{selectedAlbum.description}</p>
+              )}
+            </div>
           )}
 
           {!selectedAlbumId ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
               {isLoading
                 ? Array.from({ length: 6 }).map((_, i) => (
                     <div
                       key={i}
-                      className="bg-card rounded-2xl overflow-hidden shadow-card"
+                      className="aspect-[4/3] rounded-2xl overflow-hidden"
                     >
-                      <Skeleton className="aspect-video w-full" />
-                      <div className="p-5 space-y-2">
-                        <Skeleton className="h-5 w-2/3" />
-                        <Skeleton className="h-3 w-1/2" />
-                      </div>
+                      <Skeleton className="w-full h-full" />
                     </div>
                   ))
                 : albumsError && !albums.length
@@ -315,9 +329,9 @@ const Gallery = () => {
                       </p>
                       <button
                         onClick={() => refetchAlbums()}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity"
+                        className="inline-flex h-9 items-center gap-1.5 px-5 rounded-full bg-primary text-primary-foreground text-[13px] font-medium hover:opacity-90 transition-opacity"
                       >
-                        <RefreshCw className="w-4 h-4" /> Try Again
+                        <RefreshCw className="w-3.5 h-3.5" /> Try Again
                       </button>
                     </div>
                   )
@@ -326,16 +340,17 @@ const Gallery = () => {
                         key={album.id}
                         album={album}
                         index={i}
+                        featured={i === 0 && albums.length > 2}
                         onOpen={() => setSelectedAlbumId(album.id)}
                       />
                     ))}
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 md:gap-4">
                 {photosLoading
                   ? Array.from({ length: 8 }).map((_, i) => (
-                      <Skeleton key={i} className="aspect-square rounded-2xl" />
+                      <Skeleton key={i} className="aspect-square rounded-xl" />
                     ))
                   : photosError && !photos.length
                     ? (
@@ -351,9 +366,9 @@ const Gallery = () => {
                         </p>
                         <button
                           onClick={() => refetchPhotos()}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity"
+                          className="inline-flex h-9 items-center gap-1.5 px-5 rounded-full bg-primary text-primary-foreground text-[13px] font-medium hover:opacity-90 transition-opacity"
                         >
-                          <RefreshCw className="w-4 h-4" /> Try Again
+                          <RefreshCw className="w-3.5 h-3.5" /> Try Again
                         </button>
                       </div>
                     )
@@ -376,16 +391,21 @@ const Gallery = () => {
                                 setLightboxIndex(i);
                               }
                             }}
-                            className="aspect-square rounded-2xl overflow-hidden cursor-pointer group relative bg-secondary shadow-card hover:shadow-elevated ring-1 ring-border hover:ring-gold/60 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                            className="aspect-square rounded-xl overflow-hidden cursor-pointer group relative bg-secondary shadow-card hover:shadow-elevated ring-1 ring-border hover:ring-gold/60 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                           >
                             <MediaThumb photo={photo} />
                             {badge && (
-                              <Badge className="absolute top-2 left-2 z-10 bg-black/55 text-white text-[10px] gap-1 border border-white/10">
+                              <Badge className="absolute top-2 left-2 z-10 bg-black/55 backdrop-blur-sm text-white text-[10px] font-medium gap-1 px-2 py-0.5 border border-white/10">
                                 <Play className="w-3 h-3" />
                                 {badge}
                               </Badge>
                             )}
-                            <div className="absolute inset-0 bg-primary-dark/0 group-hover:bg-primary-dark/20 transition-colors duration-300 pointer-events-none" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                            {photo.caption && (
+                              <p className="absolute inset-x-0 bottom-0 p-2.5 text-[11px] leading-snug text-white line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                {photo.caption}
+                              </p>
+                            )}
                           </motion.div>
                         );
                       })}
@@ -440,15 +460,15 @@ const Gallery = () => {
           >
             {/* top chrome */}
             <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 py-3 z-20">
-              <span className="rounded-full bg-white/10 text-white/90 text-xs font-semibold px-3 py-1.5 tabular-nums border border-white/10">
+              <span className="rounded-full bg-white/10 text-white/90 text-[11px] font-medium px-3 py-1 tabular-nums border border-white/10">
                 {lightboxIndex! + 1} / {photos.length}
               </span>
               <button
                 onClick={closeLightbox}
                 aria-label="Close viewer"
-                className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors border border-white/10"
+                className="h-9 w-9 inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors border border-white/10"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -459,9 +479,9 @@ const Gallery = () => {
                   prevPhoto();
                 }}
                 aria-label="Previous"
-                className="absolute left-3 md:left-5 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-20 border border-white/10"
+                className="absolute left-3 md:left-5 h-9 w-9 inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-20 border border-white/10"
               >
-                <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
             )}
 
@@ -472,9 +492,9 @@ const Gallery = () => {
                   nextPhoto();
                 }}
                 aria-label="Next"
-                className="absolute right-3 md:right-5 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-20 border border-white/10"
+                className="absolute right-3 md:right-5 h-9 w-9 inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-20 border border-white/10"
               >
-                <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             )}
 

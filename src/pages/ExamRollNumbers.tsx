@@ -257,30 +257,29 @@ function CountdownUnit({ value, label }: { value: number; label: string }) {
 }
 
 /* ═══ SLIP PDF — EXACT replica of the admin dashboard "Roll No Slips" sheet ═
-   Same A4-landscape sheet, same slip width as the admin's 2-up layout, same
+   Full-page A4 PORTRAIT single slip (admin prints 2-up landscape) — same
    header, info rows, QR, class date-sheet table, 9 instructions and Deputy
    Controller signature — so the student's download is 1:1 identical to the
    office copy. The single slip is simply centred on the sheet.            */
 async function downloadSlipPdf(session: ExamSession, r: RollEntry, schedule: ExamScheduleEntry[]) {
-  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-  const pageW = 297;
-  const pageH = 210;
-  const margin = 6;
-  const midGap = 3; // same gap the admin sheet leaves around its centre cut line
+  // Student copy: ONE slip on a full A4 PORTRAIT page (the admin sheet is a
+  // 2-up landscape print; students get a full-size single page instead).
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const pageW = 210;
+  const pageH = 297;
+  const margin = 8;
 
-  const halfW = (pageW - margin * 2 - midGap * 2) / 2; // identical slip width to admin
-  const slipH = pageH - margin * 2;
-  const x = (pageW - halfW) / 2; // single slip, centred
+  const x = margin;
   const y = margin;
-  const w = halfW;
-  const h = slipH;
+  const w = pageW - margin * 2;
+  const h = pageH - margin * 2;
 
   // Same QR payload + settings as the admin sheet
   const qrData = encodeExamQRData(session.id, r.student_id, r.exam_roll_no);
   const qrImg = await QRCode.toDataURL(qrData, { width: 300, margin: 1, errorCorrectionLevel: "M", color: { dark: "#333333", light: "#FFFFFF" } });
 
   // ── Same layout as the admin sheet (see AdminExamRollNumbers.downloadPrint) ──
-  const padX = 8;
+  const padX = 12;
   const cx = x + w / 2;
 
   // ── Frame: outer + hairline inner border ──
@@ -294,48 +293,48 @@ async function downloadSlipPdf(session: ExamSession, r: RollEntry, schedule: Exa
   // ── HEADER ──
   doc.setTextColor(20, 20, 20);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(15);
-  doc.text("GOVT. HIGH SCHOOL BABI KHEL", cx, y + 12, { align: "center" });
+  doc.setFontSize(20);
+  doc.text("GOVT. HIGH SCHOOL BABI KHEL", cx, y + 16, { align: "center" });
 
-  doc.setFontSize(10.5);
+  doc.setFontSize(13);
   doc.setTextColor(60, 60, 60);
   const classExamType = schedule[0]?.exam_type || session.exam_term;
-  doc.text(`${examTypeLabel(classExamType).toUpperCase()} ${session.exam_year}`, cx, y + 18.5, { align: "center" });
+  doc.text(`${examTypeLabel(classExamType).toUpperCase()} ${session.exam_year}`, cx, y + 24, { align: "center" });
 
-  doc.setFontSize(7.5);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(110, 110, 110);
-  doc.text("EXAM  ROLL  NUMBER  SLIP", cx, y + 23.5, { align: "center", charSpace: 0.6 } as any);
+  doc.text("EXAM  ROLL  NUMBER  SLIP", cx, y + 30, { align: "center", charSpace: 0.6 } as any);
 
   doc.setDrawColor(60, 60, 60);
   doc.setLineWidth(0.7);
-  doc.line(x + padX, y + 27, x + w - padX, y + 27);
+  doc.line(x + padX, y + 34, x + w - padX, y + 34);
   doc.setLineWidth(0.2);
-  doc.line(x + padX, y + 28.3, x + w - padX, y + 28.3);
+  doc.line(x + padX, y + 35.3, x + w - padX, y + 35.3);
 
   // ── STUDENT INFO (left) + QR (right) ──
-  const qrSize = 32;
+  const qrSize = 42;
   const qrBoxX = x + w - padX - qrSize - 2;
-  const qrBoxY = y + 33;
-        const leftX = x + padX;
-  const valX = leftX + 30;
+  const qrBoxY = y + 42;
+  const leftX = x + padX;
+  const valX = leftX + 36;
   const maxValW = qrBoxX - valX - 4;
 
   const drawRow = (label: string, value: string, yy: number, big = false) => {
-    doc.setFontSize(9);
+    doc.setFontSize(10.5);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(115, 115, 115);
     doc.text(label, leftX, yy);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(20, 20, 20);
-    doc.setFontSize(big ? 13 : 10.5);
+    doc.setFontSize(big ? 15 : 12);
     let v = value;
     while (v.length > 4 && doc.getTextWidth(v) > maxValW) v = v.slice(0, -2);
     if (v !== value) v = v.replace(/\s+$/, "") + "…";
     doc.text(v, valX, yy);
   };
-  let rowY = y + 41;
-  const rowGap = 8;
+  let rowY = y + 52;
+  const rowGap = 11;
   drawRow("Student Name:", r.student_name, rowY); rowY += rowGap;
   drawRow("Father Name:", r.father_name || "—", rowY); rowY += rowGap;
   drawRow("Exam Roll No:", r.exam_roll_no, rowY, true); rowY += rowGap;
@@ -352,16 +351,16 @@ async function downloadSlipPdf(session: ExamSession, r: RollEntry, schedule: Exa
   // The slip is 198 mm tall. We size the date-sheet rows from the room that is
   // actually available so the page is filled evenly (no empty block in the middle)
   // whatever number of papers the class has.
-  const tableStartY = y + 72;
-  const sigY = y + h - 12;
-  const instrLines = 6;
-  const instrLineH = 5.2;
-  const instrH = 7 + instrLines * instrLineH;
+  const tableStartY = y + 94;
+  const sigY = y + h - 14;
+  const instrLines = SLIP_INSTRUCTIONS.length;
+  const instrLineH = 6;
+  const instrH = 9 + instrLines * instrLineH;
   const sigTop = sigY - 9;
   const tableAvail = sigTop - instrH - 6 - tableStartY;
   const nRows = Math.max(schedule.length, 1) + 1;
-  const rowMm = Math.min(8.2, Math.max(5, tableAvail / nRows));
-  const fontPt = rowMm >= 6.6 ? 8.5 : rowMm >= 5.8 ? 7.8 : 7;
+  const rowMm = Math.min(10, Math.max(5, tableAvail / nRows));
+  const fontPt = rowMm >= 8 ? 10 : rowMm >= 6.6 ? 9 : rowMm >= 5.8 ? 7.8 : 7;
   const cellPad = Math.max(1, (rowMm - fontPt * 0.352 * 1.15) / 2);
 
   if (schedule.length > 0) {
@@ -377,7 +376,7 @@ async function downloadSlipPdf(session: ExamSession, r: RollEntry, schedule: Exa
         e.start_time || "—",
         e.end_time || "—",
       ]),
-      columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 26 }, 3: { cellWidth: 15 }, 4: { cellWidth: 15 } },
+      columnStyles: { 0: { cellWidth: 30 }, 1: { cellWidth: 32 }, 3: { cellWidth: 20 }, 4: { cellWidth: 20 } },
       styles: { fontSize: fontPt, cellPadding: cellPad, textColor: [30, 30, 30], lineColor: [150, 150, 150], lineWidth: 0.2, halign: "center", valign: "middle" },
       headStyles: { fillColor: [228, 228, 228], textColor: [20, 20, 20], fontStyle: "bold", fontSize: fontPt, halign: "center", valign: "middle" },
       alternateRowStyles: { fillColor: [248, 248, 248] },
@@ -397,11 +396,11 @@ async function downloadSlipPdf(session: ExamSession, r: RollEntry, schedule: Exa
   doc.setDrawColor(150, 150, 150);
   doc.setLineWidth(0.25);
   doc.line(x + padX, instrStartY, x + w - padX, instrStartY);
-  doc.setFontSize(9);
+  doc.setFontSize(10.5);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(40, 40, 40);
-  doc.text("Instructions:", x + padX, instrStartY + 5.5);
-  doc.setFontSize(8);
+  doc.text("Instructions:", x + padX, instrStartY + 6);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(85, 85, 85);
   const instructions = SLIP_INSTRUCTIONS;
@@ -410,17 +409,17 @@ async function downloadSlipPdf(session: ExamSession, r: RollEntry, schedule: Exa
     let t = line;
     while (t.length > 8 && doc.getTextWidth(t) > maxInstrW) t = t.slice(0, -2);
     if (t !== line) t = t.replace(/\s+$/, "") + "…";
-    doc.text(t, x + padX, instrStartY + 11 + i * instrLineH);
+    doc.text(t, x + padX, instrStartY + 12.5 + i * instrLineH);
   });
 
   // ── SIGNATURE (anchored bottom-right) ──
   doc.setDrawColor(90, 90, 90);
   doc.setLineWidth(0.35);
-  doc.line(x + w - padX - 52, sigY, x + w - padX, sigY);
-  doc.setFontSize(8);
+  doc.line(x + w - padX - 60, sigY, x + w - padX, sigY);
+  doc.setFontSize(9.5);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(40, 40, 40);
-  doc.text("Deputy Controller of Exams", x + w - padX - 26, sigY + 4.2, { align: "center" });
+  doc.text("Deputy Controller of Exams", x + w - padX - 30, sigY + 5, { align: "center" });
 
   doc.save(`RollNoSlip-${r.exam_roll_no}-${r.student_name.replace(/\s+/g, "_")}.pdf`);
 }

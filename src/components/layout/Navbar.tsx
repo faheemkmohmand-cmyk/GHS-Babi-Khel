@@ -1230,14 +1230,14 @@ const Navbar = () => {
             </ul>
 
             {/* Admission — pinned primary call-to-action */}
-            <div className="sticky bottom-0 border-t border-border bg-background p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               <Link
                 to="/admission"
                 onClick={closeAllMenus}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary text-base font-semibold text-primary-foreground no-underline shadow-md transition-colors hover:bg-primary/90"
+                className="mx-auto flex h-9 w-full max-w-[16rem] items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-primary px-5 text-[13px] font-medium tracking-wide text-primary-foreground no-underline shadow-sm ring-1 ring-inset ring-white/10 transition-all hover:bg-primary/90 active:scale-[0.98]"
               >
                 Apply for Admission
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
               </Link>
             </div>
           </motion.div>

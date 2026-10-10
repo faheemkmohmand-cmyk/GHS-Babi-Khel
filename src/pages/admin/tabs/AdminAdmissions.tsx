@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import {
@@ -33,17 +33,17 @@ import { format } from "date-fns";
 const PAGE_SIZE = 20;
 
 const statusConfig: Record<AdmissionStatus, { label: string; badge: string; desc: string }> = {
-  pending:              { label: "Pending",              badge: "bg-blue-100 text-blue-800",         desc: "Eligibility application received — review needed" },
-  under_review:         { label: "Under Review",         badge: "bg-purple-100 text-purple-800",     desc: "Currently reviewing eligibility" },
-  approved:             { label: "Eligible ✅",          badge: "bg-green-100 text-green-800",       desc: "Eligible for admission — ask student to bring documents" },
-  rejected:             { label: "Not Eligible",         badge: "bg-red-100 text-red-800",           desc: "Does not meet eligibility criteria" },
-  documents_missing:    { label: "Docs Missing",         badge: "bg-orange-100 text-orange-800",     desc: "Student needs to bring missing documents" },
-  documents_verified:   { label: "Docs Verified",        badge: "bg-teal-100 text-teal-800",         desc: "All documents verified at office" },
-  interview_scheduled:  { label: "Interview Scheduled",  badge: "bg-cyan-100 text-cyan-800",         desc: "Interview slot booked" },
-  interview_completed:  { label: "Interview Done",       badge: "bg-emerald-100 text-emerald-800",   desc: "Interview completed successfully" },
-  waitlisted:           { label: "Waitlisted",           badge: "bg-amber-100 text-amber-800",       desc: "Waiting for a seat to open" },
-  admitted:             { label: "Admitted ✅",          badge: "bg-green-200 text-green-900",       desc: "Fully admitted — enrolled in students register" },
-  admit_card_issued:    { label: "Admit Card Issued",    badge: "bg-green-300 text-green-900",       desc: "Admit card generated and issued" },
+  pending:              { label: "Pending",              badge: "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300 ring-1 ring-inset ring-blue-500/20",         desc: "Eligibility application received — review needed" },
+  under_review:         { label: "Under Review",         badge: "bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-300 ring-1 ring-inset ring-purple-500/20",     desc: "Currently reviewing eligibility" },
+  approved:             { label: "Eligible ✅",          badge: "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300 ring-1 ring-inset ring-green-500/20",       desc: "Eligible for admission — ask student to bring documents" },
+  rejected:             { label: "Not Eligible",         badge: "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300 ring-1 ring-inset ring-red-500/20",           desc: "Does not meet eligibility criteria" },
+  documents_missing:    { label: "Docs Missing",         badge: "bg-orange-100 text-orange-800 dark:bg-orange-500/15 dark:text-orange-300 ring-1 ring-inset ring-orange-500/20",     desc: "Student needs to bring missing documents" },
+  documents_verified:   { label: "Docs Verified",        badge: "bg-teal-100 text-teal-800 dark:bg-teal-500/15 dark:text-teal-300 ring-1 ring-inset ring-teal-500/20",         desc: "All documents verified at office" },
+  interview_scheduled:  { label: "Interview Scheduled",  badge: "bg-cyan-100 text-cyan-800 dark:bg-cyan-500/15 dark:text-cyan-300 ring-1 ring-inset ring-cyan-500/20",         desc: "Interview slot booked" },
+  interview_completed:  { label: "Interview Done",       badge: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 ring-1 ring-inset ring-emerald-500/20",   desc: "Interview completed successfully" },
+  waitlisted:           { label: "Waitlisted",           badge: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300 ring-1 ring-inset ring-amber-500/20",       desc: "Waiting for a seat to open" },
+  admitted:             { label: "Admitted ✅",          badge: "bg-green-200 text-green-900 dark:bg-green-500/15 dark:text-green-300 ring-1 ring-inset ring-green-500/20",       desc: "Fully admitted — enrolled in students register" },
+  admit_card_issued:    { label: "Admit Card Issued",    badge: "bg-green-300 text-green-900 dark:bg-green-500/15 dark:text-green-300 ring-1 ring-inset ring-green-500/20",       desc: "Admit card generated and issued" },
 };
 
 const MIGRATION_STEPS = [
@@ -378,15 +378,19 @@ function AdmissionDetail({ app, onClose, onSaved, onDelete }: { app: Admission; 
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg w-[calc(100vw-1.5rem)] max-h-[90vh] overflow-y-auto rounded-2xl p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base">
-            <GraduationCap className="w-4 h-4 text-primary" />
-            {app.reference_no} — {app.full_name}
+          <DialogTitle className="flex items-center gap-3 text-left">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">{initials(app.full_name)}</span>
+            <span className="min-w-0">
+              <span className="block text-base font-semibold leading-tight break-words">{app.full_name}</span>
+              <span className="mt-0.5 block text-[11px] font-mono font-normal text-muted-foreground break-all">{app.reference_no}</span>
+            </span>
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 pb-2">
+          <StatusPill status={app.status} />
           {/* Student info grid */}
           <div className="grid grid-cols-2 gap-2 text-sm">
             {([
@@ -400,8 +404,8 @@ function AdmissionDetail({ app, onClose, onSaved, onDelete }: { app: Admission; 
               ["Prev Marks",  app.previous_marks ?? "—"],
               ["Applied",     format(new Date(app.created_at), "dd MMM yyyy")],
             ] as [string, string][]).map(([k, v]) => (
-              <div key={k} className="bg-muted/50 rounded-lg p-2">
-                <p className="text-[10px] text-muted-foreground font-medium uppercase">{k}</p>
+              <div key={k} className="bg-muted/40 border border-border/50 rounded-xl px-3 py-2 min-w-0">
+                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{k}</p>
                 <p className="font-semibold text-xs break-words">{v}</p>
               </div>
             ))}
@@ -420,17 +424,17 @@ function AdmissionDetail({ app, onClose, onSaved, onDelete }: { app: Admission; 
               <div className="space-y-1.5">
                 {docs.map(doc => (
                   <div key={doc.id}
-                    className="flex items-center gap-2 text-xs bg-muted/50 border border-border rounded-lg px-3 py-2">
+                    className="flex items-center gap-2 text-xs bg-muted/40 border border-border rounded-xl px-3 py-2">
                     <FileText className="w-3.5 h-3.5 shrink-0 text-primary" />
-                    <span className="flex-1 capitalize font-medium">
+                    <span className="flex-1 min-w-0 break-words capitalize font-medium">
                       {doc.doc_type.replace(/_/g, " ")}
                     </span>
                     {/* Download button — fetches blob so file downloads, not opens */}
                     <button
                       onClick={() => downloadFile(doc.file_path, `${doc.doc_type}_${app.full_name}`)}
-                      className="flex items-center gap-1 text-primary hover:underline"
+                      className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-primary hover:bg-primary/5"
                       title="Download">
-                      <Download className="w-3.5 h-3.5" /> Download
+                      <Download className="w-3 h-3" /> Download
                     </button>
                   </div>
                 ))}
@@ -496,30 +500,30 @@ function AdmissionDetail({ app, onClose, onSaved, onDelete }: { app: Admission; 
               placeholder="e.g. OHS-26-001" className="text-xs h-9" />
           </div>
 
-          <Button onClick={handleSave} disabled={saving} className="w-full gap-2">
-            {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : "Save Changes"}
+          <Button onClick={handleSave} disabled={saving} className="w-full h-9 gap-1.5 rounded-full text-[13px] font-medium">
+            {saving ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...</> : "Save Changes"}
           </Button>
 
           {/* Enroll to students register — only show when approved and admission no. assigned */}
           {isApproved && rollNo && (
-            <div className="border border-green-200 bg-green-50 rounded-xl p-3">
-              <p className="text-xs font-bold text-green-800 mb-1 flex items-center gap-1.5">
+            <div className="border border-green-500/30 bg-green-500/10 rounded-xl p-3">
+              <p className="text-xs font-bold text-green-800 dark:text-green-300 mb-1 flex items-center gap-1.5">
                 <UserCheck className="w-3.5 h-3.5" /> Enroll into Students Register
               </p>
 
               <div className="mb-2">
-                <Label className="text-[11px] font-bold mb-1 block text-green-900">
+                <Label className="text-[11px] font-bold mb-1 block text-green-900 dark:text-green-200">
                   Class Roll No. (for Class {app.applying_class})
                 </Label>
                 <Input value={classRollNo} onChange={e => setClassRollNo(e.target.value)}
-                  placeholder="e.g. 12" className="text-xs h-9 bg-white" />
+                  placeholder="e.g. 12" className="text-xs h-9 bg-background" />
               </div>
 
-              <p className="text-[11px] text-green-700 mb-1">
+              <p className="text-[11px] text-green-700 dark:text-green-300/90 mb-1">
                 This will add {app.full_name} to Class {app.applying_class} with Roll No{" "}
                 {classRollNo || "—"}. No duplicate will be created.
               </p>
-              <p className="text-[11px] text-green-700 mb-2 flex items-start gap-1.5">
+              <p className="text-[11px] text-green-700 dark:text-green-300/90 mb-2 flex items-start gap-1.5">
                 <Wallet className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                 <span>
                   Also auto-generates the <b>admission fee voucher</b> from Fee Structures
@@ -529,7 +533,7 @@ function AdmissionDetail({ app, onClose, onSaved, onDelete }: { app: Admission; 
                 </span>
               </p>
               <Button size="sm" onClick={handleEnroll} disabled={enrolling || !classRollNo}
-                className="w-full bg-green-600 hover:bg-green-700 text-white gap-2 h-8 text-xs">
+                className="w-full bg-green-600 hover:bg-green-700 text-white gap-1.5 h-9 rounded-full text-[13px] font-medium">
                 {enrolling
                   ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Enrolling...</>
                   : <><UserCheck className="w-3.5 h-3.5" /> Enroll Student</>}
@@ -538,17 +542,17 @@ function AdmissionDetail({ app, onClose, onSaved, onDelete }: { app: Admission; 
           )}
 
           {/* Delete admission */}
-          <div className="border border-red-200 bg-red-50 rounded-xl p-3">
-            <p className="text-xs font-bold text-red-800 mb-1 flex items-center gap-1.5">
+          <div className="border border-red-500/30 bg-red-500/10 rounded-xl p-3">
+            <p className="text-xs font-bold text-red-800 dark:text-red-300 mb-1 flex items-center gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5" /> Danger Zone
             </p>
-            <p className="text-[11px] text-red-700 mb-2">
+            <p className="text-[11px] text-red-700 dark:text-red-300/90 mb-2">
               Permanently delete this admission record and all associated documents. This action cannot be undone.
             </p>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button size="sm" variant="destructive" disabled={deleteMut.isPending}
-                  className="w-full gap-2 h-8 text-xs">
+                  className="w-full gap-1.5 h-9 rounded-full text-[13px] font-medium">
                   {deleteMut.isPending
                     ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Deleting...</>
                     : <><Trash2 className="w-3.5 h-3.5" /> Delete Admission</>}
@@ -625,14 +629,12 @@ function AdmissionSettingsPanel() {
   if (isLoading) return <Skeleton className="h-40 rounded-xl" />;
 
   return (
-    <Card className="mb-6">
-      <CardContent className="p-5">
-        <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
-          <Settings2 className="w-4 h-4 text-primary" /> Admission Settings
-        </h3>
+    <Card className="rounded-2xl shadow-sm">
+      <CardContent className="p-4 sm:p-5">
+        <PanelHeader icon={Settings2} title="Admission Settings" desc="Control the public admission window and banner" />
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl sm:col-span-2">
-            <div>
+          <div className="flex items-center justify-between gap-3 p-3 bg-muted/40 border border-border/60 rounded-xl sm:col-span-2">
+            <div className="min-w-0">
               <p className="font-semibold text-sm">Admissions Open</p>
               <p className="text-xs text-muted-foreground">Shows banner & apply button on homepage</p>
             </div>
@@ -662,8 +664,8 @@ function AdmissionSettingsPanel() {
               className="h-9 text-sm" />
           </div>
         </div>
-        <Button onClick={handleSave} disabled={saving} className="mt-4 gap-2">
-          {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : "Save Settings"}
+        <Button onClick={handleSave} disabled={saving} className="mt-4 h-9 gap-1.5 rounded-full px-5 text-[13px] font-medium w-full sm:w-auto">
+          {saving ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...</> : "Save Settings"}
         </Button>
       </CardContent>
     </Card>
@@ -775,19 +777,21 @@ function InterviewSlotsPanel() {
   };
 
   return (
-    <Card className="mb-6">
-      <CardContent className="p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-sm flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-primary" /> Interview Slots
-          </h3>
-          <Button size="sm" variant="outline" className="h-8 gap-1 text-xs" onClick={() => setShowForm(v => !v)}>
-            <Plus className="w-3.5 h-3.5" /> {showForm ? "Cancel" : "Add Slot"}
-          </Button>
-        </div>
+    <Card className="rounded-2xl shadow-sm">
+      <CardContent className="p-4 sm:p-5">
+        <PanelHeader
+          icon={Calendar}
+          title="Interview Slots"
+          desc="Open slots applicants can book from their portal"
+          action={
+            <Button size="sm" variant="outline" className="h-8 shrink-0 gap-1 rounded-full px-3 text-xs font-medium" onClick={() => setShowForm(v => !v)}>
+              {showForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />} {showForm ? "Cancel" : "Add Slot"}
+            </Button>
+          }
+        />
 
         {showForm && (
-          <div className="grid sm:grid-cols-2 gap-3 mb-4 p-3 bg-muted/50 rounded-xl">
+          <div className="grid sm:grid-cols-2 gap-3 mb-4 p-3 bg-muted/40 border border-border/60 rounded-xl">
             <div>
               <Label className="text-xs font-semibold mb-1 block">Date</Label>
               <Input type="date" value={form.slot_date}
@@ -821,8 +825,8 @@ function InterviewSlotsPanel() {
                 placeholder="Bring original documents and B-Form." className="text-sm" rows={2} />
             </div>
             <div className="sm:col-span-2">
-              <Button onClick={createSlot} disabled={saving} className="gap-2">
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              <Button onClick={createSlot} disabled={saving} className="h-9 gap-1.5 rounded-full px-5 text-[13px] font-medium w-full sm:w-auto">
+                {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                 Create Slot
               </Button>
             </div>
@@ -839,23 +843,23 @@ function InterviewSlotsPanel() {
           <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
             {slots.map(slot => (
               <div key={slot.id}
-                className={`flex items-center justify-between gap-3 p-3 rounded-xl border ${slot.is_active ? "border-border" : "border-border opacity-50"}`}>
+                className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-2 p-3 rounded-xl border bg-card ${slot.is_active ? "border-border" : "border-border opacity-55"}`}>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold">
                     {format(new Date(slot.slot_date + "T00:00:00"), "dd MMM yyyy")} · {slot.start_time.slice(0, 5)}
                   </p>
-                  <p className="text-[11px] text-muted-foreground flex items-center gap-2 mt-0.5">
+                  <p className="text-[11px] text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
                     <Users className="w-3 h-3" /> {slot.current_bookings}/{slot.capacity}
                     {slot.location && <><MapPin className="w-3 h-3 ml-1" /> {slot.location}</>}
                     {!slot.is_active && <span className="text-red-500 font-semibold">· Inactive</span>}
                   </p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <Button size="sm" variant="outline" className="h-7 text-[10px] px-2"
+                  <Button size="sm" variant="outline" className="h-8 rounded-full text-[11px] font-medium px-3"
                     onClick={() => toggleActive(slot)}>
                     {slot.is_active ? "Deactivate" : "Activate"}
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-500/10"
                     onClick={() => deleteSlot(slot)}>
                     <Trash2 className="w-3.5 h-3.5" />
                   </Button>
@@ -868,6 +872,134 @@ function InterviewSlotsPanel() {
     </Card>
   );
 }
+/* ── Shared premium UI pieces ───────────────────────────────────────────── */
+const StatusPill = ({ status }: { status: AdmissionStatus }) => (
+  <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-medium ${statusConfig[status].badge}`}>
+    {statusConfig[status].label}
+  </span>
+);
+
+const initials = (name: string) =>
+  name.trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? "").join("");
+
+const PanelHeader = ({ icon: Icon, title, desc, action }: { icon: typeof Users; title: string; desc?: string; action?: ReactNode }) => (
+  <div className="flex items-start justify-between gap-3 mb-4">
+    <div className="flex items-start gap-3 min-w-0">
+      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <Icon className="w-4 h-4" />
+      </span>
+      <div className="min-w-0">
+        <h3 className="text-sm font-semibold leading-tight">{title}</h3>
+        {desc && <p className="mt-0.5 text-xs text-muted-foreground leading-snug">{desc}</p>}
+      </div>
+    </div>
+    {action}
+  </div>
+);
+
+const DeleteApplicationButton = ({ app, disabled, onConfirm }: { app: Admission; disabled?: boolean; onConfirm: (id: string) => void }) => (
+  <AlertDialog>
+    <AlertDialogTrigger asChild>
+      <Button size="sm" variant="ghost" disabled={disabled} aria-label={`Delete ${app.full_name}`}
+        className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-500/10">
+        <Trash2 className="w-3.5 h-3.5" />
+      </Button>
+    </AlertDialogTrigger>
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Delete {app.full_name}?</AlertDialogTitle>
+        <AlertDialogDescription>
+          This will permanently delete this admission record ({app.reference_no}) and all associated documents. This action cannot be undone.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogAction onClick={() => onConfirm(app.id)} className="bg-red-600 hover:bg-red-700">
+          Yes, Delete
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+);
+
+/** Applications list — table on ≥md, stacked cards on mobile (nothing cut off). */
+function ApplicationsList({ apps, onView, onDelete, deleting }: {
+  apps: Admission[]; onView: (a: Admission) => void; onDelete: (id: string) => void; deleting?: boolean;
+}) {
+  return (
+    <>
+      {/* Desktop / tablet */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border bg-muted/40 text-left">
+              {["Applicant", "Class", "Type", "Status", "Applied", ""].map((h, i) => (
+                <th key={i} className={`px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap ${i === 5 ? "text-right" : ""}`}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border/70">
+            {apps.map(app => (
+              <tr key={app.id} className="hover:bg-muted/30 transition-colors">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-semibold text-primary">{initials(app.full_name)}</span>
+                    <div className="min-w-0">
+                      <p className="font-medium leading-tight break-words">{app.full_name}</p>
+                      <p className="text-[11px] text-muted-foreground font-mono">{app.reference_no}</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">Class {app.applying_class}</td>
+                <td className="px-4 py-3 capitalize whitespace-nowrap">{app.admission_type}</td>
+                <td className="px-4 py-3"><StatusPill status={app.status} /></td>
+                <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{format(new Date(app.created_at), "dd MMM yy")}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button size="sm" variant="outline" onClick={() => onView(app)} className="h-8 gap-1 rounded-full px-3 text-xs font-medium">
+                      <Eye className="w-3.5 h-3.5" /> View
+                    </Button>
+                    <DeleteApplicationButton app={app} disabled={deleting} onConfirm={onDelete} />
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile */}
+      <ul className="md:hidden divide-y divide-border/70">
+        {apps.map(app => (
+          <li key={app.id} className="p-4">
+            <div className="flex items-start gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{initials(app.full_name)}</span>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-sm leading-snug break-words">{app.full_name}</p>
+                <p className="text-[11px] text-muted-foreground font-mono break-all">{app.reference_no}</p>
+              </div>
+              <StatusPill status={app.status} />
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              <span>Class {app.applying_class}</span>
+              <span className="h-1 w-1 rounded-full bg-border" />
+              <span className="capitalize">{app.admission_type}</span>
+              <span className="h-1 w-1 rounded-full bg-border" />
+              <span>{format(new Date(app.created_at), "dd MMM yyyy")}</span>
+            </div>
+            <div className="mt-3 flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => onView(app)} className="h-8 flex-1 gap-1 rounded-full text-xs font-medium">
+                <Eye className="w-3.5 h-3.5" /> View &amp; Manage
+              </Button>
+              <DeleteApplicationButton app={app} disabled={deleting} onConfirm={onDelete} />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
+
 const AdminAdmissions = () => {
   const [statusFilter, setStatusFilter] = useState("pending");
   const [classFilter,  setClassFilter]  = useState("all");
@@ -942,35 +1074,40 @@ const AdminAdmissions = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-bold flex items-center gap-2">
-          <GraduationCap className="w-5 h-5 text-primary" /> Admissions Management
-        </h2>
-
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
+          <GraduationCap className="w-5 h-5" />
+        </span>
+        <div className="min-w-0">
+          <h2 className="text-lg sm:text-xl font-bold leading-tight">Admissions Management</h2>
+          <p className="text-xs text-muted-foreground">Review applications, manage sessions and interview slots</p>
+        </div>
       </div>
 
       {/* Stats — CLICKABLE cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 [&>*:first-child]:col-span-2 sm:[&>*:first-child]:col-span-1">
         {[
           { key: "total",     label: "Total",     value: stats.total,     icon: Users,        color: "text-primary",    activeBg: "bg-primary/10 border-primary" },
-          { key: "pending",   label: "Pending",   value: stats.pending,   icon: Clock,        color: "text-blue-600",   activeBg: "bg-blue-50 border-blue-400" },
-          { key: "approved",  label: "Approved",  value: stats.approved,  icon: CheckCircle2, color: "text-green-600",  activeBg: "bg-green-50 border-green-400" },
-          { key: "rejected",  label: "Rejected",  value: stats.rejected,  icon: XCircle,      color: "text-red-500",    activeBg: "bg-red-50 border-red-400" },
-          { key: "migration", label: "Migration", value: stats.migration, icon: RefreshCw,    color: "text-purple-600", activeBg: "bg-purple-50 border-purple-400" },
+          { key: "pending",   label: "Pending",   value: stats.pending,   icon: Clock,        color: "text-blue-600",   activeBg: "bg-blue-500/10 border-blue-400" },
+          { key: "approved",  label: "Approved",  value: stats.approved,  icon: CheckCircle2, color: "text-green-600",  activeBg: "bg-green-500/10 border-green-400" },
+          { key: "rejected",  label: "Rejected",  value: stats.rejected,  icon: XCircle,      color: "text-red-500",    activeBg: "bg-red-500/10 border-red-400" },
+          { key: "migration", label: "Migration", value: stats.migration, icon: RefreshCw,    color: "text-purple-600", activeBg: "bg-purple-500/10 border-purple-400" },
         ].map(s => (
           <Card
             key={s.key}
-            className={`border cursor-pointer transition-all duration-200 hover:shadow-md active:scale-[0.97] ${
+            className={`rounded-2xl border shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md active:scale-[0.98] ${
               activeStatFilter === s.key ? s.activeBg : "border-border hover:border-primary/30"
             }`}
             onClick={() => handleStatClick(s.key)}
           >
-            <CardContent className="p-3 flex items-center gap-2">
-              <s.icon className={`w-5 h-5 ${s.color} shrink-0`} />
-              <div>
-                <p className="text-lg font-bold leading-none">{s.value}</p>
-                <p className="text-[10px] text-muted-foreground">{s.label}</p>
+            <CardContent className="p-3.5 flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted/60">
+                <s.icon className={`w-4 h-4 ${s.color}`} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-xl font-bold leading-none tabular-nums">{s.value}</p>
+                <p className="mt-1 text-[11px] text-muted-foreground">{s.label}</p>
               </div>
             </CardContent>
           </Card>
@@ -979,8 +1116,8 @@ const AdminAdmissions = () => {
 
       {/* Clickable stat filtered list — shows when a stat card is clicked */}
       {activeStatFilter && statFilteredAdmissions && (
-        <Card className="border-2 border-primary/30 overflow-hidden">
-          <div className="bg-muted/50 px-4 py-3 flex items-center justify-between">
+        <Card className="border border-primary/30 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-muted/40 border-b border-border px-4 py-3 flex items-center justify-between gap-2">
             <h3 className="text-sm font-bold flex items-center gap-2">
               {activeStatFilter === "total" && <Users className="w-4 h-4 text-primary" />}
               {activeStatFilter === "pending" && <Clock className="w-4 h-4 text-blue-600" />}
@@ -991,83 +1128,18 @@ const AdminAdmissions = () => {
               <Badge variant="secondary" className="text-[10px] h-5">{statFilteredAdmissions.length}</Badge>
             </h3>
             <Button size="sm" variant="ghost" onClick={() => setActiveStatFilter(null)}
-              className="h-7 w-7 p-0">
+              className="h-8 w-8 p-0 shrink-0">
               <X className="w-4 h-4" />
             </Button>
           </div>
-          <div className="overflow-x-auto max-h-[60vh] overflow-y-auto">
+          <div className="max-h-[60vh] overflow-y-auto">
             {statFilteredAdmissions.length === 0 ? (
               <div className="py-12 text-center text-muted-foreground text-sm">
                 <GraduationCap className="w-8 h-8 mx-auto mb-2 opacity-40" />
                 No {activeStatFilter} admissions found
               </div>
             ) : (
-              <table className="w-full text-xs border-collapse">
-                <thead className="sticky top-0 z-10">
-                  <tr className="bg-slate-100">
-                    {["Name", "Class", "Type", "Status", "Date", "Action"].map(h => (
-                      <th key={h} className="text-center px-3 py-2.5 font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap border border-slate-200">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {statFilteredAdmissions.map((app, i) => {
-                    const cfg = statusConfig[app.status];
-                    return (
-                      <tr key={app.id} className={`hover:bg-blue-50/40 transition-colors ${i % 2 === 1 ? "bg-slate-50/60" : "bg-white"}`}>
-                        <td className="px-3 py-2.5 border border-slate-200 text-center">
-                          <p className="font-medium whitespace-nowrap">{app.full_name}</p>
-                          <p className="text-[10px] text-muted-foreground font-mono">{app.reference_no}</p>
-                        </td>
-                        <td className="px-3 py-2.5 border border-slate-200 whitespace-nowrap text-center">Class {app.applying_class}</td>
-                        <td className="px-3 py-2.5 border border-slate-200 capitalize text-center">{app.admission_type}</td>
-                        <td className="px-3 py-2.5 border border-slate-200 text-center">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${cfg.badge}`}>
-                            {cfg.label}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2.5 border border-slate-200 text-muted-foreground whitespace-nowrap text-center">
-                          {format(new Date(app.created_at), "dd MMM yy")}
-                        </td>
-                        <td className="px-3 py-2.5 border border-slate-200 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <Button size="sm" variant="outline"
-                              onClick={() => setSelected(app)}
-                              className="h-7 gap-1 text-xs px-2">
-                              <Eye className="w-3 h-3" /> View
-                            </Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="ghost"
-                                  disabled={deleteMut.isPending}
-                                  className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50">
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete {app.full_name}?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This will permanently delete this admission record ({app.reference_no}) and all associated documents. This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDeleteAdmission(app.id)}
-                                    className="bg-red-600 hover:bg-red-700">
-                                    Yes, Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <ApplicationsList apps={statFilteredAdmissions} onView={setSelected} onDelete={handleDeleteAdmission} deleting={deleteMut.isPending} />
             )}
           </div>
         </Card>
@@ -1080,15 +1152,15 @@ const AdminAdmissions = () => {
       <InterviewSlotsPanel />
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2">
-        <div className="relative flex-1 min-w-[180px]">
+      <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-2">
+        <div className="relative col-span-3 sm:flex-1 sm:min-w-[220px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search name / B-Form / ref..."
-            className="pl-8 h-9 text-xs" />
+            className="pl-8 h-9 text-xs rounded-full" />
         </div>
         <Select value={statusFilter} onValueChange={v => { setStatusFilter(v); setPage(0); }}>
-          <SelectTrigger className="h-9 text-xs w-36"><SelectValue placeholder="Status" /></SelectTrigger>
+          <SelectTrigger className="h-9 text-xs w-full sm:w-36 rounded-full"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             {(Object.keys(statusConfig) as AdmissionStatus[]).map(s => (
@@ -1097,14 +1169,14 @@ const AdminAdmissions = () => {
           </SelectContent>
         </Select>
         <Select value={classFilter} onValueChange={v => { setClassFilter(v); setPage(0); }}>
-          <SelectTrigger className="h-9 text-xs w-28"><SelectValue placeholder="Class" /></SelectTrigger>
+          <SelectTrigger className="h-9 text-xs w-full sm:w-28 rounded-full"><SelectValue placeholder="Class" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Classes</SelectItem>
             {["6","7","8","9","10"].map(c => <SelectItem key={c} value={c}>Class {c}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={typeFilter} onValueChange={v => { setTypeFilter(v); setPage(0); }}>
-          <SelectTrigger className="h-9 text-xs w-32"><SelectValue placeholder="Type" /></SelectTrigger>
+          <SelectTrigger className="h-9 text-xs w-full sm:w-32 rounded-full"><SelectValue placeholder="Type" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="fresh">Fresh</SelectItem>
@@ -1114,8 +1186,8 @@ const AdminAdmissions = () => {
       </div>
 
       {/* Table */}
-      <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
+      <Card className="overflow-hidden rounded-2xl shadow-sm">
+        <div>
           {isLoading ? (
             <div className="p-4 space-y-2">
               {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}
@@ -1126,86 +1198,21 @@ const AdminAdmissions = () => {
               No applications found
             </div>
           ) : (
-            <table className="w-full text-xs border-collapse">
-              <thead>
-                <tr className="bg-slate-100">
-                  {["Name", "Class", "Type", "Status", "Date", "Action"].map(h => (
-                    <th key={h} className="text-center px-3 py-2.5 font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap border border-slate-200">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((app, i) => {
-                  const cfg = statusConfig[app.status];
-                  return (
-                    <tr key={app.id} className={`hover:bg-blue-50/40 transition-colors ${i % 2 === 1 ? "bg-slate-50/60" : "bg-white"}`}>
-                      <td className="px-3 py-2.5 border border-slate-200 text-center">
-                        <p className="font-medium whitespace-nowrap">{app.full_name}</p>
-                        <p className="text-[10px] text-muted-foreground font-mono">{app.reference_no}</p>
-                      </td>
-                      <td className="px-3 py-2.5 border border-slate-200 whitespace-nowrap text-center">Class {app.applying_class}</td>
-                      <td className="px-3 py-2.5 border border-slate-200 capitalize text-center">{app.admission_type}</td>
-                      <td className="px-3 py-2.5 border border-slate-200 text-center">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${cfg.badge}`}>
-                          {cfg.label}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2.5 border border-slate-200 text-muted-foreground whitespace-nowrap text-center">
-                        {format(new Date(app.created_at), "dd MMM yy")}
-                      </td>
-                      <td className="px-3 py-2.5 border border-slate-200 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <Button size="sm" variant="outline"
-                            onClick={() => setSelected(app)}
-                            className="h-7 gap-1 text-xs px-2">
-                            <Eye className="w-3 h-3" /> View
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button size="sm" variant="ghost"
-                                disabled={deleteMut.isPending}
-                                className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50">
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete {app.full_name}?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This will permanently delete this admission record ({app.reference_no}) and all associated documents. This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteAdmission(app.id)}
-                                  className="bg-red-600 hover:bg-red-700">
-                                  Yes, Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <ApplicationsList apps={filtered} onView={setSelected} onDelete={handleDeleteAdmission} deleting={deleteMut.isPending} />
           )}
         </div>
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+          <div className="flex items-center justify-between gap-3 px-4 py-3 border-t border-border bg-muted/20">
             <p className="text-xs text-muted-foreground">
               Page {page + 1} of {totalPages} ({data?.count} total)
             </p>
             <div className="flex gap-2">
               <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(p => p - 1)}
-                className="h-7 w-7 p-0"><ChevronLeft className="w-3 h-3" /></Button>
+                className="h-8 w-8 rounded-full p-0"><ChevronLeft className="w-3.5 h-3.5" /></Button>
               <Button size="sm" variant="outline" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}
-                className="h-7 w-7 p-0"><ChevronRight className="w-3 h-3" /></Button>
+                className="h-8 w-8 rounded-full p-0"><ChevronRight className="w-3.5 h-3.5" /></Button>
             </div>
           </div>
         )}

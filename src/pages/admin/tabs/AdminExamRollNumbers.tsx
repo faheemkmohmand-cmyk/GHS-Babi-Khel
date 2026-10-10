@@ -2572,10 +2572,6 @@ const AdminExamRollNumbers = () => {
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <Button variant="outline" size="sm" onClick={() => { setSelectedSession(s); setView("detail"); }} className="gap-1.5"><Eye className="w-3.5 h-3.5" /> View</Button>
-                          <Button variant="outline" size="sm" onClick={() => togglePublish(s)} className="gap-1.5">
-                            {s.is_published ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                            {s.is_published ? "Unpublish" : "Publish"}
-                          </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild><Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10"><Trash2 className="w-4 h-4" /></Button></AlertDialogTrigger>
                             <AlertDialogContent>
